@@ -1251,8 +1251,6 @@
               return { x: pt.x, y: (prev + next) / 2, estimated: true };
             } else if (prev !== null) {
               return { x: pt.x, y: prev, estimated: true };
-            } else if (next !== null) {
-              return { x: pt.x, y: next, estimated: true };
             }
             return null; // no data at all for this city
           }).filter(pt => pt !== null);
@@ -1267,7 +1265,16 @@
               pointRadius: 3,
               pointHoverRadius: 5,
               tension: 0.3,
-              fill: false
+              fill: false,
+              segment: {
+                borderDash: (ctx) => {
+                  const data = ctx.chart.data.datasets[ctx.datasetIndex].data;
+                  const p0 = data[ctx.p0DataIndex];
+                  const p1 = data[ctx.p1DataIndex];
+                  if (p0.estimated || p1.estimated) return [6, 4];
+                  return undefined;
+                }
+              }
             });
           }
         });
