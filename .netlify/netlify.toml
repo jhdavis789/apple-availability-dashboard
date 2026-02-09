@@ -1,0 +1,26 @@
+plugins = []
+headers = []
+redirects = []
+
+[functions]
+
+[functions."*"]
+
+[build]
+publish = "/Users/Jackson/.openclaw/workspace/research/apple-availability/dashboard copy/deploy"
+publishOrigin = "default"
+base = "/Users/Jackson/.openclaw/workspace/research/apple-availability/dashboard copy/deploy"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
