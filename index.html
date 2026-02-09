@@ -701,9 +701,10 @@
       allOpt.textContent = 'All Products (Average)';
       productSelect.appendChild(allOpt);
 
-      // Only include models that have at least one non-null/non-ERR data point
+      // Only include models that have data in recent snapshots (last 10)
+      const recentSnapshots = DATA.snapshots.slice(-10);
       const modelsWithData = DATA.all_models.filter(model => {
-        return DATA.snapshots.some(s => {
+        return recentSnapshots.some(s => {
           const prod = s.products.find(p => p.model === model);
           if (!prod) return false;
           return Object.values(prod.values).some(v => v !== null && v !== undefined);
