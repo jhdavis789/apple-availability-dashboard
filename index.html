@@ -1003,22 +1003,32 @@
       updateTrackFill();
     }
 
-    function getFilteredSnapshots() {
-      const filterZeros = document.getElementById('filterZeros').checked;
-
-      let snapshots = DATA.snapshots.filter(s => {
+    function _baseFilteredSnapshots() {
+      return DATA.snapshots.filter(s => {
         // Always exclude qty/3-item files
         if (s.file_type === 'qty' || s.file_type === '3_item') return false;
         // Always exclude snapshots where all cities have store_count = 0
         const allZeroStores = s.cities.every(c => c.store_count === 0);
         if (allZeroStores) return false;
-        // Time range filter
+        return true;
+      });
+    }
+
+    function getFilteredSnapshots() {
+      const filterZeros = document.getElementById('filterZeros').checked;
+      let snapshots = _baseFilteredSnapshots().filter(s => {
         const ts = new Date(s.timestamp).getTime();
         if (ts < timeStartMs || ts > timeEndMs) return false;
         return true;
       });
-
       return { snapshots, filterZeros };
+    }
+
+    /** All quality-filtered snapshots, ignoring the time range slider.
+     *  Used by City Averages & Movers so they can compute their own periods independently. */
+    function getAllSnapshots() {
+      const filterZeros = document.getElementById('filterZeros').checked;
+      return { snapshots: _baseFilteredSnapshots(), filterZeros };
     }
 
     function getSelectedCities() {
@@ -1172,8 +1182,12 @@
         renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
       }
 
-      renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
-      renderMovers(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+      // City Averages & Movers use ALL snapshots (ignoring time range) so their
+      // period buttons are independent of the top-level time range selector.
+      const allSnaps = getAllSnapshots();
+      const allBlipSet = allSnaps.filterZeros ? getBlipSet(allSnaps.snapshots) : null;
+      renderCitySummary(allSnaps.snapshots, selectedCities, allSnaps.filterZeros, isAllProducts, selectedProduct, allBlipSet);
+      renderMovers(allSnaps.snapshots, selectedCities, allSnaps.filterZeros, isAllProducts, selectedProduct, allBlipSet);
       renderProductChart(snapshots, selectedCities, filterZeros, blipSet);
       renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
     }
