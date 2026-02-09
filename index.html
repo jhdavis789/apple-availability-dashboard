@@ -972,8 +972,18 @@
       });
 
       // Time range period buttons (24h, 7d, 2wk, Max)
+      // Grey out buttons whose period exceeds total data range
+      const dataRangeHours = (timeMax - timeMin) / 3600000;
+      document.querySelectorAll('#timeRangePeriodBtns .period-btn').forEach(btn => {
+        const hours = parseInt(btn.dataset.hours);
+        if (hours > 0 && hours > dataRangeHours) {
+          btn.classList.add('disabled');
+        }
+      });
+
       document.querySelectorAll('#timeRangePeriodBtns .period-btn').forEach(btn => {
         btn.addEventListener('click', () => {
+          if (btn.classList.contains('disabled')) return;
           const hours = parseInt(btn.dataset.hours);
           document.querySelectorAll('#timeRangePeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
@@ -1269,10 +1279,14 @@
           });
 
           // Second pass: interpolate missing values as midpoint of nearest known neighbors
+          // Count real data points — if only 1, don't extrapolate at all
+          const realCount = rawPoints.filter(p => p.y !== null).length;
           const points = rawPoints.map((pt, i) => {
             if (pt.y !== null) {
               return { x: pt.x, y: pt.y, estimated: false };
             }
+            // If only one real data point, don't extrapolate
+            if (realCount <= 1) return null;
             // Find previous known value
             let prev = null;
             for (let j = i - 1; j >= 0; j--) {
