@@ -972,11 +972,11 @@
       });
 
       // Time range period buttons (24h, 7d, 2wk, Max)
-      // Grey out buttons whose period exceeds total data range
+      // Grey out buttons whose period exceeds total data range (same 50% threshold as section buttons)
       const dataRangeHours = (timeMax - timeMin) / 3600000;
       document.querySelectorAll('#timeRangePeriodBtns .period-btn').forEach(btn => {
         const hours = parseInt(btn.dataset.hours);
-        if (hours > 0 && hours > dataRangeHours) {
+        if (hours > 0 && dataRangeHours < hours * 0.5) {
           btn.classList.add('disabled');
         }
       });
