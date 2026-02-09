@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple Product Availability Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      padding: 24px 32px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .header .subtitle {
+      font-size: 13px;
+      color: #888;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 20px 32px;
+      background: #111;
+      border-bottom: 1px solid #222;
+      align-items: flex-end;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-group label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      font-weight: 600;
+    }
+    select, button {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border: 1px solid #333;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
+    }
+    select:hover, button:hover { border-color: #555; }
+    select:focus, button:focus { border-color: #0a84ff; }
+    select[multiple] {
+      min-height: 120px;
+      min-width: 180px;
+    }
+    button {
+      background: #0a84ff;
+      border-color: #0a84ff;
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 20px;
+    }
+    button:hover { background: #0070e0; }
+    button.secondary {
+      background: transparent;
+      border-color: #444;
+      color: #aaa;
+    }
+    button.secondary:hover { border-color: #666; color: #ddd; }
+
+    .filter-toggles {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #bbb;
+      cursor: pointer;
+    }
+    .toggle-label input[type="checkbox"] {
+      accent-color: #0a84ff;
+      width: 16px;
+      height: 16px;
+    }
+
+    .dashboard {
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .chart-card {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .chart-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+    .chart-container {
+      position: relative;
+      height: 350px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .summary-card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+    .summary-card .city-name {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .summary-card .avg-val {
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .summary-card .label {
+      font-size: 11px;
+      color: #666;
+      margin-top: 2px;
+    }
+    .good { color: #30d158; }
+    .ok { color: #ffd60a; }
+    .bad { color: #ff453a; }
+
+    .period-btns { display: flex; gap: 4px; margin-bottom: 14px; }
+    .period-btn {
+      padding: 5px 12px; font-size: 11px; border-radius: 5px;
+      background: transparent; border: 1px solid #333; color: #999;
+      cursor: pointer; font-weight: 600;
+    }
+    .period-btn.active { background: #0a84ff; border-color: #0a84ff; color: #fff; }
+    .period-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+
+    .movers-row {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid #222;
+    }
+    .summary-card .delta-val {
+      font-size: 20px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .summary-card .sub-label {
+      font-size: 10px;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    .view-tabs {
+      display: flex;
+      gap: 4px;
+    }
+    .view-tab {
+      padding: 6px 14px;
+      font-size: 12px;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid #333;
+      color: #999;
+      cursor: pointer;
+    }
+    .view-tab.active {
+      background: #0a84ff;
+      border-color: #0a84ff;
+      color: #fff;
+    }
+    .heatmap-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .heatmap-table th, .heatmap-table td {
+      padding: 8px 10px;
+      text-align: center;
+      border: 1px solid #222;
+    }
+    .heatmap-table th {
+      background: #1a1a2e;
+      color: #aaa;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+    .heatmap-table th:first-child, .heatmap-table td:first-child {
+      text-align: left;
+      min-width: 140px;
+      font-weight: 600;
+    }
+    .stats-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .stat-box {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 10px;
+      padding: 16px 24px;
+      flex: 1;
+      min-width: 150px;
+    }
+    .stat-box .stat-label {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .stat-box .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+    }
+    #loading {
+      text-align: center;
+      padding: 80px;
+      color: #666;
+      font-size: 16px;
+    }
+    .excluded-info {
+      font-size: 11px;
+      color: #666;
+      padding: 4px 0;
+    }
+
+    /* Time range slider */
+    .time-range-group {
+      min-width: 320px;
+    }
+    .time-range-inputs {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .time-range-inputs input[type="datetime-local"] {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border: 1px solid #333;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+      flex: 1;
+      color-scheme: dark;
+    }
+    .time-range-inputs input[type="datetime-local"]:focus {
+      border-color: #0a84ff;
+    }
+    .time-range-inputs span {
+      color: #666;
+      font-size: 12px;
+    }
+    .dual-range {
+      position: relative;
+      height: 24px;
+      width: 100%;
+    }
+    .dual-range input[type="range"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 24px;
+      margin: 0;
+      pointer-events: none;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      outline: none;
+    }
+    .dual-range input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #0a84ff;
+      border: 2px solid #fff;
+      cursor: pointer;
+      pointer-events: all;
+      position: relative;
+      z-index: 2;
+    }
+    .dual-range input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #0a84ff;
+      border: 2px solid #fff;
+      cursor: pointer;
+      pointer-events: all;
+    }
+    .dual-range .track {
+      position: absolute;
+      top: 10px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #333;
+      border-radius: 2px;
+    }
+    .dual-range .track-fill {
+      position: absolute;
+      top: 10px;
+      height: 4px;
+      background: #0a84ff;
+      border-radius: 2px;
+    }
+    .time-range-label {
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+      margin-top: 2px;
+    }
+    .time-range-reset {
+      background: transparent;
+      border: 1px solid #444;
+      color: #aaa;
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .time-range-reset:hover { border-color: #666; color: #ddd; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Apple Product Availability Tracker</h1>
+    <div class="subtitle">Pickup availability across 12 US cities · <span id="lastUpdated" style="color:#aaa;"></span></div>
+    <div class="subtitle" style="margin-top:8px;font-size:13px;"><span style="background:#ffd60a;color:#000;padding:4px 8px;border-radius:4px;text-decoration:underline;font-weight:600;">⚠️ Percentages = % of stores with at least one unit in stock (not inventory depth)</span></div>
+  </div>
+
+  <div class="controls" id="controls">
+    <div class="control-group" style="width:100%;">
+      <label>Quick Views</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="qvMacMini" class="view-tab" style="background:#1a1a2e;border-color:#0a84ff;color:#6cb4ff;">🖥 Base Mac Mini — by City</button>
+        <button id="qvAllProducts" class="view-tab" style="background:#1a1a2e;border-color:#30d158;color:#30d158;">📊 All Products — Over Time</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>View</label>
+      <div class="view-tabs" id="viewTabs">
+        <div class="view-tab active" data-view="trends">Trends</div>
+        <div class="view-tab" data-view="heatmap">Heatmap</div>
+        <div class="view-tab" data-view="compare">Compare Cities</div>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Product</label>
+      <select id="productSelect"></select>
+    </div>
+
+    <div class="control-group">
+      <label>Cities</label>
+      <select id="citySelect" multiple></select>
+    </div>
+
+    <div class="control-group">
+      <label>Custom Avg (city names, comma-sep)</label>
+      <input type="text" id="customAvgInput" placeholder="e.g. NYC, LA, SF" style="background:#1a1a2e;color:#e0e0e0;border:1px solid #333;padding:8px 12px;border-radius:6px;font-size:13px;outline:none;min-width:200px;">
+    </div>
+
+    <div class="control-group">
+      <label>Data Filters</label>
+      <div class="filter-toggles">
+        <label class="toggle-label">
+          <input type="checkbox" id="filterZeros" checked>
+          Exclude 0% errors (single-call &amp; 0-store)
+        </label>
+      </div>
+    </div>
+
+    <div class="control-group time-range-group">
+      <label>Time Range</label>
+      <div class="time-range-inputs">
+        <input type="datetime-local" id="timeStart" step="1">
+        <span>to</span>
+        <input type="datetime-local" id="timeEnd" step="1">
+        <button class="time-range-reset" id="timeReset">Reset</button>
+      </div>
+      <div class="dual-range" id="dualRange">
+        <div class="track"></div>
+        <div class="track-fill" id="trackFill"></div>
+        <input type="range" id="rangeStart" min="0" max="1000" value="0">
+        <input type="range" id="rangeEnd" min="0" max="1000" value="1000">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>&nbsp;</label>
+      <div style="display:flex;gap:8px;">
+        <button id="resetCities" class="secondary">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading">Loading data...</div>
+
+  <div class="dashboard" id="dashboard" style="display:none;">
+    <!-- Stats row -->
+    <div class="stats-row" id="statsRow"></div>
+    <div class="excluded-info" id="excludedInfo"></div>
+
+    <!-- Main chart area -->
+    <div class="chart-card">
+      <h3 id="mainChartTitle">Availability Over Time</h3>
+      <div class="chart-container">
+        <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Heatmap view (hidden by default) -->
+    <div class="chart-card" id="heatmapCard" style="display:none;">
+      <h3>Latest Snapshot Heatmap</h3>
+      <div style="overflow-x:auto;">
+        <table class="heatmap-table" id="heatmapTable"></table>
+      </div>
+    </div>
+
+    <!-- City summary -->
+    <div class="chart-card">
+      <h3>City Averages</h3>
+      <div class="period-btns" id="cityPeriodBtns">
+        <button class="period-btn" data-hours="24">24h</button>
+        <button class="period-btn" data-hours="168">7d</button>
+        <button class="period-btn" data-hours="336">2wk</button>
+        <button class="period-btn active" data-hours="0">All Time</button>
+      </div>
+      <div class="summary-grid" id="citySummary"></div>
+    </div>
+
+    <!-- City moves -->
+    <div class="chart-card">
+      <h3>Largest Moves by City</h3>
+      <div class="period-btns" id="moverPeriodBtns">
+        <button class="period-btn active" data-hours="24">24h</button>
+        <button class="period-btn" data-hours="168">7d</button>
+        <button class="period-btn" data-hours="336">2wk</button>
+      </div>
+      <div class="summary-grid" id="moversGrid"></div>
+    </div>
+
+    <!-- Per-product chart -->
+    <div class="chart-card">
+      <h3 id="productChartTitle">Product Comparison</h3>
+      <div class="chart-container">
+        <canvas id="productChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Data matrix (shown when a specific product is selected) -->
+    <div class="chart-card" id="dataMatrixCard" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 id="dataMatrixTitle" style="margin-bottom:0;">Data Matrix</h3>
+        <button id="downloadCsv" class="secondary" style="font-size:12px;padding:6px 14px;">Download CSV</button>
+      </div>
+      <div style="overflow-x:auto;max-height:500px;overflow-y:auto;">
+        <table class="heatmap-table" id="dataMatrixTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let DATA = null;
+    let mainChart = null;
+    let productChart = null;
+    let currentView = 'trends';
+    let timeMin = 0;  // epoch ms — absolute min from data
+    let timeMax = 0;  // epoch ms — absolute max from data
+    let timeStartMs = 0; // current selected start
+    let timeEndMs = 0;   // current selected end
+
+    const CITY_COLORS = {
+      'NYC': '#ff6384', 'LA': '#36a2eb', 'SF': '#ffce56', 'Austin': '#4bc0c0',
+      'Boston': '#9966ff', 'Chicago': '#ff9f40', 'Houston': '#c9cbcf',
+      'Phoenix': '#7bc8a4', 'Seattle': '#f67019', 'Miami': '#00d2ff',
+      'Denver': '#e8c3b9', 'Atlanta': '#c45850'
+    };
+
+    const PRODUCT_COLORS = [
+      '#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2',
+      '#64d2ff', '#ffd60a', '#ff375f', '#ac8e68', '#8e8e93',
+      '#5e5ce6', '#ff6482', '#32d74b', '#ffcc02', '#eb4d3d'
+    ];
+
+    /**
+     * Click-to-highlight: clicking a line dims all others.
+     * Clicking the background resets.
+     */
+    function makeHighlightPlugin(chartRef) {
+      return {
+        id: 'clickHighlight',
+        _highlighted: -1,
+        _hovered: -1,
+        _origStyles: [],
+        afterEvent(chart, args) {
+          const evt = args.event;
+
+          // --- Click: select/deselect a line ---
+          if (evt.type === 'click') {
+            // Ignore clicks outside the chart area (e.g. legend clicks)
+            const area = chart.chartArea;
+            if (!area || evt.x < area.left || evt.x > area.right || evt.y < area.top || evt.y > area.bottom) {
+              return; // Let the legend onClick handler deal with it
+            }
+            // Use 'dataset' mode with intersect:false so clicking near a line works
+            const elements = chart.getElementsAtEventForMode(evt, 'dataset', { intersect: false }, false);
+            if (elements.length > 0) {
+              const clickedIdx = elements[0].datasetIndex;
+              this._highlight(chart, clickedIdx);
+            } else {
+              this._reset(chart);
+            }
+            return;
+          }
+
+          // --- Mousemove: subtle hover highlight on nearest line ---
+          if (evt.type === 'mousemove') {
+            const elements = chart.getElementsAtEventForMode(evt, 'dataset', { intersect: false }, false);
+            const hoverIdx = elements.length > 0 ? elements[0].datasetIndex : -1;
+            if (hoverIdx !== this._hovered) {
+              this._hovered = hoverIdx;
+              this._applyHover(chart);
+            }
+            return;
+          }
+
+          // --- Mouseout: clear hover ---
+          if (evt.type === 'mouseout') {
+            if (this._hovered !== -1) {
+              this._hovered = -1;
+              this._applyHover(chart);
+            }
+          }
+        },
+        _dimColor(color) {
+          if (typeof color !== 'string') return color;
+          if (/^#[0-9a-f]{6}$/i.test(color)) return color + '26';
+          if (/^#[0-9a-f]{8}$/i.test(color)) return color.slice(0, 7) + '26';
+          if (color.startsWith('rgb')) return color.replace(/[\d.]+\)$/, '0.15)');
+          return color;
+        },
+        /** Apply subtle hover effect (only when nothing is click-highlighted) */
+        _applyHover(chart) {
+          // Don't interfere with click-highlight state
+          if (this._highlighted >= 0) {
+            // When highlighted, just update cursor
+            chart.canvas.style.cursor = this._hovered >= 0 ? 'pointer' : 'default';
+            chart.update('none');
+            return;
+          }
+          this._ensureOrigStyles(chart);
+          chart.data.datasets.forEach((ds, i) => {
+            if (this._hovered === -1) {
+              // No hover — restore originals
+              ds.borderColor = this._origStyles[i].borderColor;
+              ds.borderWidth = this._origStyles[i].borderWidth;
+              ds.pointRadius = this._origStyles[i].pointRadius;
+            } else if (i === this._hovered) {
+              // Hovered line: slightly thicker
+              ds.borderColor = this._origStyles[i].borderColor;
+              ds.borderWidth = this._origStyles[i].borderWidth + 1.5;
+              ds.pointRadius = this._origStyles[i].pointRadius;
+            } else {
+              // Other lines: stay normal
+              ds.borderColor = this._origStyles[i].borderColor;
+              ds.borderWidth = this._origStyles[i].borderWidth;
+              ds.pointRadius = this._origStyles[i].pointRadius;
+            }
+          });
+          chart.canvas.style.cursor = this._hovered >= 0 ? 'pointer' : 'default';
+          if (this._hovered === -1) {
+            // Clean up origStyles so _highlight can re-capture fresh state
+            this._origStyles = [];
+          }
+          chart.update('none');
+        },
+        _ensureOrigStyles(chart) {
+          if (this._origStyles.length === 0) {
+            this._origStyles = chart.data.datasets.map(ds => ({
+              borderColor: ds.borderColor,
+              borderWidth: ds.borderWidth,
+              pointRadius: ds.pointRadius,
+              borderDash: ds.borderDash || [],
+            }));
+          }
+        },
+        _highlight(chart, idx) {
+          if (this._highlighted === idx) {
+            this._reset(chart);
+            return;
+          }
+          this._ensureOrigStyles(chart);
+          chart.data.datasets.forEach((ds, i) => {
+            if (i === idx) {
+              ds.borderColor = this._origStyles[i].borderColor;
+              ds.borderWidth = 3;
+              ds.pointRadius = 4;
+              ds.borderDash = [];
+            } else {
+              ds.borderColor = this._dimColor(this._origStyles[i].borderColor);
+              ds.borderWidth = 1;
+              ds.pointRadius = 0;
+              ds.borderDash = [];
+            }
+          });
+          this._highlighted = idx;
+          chart.canvas.style.cursor = 'pointer';
+          chart.update('none');
+        },
+        _reset(chart) {
+          if (this._origStyles.length === 0) return;
+          chart.data.datasets.forEach((ds, i) => {
+            ds.borderColor = this._origStyles[i].borderColor;
+            ds.borderWidth = this._origStyles[i].borderWidth;
+            ds.pointRadius = this._origStyles[i].pointRadius;
+            ds.borderDash = this._origStyles[i].borderDash;
+          });
+          this._origStyles = [];
+          this._highlighted = -1;
+          this._hovered = -1;
+          chart.canvas.style.cursor = 'default';
+          chart.update('none');
+        }
+      };
+    }
+
+    async function loadData() {
+      const resp = await fetch('data.json');
+      DATA = await resp.json();
+
+      // Show last-updated time from most recent snapshot
+      if (DATA.snapshots && DATA.snapshots.length > 0) {
+        const last = new Date(DATA.snapshots[DATA.snapshots.length - 1].timestamp);
+        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const h = last.getHours(), m = last.getMinutes();
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        const minStr = m < 10 ? '0' + m : m;
+        document.getElementById('lastUpdated').textContent =
+          `Last updated ${days[last.getDay()]} ${months[last.getMonth()]} ${last.getDate()} at ${h12}:${minStr} ${ampm}`;
+      }
+
+      initControls();
+      render();
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'flex';
+    }
+
+    function initControls() {
+      const productSelect = document.getElementById('productSelect');
+      // Add "All Products (Average)" option
+      const allOpt = document.createElement('option');
+      allOpt.value = '__ALL__';
+      allOpt.textContent = 'All Products (Average)';
+      productSelect.appendChild(allOpt);
+
+      // Only include models that have at least one non-null/non-ERR data point
+      const modelsWithData = DATA.all_models.filter(model => {
+        return DATA.snapshots.some(s => {
+          const prod = s.products.find(p => p.model === model);
+          if (!prod) return false;
+          return Object.values(prod.values).some(v => v !== null && v !== undefined);
+        });
+      });
+
+      modelsWithData.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        productSelect.appendChild(opt);
+      });
+
+      // Default to Mac Mini M4 ($599) on load
+      const defaultProduct = modelsWithData.find(m => m === 'Mac Mini M4 ($599)');
+      if (defaultProduct) productSelect.value = defaultProduct;
+
+      const citySelect = document.getElementById('citySelect');
+      DATA.all_cities.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        opt.selected = true;
+        citySelect.appendChild(opt);
+      });
+
+      productSelect.addEventListener('change', render);
+      citySelect.addEventListener('change', render);
+      document.getElementById('filterZeros').addEventListener('change', render);
+      document.getElementById('customAvgInput').addEventListener('input', render);
+
+      document.getElementById('resetCities').addEventListener('click', () => {
+        [...citySelect.options].forEach(o => o.selected = true);
+        render();
+      });
+
+      document.querySelectorAll('.view-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentView = tab.dataset.view;
+          render();
+        });
+      });
+
+      // Quick view buttons
+      document.getElementById('qvMacMini').addEventListener('click', () => {
+        // Set product to Mac Mini M4 ($599), view to Compare Cities
+        const ps = document.getElementById('productSelect');
+        const macMini = [...ps.options].find(o => o.value === 'Mac Mini M4 ($599)');
+        if (macMini) ps.value = macMini.value;
+        document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+        const compareTab = document.querySelector('.view-tab[data-view="compare"]');
+        if (compareTab) { compareTab.classList.add('active'); currentView = 'compare'; }
+        render();
+      });
+
+      document.getElementById('qvAllProducts').addEventListener('click', () => {
+        // Set product to All Products, view to Trends
+        document.getElementById('productSelect').value = '__ALL__';
+        document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+        const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
+        if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
+        render();
+      });
+
+      // City period buttons
+      document.querySelectorAll('#cityPeriodBtns .period-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.classList.contains('disabled')) return;
+          document.querySelectorAll('#cityPeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          _cityPeriodHours = parseInt(btn.dataset.hours);
+          render();
+        });
+      });
+
+      // Mover period buttons
+      document.querySelectorAll('#moverPeriodBtns .period-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.classList.contains('disabled')) return;
+          document.querySelectorAll('#moverPeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          _moverPeriodHours = parseInt(btn.dataset.hours);
+          render();
+        });
+      });
+
+      // Time range controls
+      initTimeRange();
+    }
+
+    function toLocalDatetimeStr(ms) {
+      const d = new Date(ms);
+      const pad = (n, len=2) => String(n).padStart(len, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function fromLocalDatetimeStr(str) {
+      return new Date(str).getTime();
+    }
+
+    function initTimeRange() {
+      const timestamps = DATA.snapshots.map(s => new Date(s.timestamp).getTime());
+      timeMin = Math.min(...timestamps);
+      timeMax = Math.max(...timestamps);
+      timeStartMs = timeMin;
+      timeEndMs = timeMax;
+
+      const startInput = document.getElementById('timeStart');
+      const endInput = document.getElementById('timeEnd');
+      const rangeStart = document.getElementById('rangeStart');
+      const rangeEnd = document.getElementById('rangeEnd');
+      const resetBtn = document.getElementById('timeReset');
+
+      startInput.value = toLocalDatetimeStr(timeMin);
+      endInput.value = toLocalDatetimeStr(timeMax);
+
+      function updateTrackFill() {
+        const pctL = ((timeStartMs - timeMin) / (timeMax - timeMin)) * 100;
+        const pctR = ((timeEndMs - timeMin) / (timeMax - timeMin)) * 100;
+        const fill = document.getElementById('trackFill');
+        fill.style.left = pctL + '%';
+        fill.style.width = (pctR - pctL) + '%';
+      }
+
+      function syncSlidersFromMs() {
+        rangeStart.value = Math.round(((timeStartMs - timeMin) / (timeMax - timeMin)) * 1000);
+        rangeEnd.value = Math.round(((timeEndMs - timeMin) / (timeMax - timeMin)) * 1000);
+        updateTrackFill();
+      }
+
+      function syncInputsFromMs() {
+        startInput.value = toLocalDatetimeStr(timeStartMs);
+        endInput.value = toLocalDatetimeStr(timeEndMs);
+      }
+
+      // Slider -> update text + render
+      rangeStart.addEventListener('input', () => {
+        let val = parseInt(rangeStart.value);
+        const endVal = parseInt(rangeEnd.value);
+        if (val > endVal) { val = endVal; rangeStart.value = val; }
+        timeStartMs = timeMin + (val / 1000) * (timeMax - timeMin);
+        syncInputsFromMs();
+        updateTrackFill();
+        render();
+      });
+
+      rangeEnd.addEventListener('input', () => {
+        let val = parseInt(rangeEnd.value);
+        const startVal = parseInt(rangeStart.value);
+        if (val < startVal) { val = startVal; rangeEnd.value = val; }
+        timeEndMs = timeMin + (val / 1000) * (timeMax - timeMin);
+        syncInputsFromMs();
+        updateTrackFill();
+        render();
+      });
+
+      // Text input -> update slider + render
+      startInput.addEventListener('change', () => {
+        const ms = fromLocalDatetimeStr(startInput.value);
+        if (!isNaN(ms)) {
+          timeStartMs = Math.max(timeMin, Math.min(ms, timeEndMs));
+          syncInputsFromMs();
+          syncSlidersFromMs();
+          render();
+        }
+      });
+
+      endInput.addEventListener('change', () => {
+        const ms = fromLocalDatetimeStr(endInput.value);
+        if (!isNaN(ms)) {
+          timeEndMs = Math.min(timeMax, Math.max(ms, timeStartMs));
+          syncInputsFromMs();
+          syncSlidersFromMs();
+          render();
+        }
+      });
+
+      // Reset button
+      resetBtn.addEventListener('click', () => {
+        timeStartMs = timeMin;
+        timeEndMs = timeMax;
+        syncInputsFromMs();
+        syncSlidersFromMs();
+        render();
+      });
+
+      syncSlidersFromMs();
+      updateTrackFill();
+    }
+
+    function getFilteredSnapshots() {
+      const filterZeros = document.getElementById('filterZeros').checked;
+
+      let snapshots = DATA.snapshots.filter(s => {
+        // Always exclude qty/3-item files
+        if (s.file_type === 'qty' || s.file_type === '3_item') return false;
+        // Always exclude snapshots where all cities have store_count = 0
+        const allZeroStores = s.cities.every(c => c.store_count === 0);
+        if (allZeroStores) return false;
+        // Time range filter
+        const ts = new Date(s.timestamp).getTime();
+        if (ts < timeStartMs || ts > timeEndMs) return false;
+        return true;
+      });
+
+      return { snapshots, filterZeros };
+    }
+
+    function getSelectedCities() {
+      const sel = document.getElementById('citySelect');
+      return [...sel.selectedOptions].map(o => o.value);
+    }
+
+    function getSelectedProduct() {
+      return document.getElementById('productSelect').value;
+    }
+
+    function getCustomAvgCities() {
+      const raw = document.getElementById('customAvgInput').value.trim();
+      if (!raw) return [];
+      const allCities = DATA.all_cities.map(c => c.toLowerCase());
+      return raw.split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .map(s => {
+          // Match case-insensitively against known cities
+          const idx = allCities.indexOf(s.toLowerCase());
+          return idx >= 0 ? DATA.all_cities[idx] : null;
+        })
+        .filter(c => c !== null);
+    }
+
+    /**
+     * Build a set of (product, city, snapshotIndex) triples where a 0% value
+     * is a blip — i.e. the nearest non-null neighbors on BOTH sides are much
+     * higher. This handles gaps/skips in the data.
+     *
+     * A 0% at index i is a blip if:
+     *   - The closest non-null, non-zero value BEFORE i is >= BLIP_THRESHOLD
+     *   - The closest non-null, non-zero value AFTER  i is >= BLIP_THRESHOLD
+     *   - OR it's at the edge (first/last) and the one available neighbor is >= BLIP_THRESHOLD
+     *   - OR the store count for that city in that snapshot is 0
+     */
+    const BLIP_THRESHOLD = 25; // neighbor must be >= this % to call a 0% a blip
+    let _blipSet = null;
+    let _blipSetKey = null;
+
+    function getBlipSet(snapshots) {
+      const key = snapshots.length + '|' + (snapshots.length > 0 ? snapshots[0].timestamp : '');
+      if (_blipSetKey === key && _blipSet) return _blipSet;
+
+      const blips = new Set();
+
+      // Collect all unique (product, city) pairs
+      const pairs = new Map(); // key -> [{idx, val, storeCount}]
+      snapshots.forEach((s, si) => {
+        s.products.forEach(p => {
+          s.cities.forEach(cityInfo => {
+            const city = cityInfo.name;
+            const val = p.values[city];
+            if (val === null || val === undefined) return;
+            const k = `${p.model}|||${city}`;
+            if (!pairs.has(k)) pairs.set(k, []);
+            pairs.get(k).push({ si, val, storeCount: cityInfo.store_count });
+          });
+        });
+      });
+
+      // For each (product, city), walk the time-ordered sequence
+      pairs.forEach((entries, key) => {
+        // entries are already in snapshot order since we iterated snapshots in order
+        for (let i = 0; i < entries.length; i++) {
+          const e = entries[i];
+          if (e.val !== 0) continue;
+
+          // Always flag 0% when store count is 0
+          if (e.storeCount <= 0) {
+            blips.add(`${key}|||${e.si}`);
+            continue;
+          }
+
+          // Find nearest non-null neighbor BEFORE with val > 0
+          let prevVal = null;
+          for (let j = i - 1; j >= 0; j--) {
+            if (entries[j].val !== null && entries[j].val > 0) {
+              prevVal = entries[j].val;
+              break;
+            }
+          }
+
+          // Find nearest non-null neighbor AFTER with val > 0
+          let nextVal = null;
+          for (let j = i + 1; j < entries.length; j++) {
+            if (entries[j].val !== null && entries[j].val > 0) {
+              nextVal = entries[j].val;
+              break;
+            }
+          }
+
+          // Determine if it's a blip:
+          // - Both neighbors exist and are >= threshold
+          // - Or only one neighbor exists (edge) and it's >= threshold
+          // - Or no neighbors (all zeros) — keep it as real data
+          const prevHigh = prevVal !== null && prevVal >= BLIP_THRESHOLD;
+          const nextHigh = nextVal !== null && nextVal >= BLIP_THRESHOLD;
+          const hasNeighbors = prevVal !== null || nextVal !== null;
+
+          if (hasNeighbors && (prevVal === null || prevHigh) && (nextVal === null || nextHigh)) {
+            blips.add(`${key}|||${e.si}`);
+          }
+        }
+      });
+
+      _blipSet = blips;
+      _blipSetKey = key;
+      return blips;
+    }
+
+    /**
+     * For a given snapshot, product, and city, determine if the data point is valid.
+     * Filters out: null/ERR, store count 0, and 0% blips (isolated drops surrounded
+     * by much higher values).
+     */
+    function getValidValue(snapshot, product, cityName, filterZeros, blipSet, snapshotIdx) {
+      const prodData = snapshot.products.find(p => p.model === product);
+      if (!prodData) return null;
+      const val = prodData.values[cityName];
+      if (val === null || val === undefined) return null;
+
+      const cityInfo = snapshot.cities.find(c => c.name === cityName);
+      // If store count is 0 or unknown, it's likely an error snapshot for this city
+      if (cityInfo && cityInfo.store_count === 0) return null;
+
+      if (filterZeros && val === 0 && blipSet) {
+        const k = `${product}|||${cityName}|||${snapshotIdx}`;
+        if (blipSet.has(k)) return null;
+      }
+
+      return val;
+    }
+
+    function render() {
+      const { snapshots, filterZeros } = getFilteredSnapshots();
+      const selectedCities = getSelectedCities();
+      const selectedProduct = getSelectedProduct();
+      const isAllProducts = selectedProduct === '__ALL__';
+      const blipSet = filterZeros ? getBlipSet(snapshots) : null;
+
+      updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+
+      if (currentView === 'trends' || currentView === 'compare') {
+        document.getElementById('heatmapCard').style.display = 'none';
+        renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+      } else {
+        document.getElementById('heatmapCard').style.display = 'block';
+        renderHeatmap(snapshots, selectedCities, filterZeros, blipSet);
+        renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+      }
+
+      renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+      renderMovers(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+      renderProductChart(snapshots, selectedCities, filterZeros, blipSet);
+      renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+    }
+
+    function updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+      const statsRow = document.getElementById('statsRow');
+      const excludedInfo = document.getElementById('excludedInfo');
+
+      let totalPoints = 0;
+      let excludedPoints = 0;
+      let validValues = [];
+
+      snapshots.forEach((s, si) => {
+        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
+        products.forEach(prod => {
+          selectedCities.forEach(city => {
+            totalPoints++;
+            const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
+            if (val !== null) {
+              validValues.push(val);
+            } else {
+              excludedPoints++;
+            }
+          });
+        });
+      });
+
+      const avg = validValues.length ? (validValues.reduce((a, b) => a + b, 0) / validValues.length).toFixed(1) : 'N/A';
+      const min = validValues.length ? Math.min(...validValues) : 'N/A';
+      const max = validValues.length ? Math.max(...validValues) : 'N/A';
+
+      statsRow.innerHTML = `
+        <div class="stat-box">
+          <div class="stat-label">Snapshots</div>
+          <div class="stat-value">${snapshots.length}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Data Points</div>
+          <div class="stat-value">${validValues.length}</div>
+        </div>
+      `;
+
+      excludedInfo.textContent = excludedPoints > 0
+        ? `${excludedPoints} data points excluded by filters (ERR, N/A, error snapshots with 0 stores, or isolated single-call 0% values)`
+        : '';
+    }
+
+    function renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+      const ctx = document.getElementById('mainChart');
+
+      if (mainChart) {
+        mainChart.destroy();
+        mainChart = null;
+      }
+
+      let datasets = [];
+
+      /** Helper: get store count for a city in a snapshot */
+      function getStoreCount(snapshot, cityName) {
+        const c = snapshot.cities.find(c => c.name === cityName);
+        return (c && c.store_count > 0) ? c.store_count : 0;
+      }
+
+      /** Helper: compute store-weighted average across cities for a snapshot.
+       *  products is an array of product names to average over.
+       *  Returns null if no valid data. */
+      function weightedAvg(snapshot, si, products, cities, filterZeros, blipSet) {
+        let totalWeight = 0, weightedSum = 0;
+        cities.forEach(city => {
+          const sc = getStoreCount(snapshot, city);
+          if (sc <= 0) return;
+          products.forEach(prod => {
+            const val = getValidValue(snapshot, prod, city, filterZeros, blipSet, si);
+            if (val !== null) {
+              weightedSum += val * sc;
+              totalWeight += sc;
+            }
+          });
+        });
+        return totalWeight > 0 ? weightedSum / totalWeight : null;
+      }
+
+      if (currentView === 'compare' || !isAllProducts) {
+        // One line per city
+        const title = isAllProducts ? 'Average Availability by City' : `${selectedProduct} — Availability by City`;
+        document.getElementById('mainChartTitle').textContent = title;
+
+        selectedCities.forEach(city => {
+          // First pass: collect raw values (null where missing)
+          const rawPoints = snapshots.map((s, si) => {
+            let val = null;
+            if (isAllProducts) {
+              const vals = s.products
+                .map(p => getValidValue(s, p.model, city, filterZeros, blipSet, si))
+                .filter(v => v !== null);
+              if (vals.length > 0) {
+                val = vals.reduce((a, b) => a + b, 0) / vals.length;
+              }
+            } else {
+              val = getValidValue(s, selectedProduct, city, filterZeros, blipSet, si);
+            }
+            return { x: new Date(s.timestamp), y: val };
+          });
+
+          // Second pass: interpolate missing values as midpoint of nearest known neighbors
+          const points = rawPoints.map((pt, i) => {
+            if (pt.y !== null) {
+              return { x: pt.x, y: pt.y, estimated: false };
+            }
+            // Find previous known value
+            let prev = null;
+            for (let j = i - 1; j >= 0; j--) {
+              if (rawPoints[j].y !== null) { prev = rawPoints[j].y; break; }
+            }
+            // Find next known value
+            let next = null;
+            for (let j = i + 1; j < rawPoints.length; j++) {
+              if (rawPoints[j].y !== null) { next = rawPoints[j].y; break; }
+            }
+            if (prev !== null && next !== null) {
+              return { x: pt.x, y: (prev + next) / 2, estimated: true };
+            } else if (prev !== null) {
+              return { x: pt.x, y: prev, estimated: true };
+            } else if (next !== null) {
+              return { x: pt.x, y: next, estimated: true };
+            }
+            return null; // no data at all for this city
+          }).filter(pt => pt !== null);
+
+          if (points.length > 0) {
+            datasets.push({
+              label: city,
+              data: points,
+              borderColor: CITY_COLORS[city] || '#888',
+              backgroundColor: (CITY_COLORS[city] || '#888') + '20',
+              borderWidth: 2,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              tension: 0.3,
+              fill: false
+            });
+          }
+        });
+
+        // Add weighted average line (weighted by store count per city)
+        if (selectedCities.length > 1) {
+          const avgPoints = [];
+          const products = isAllProducts ? DATA.all_models : [selectedProduct];
+          snapshots.forEach((s, si) => {
+            const val = weightedAvg(s, si, products, selectedCities, filterZeros, blipSet);
+            if (val !== null) {
+              avgPoints.push({ x: new Date(s.timestamp), y: val });
+            }
+          });
+          if (avgPoints.length > 0) {
+            datasets.push({
+              label: 'Weighted Avg',
+              data: avgPoints,
+              borderColor: '#ffffff',
+              backgroundColor: '#ffffff20',
+              borderWidth: 3,
+              borderDash: [6, 3],
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              tension: 0.3,
+              fill: false
+            });
+          }
+        }
+
+        // Add custom weighted average line if user specified cities
+        const customCities = getCustomAvgCities();
+        if (customCities.length > 0) {
+          const customPoints = [];
+          const products = isAllProducts ? DATA.all_models : [selectedProduct];
+          snapshots.forEach((s, si) => {
+            const val = weightedAvg(s, si, products, customCities, filterZeros, blipSet);
+            if (val !== null) {
+              customPoints.push({ x: new Date(s.timestamp), y: val });
+            }
+          });
+          if (customPoints.length > 0) {
+            datasets.push({
+              label: 'Custom Avg (' + customCities.join(', ') + ')',
+              data: customPoints,
+              borderColor: '#ffd60a',
+              backgroundColor: '#ffd60a20',
+              borderWidth: 3,
+              borderDash: [3, 3],
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              tension: 0.3,
+              fill: false
+            });
+          }
+        }
+      } else {
+        // All products view: one line per product (store-weighted average across selected cities)
+        document.getElementById('mainChartTitle').textContent = 'All Products — Store-Weighted Average Across Selected Cities';
+
+        // First pass: compute each product's overall weighted avg for sorting
+        const modelStats = DATA.all_models.map((model, idx) => {
+          const points = [];
+          let overallSum = 0, overallWeight = 0;
+          snapshots.forEach((s, si) => {
+            let wSum = 0, wTotal = 0;
+            selectedCities.forEach(city => {
+              const sc = getStoreCount(s, city);
+              if (sc <= 0) return;
+              const val = getValidValue(s, model, city, filterZeros, blipSet, si);
+              if (val !== null) {
+                wSum += val * sc;
+                wTotal += sc;
+              }
+            });
+            if (wTotal > 0) {
+              const avg = wSum / wTotal;
+              points.push({ x: new Date(s.timestamp), y: avg });
+              overallSum += avg;
+              overallWeight++;
+            }
+          });
+          return { model, idx, points, overallAvg: overallWeight > 0 ? overallSum / overallWeight : -1 };
+        }).filter(m => m.points.length > 0);
+
+        // Sort by overall weighted average (lowest first so worst products are easy to spot)
+        modelStats.sort((a, b) => a.overallAvg - b.overallAvg);
+
+        modelStats.forEach((m, sortIdx) => {
+          datasets.push({
+            label: `${m.model} (${m.overallAvg.toFixed(0)}%)`,
+            data: m.points,
+            borderColor: PRODUCT_COLORS[sortIdx % PRODUCT_COLORS.length],
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+            tension: 0.3,
+            fill: false
+          });
+        });
+      }
+
+      const highlightPlugin = makeHighlightPlugin('mainChart');
+      mainChart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          onClick: () => {}, // enable click events for plugin
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { color: '#aaa', usePointStyle: true, pointStyle: 'circle', padding: 16 },
+              onClick: (e, legendItem, legend) => {
+                // Clicking a legend item highlights that dataset
+                highlightPlugin._highlight(legend.chart, legendItem.datasetIndex);
+              }
+            },
+            tooltip: {
+              backgroundColor: '#1a1a2e',
+              borderColor: '#333',
+              borderWidth: 1,
+              titleColor: '#fff',
+              bodyColor: '#ccc',
+              filter: (tooltipItem) => {
+                // When a line is highlighted, only show that line's tooltip
+                if (highlightPlugin._highlighted >= 0) {
+                  return tooltipItem.datasetIndex === highlightPlugin._highlighted;
+                }
+                return true;
+              },
+              itemSort: (a, b) => b.parsed.y - a.parsed.y,
+              callbacks: {
+                label: ctx => {
+                  const raw = ctx.raw;
+                  const prefix = (raw && raw.estimated) ? '~' : '';
+                  return `${ctx.dataset.label}: ${prefix}${ctx.parsed.y.toFixed(1)}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'time',
+              time: { tooltipFormat: 'MMM d, yyyy h:mm a', displayFormats: { hour: 'h a', day: 'MMM d' } },
+              grid: { color: '#1a1a1a' },
+              ticks: {
+                color: '#666',
+                maxRotation: 0,
+                autoSkip: false,
+                source: 'auto',
+                callback: function(value, index, ticks) {
+                  // value = formatted string from Chart.js, ticks[index].value = epoch ms
+                  const raw = ticks[index] ? ticks[index].value : value;
+                  const d = new Date(raw);
+                  if (isNaN(d.getTime())) return value;
+
+                  const hour = d.getHours();
+                  const min = d.getMinutes();
+
+                  // Only label on-the-hour ticks
+                  if (min !== 0) return '';
+
+                  const ampm = hour >= 12 ? 'PM' : 'AM';
+                  const h12 = hour % 12 || 12;
+                  const timeLine = `${h12} ${ampm}`;
+
+                  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                  const dateStr = `${dayNames[d.getDay()]} ${monthNames[d.getMonth()]} ${d.getDate()}`;
+
+                  // Mark this tick with ._isDay if it's a day-boundary tick (4 AM)
+                  if (ticks[index]._isDay) {
+                    return [timeLine, dateStr];
+                  }
+                  return timeLine;
+                }
+              }
+            },
+            y: {
+              position: 'left',
+              min: 0, max: 100,
+              grid: { color: '#1a1a1a' },
+              ticks: { color: '#666', callback: v => v + '%' }
+            },
+            y2: {
+              position: 'right',
+              min: 0, max: 100,
+              grid: { drawOnChartArea: false },
+              ticks: { color: '#666', callback: v => v + '%' }
+            }
+          }
+        },
+        plugins: [highlightPlugin, {
+          id: 'customTimeTicks',
+          beforeUpdate(chart) {
+            // Dynamically set time unit and stepSize based on data range
+            const xScale = chart.options.scales.x;
+            if (!xScale || xScale.type !== 'time') return;
+            let minT = Infinity, maxT = -Infinity;
+            chart.data.datasets.forEach(ds => {
+              ds.data.forEach(pt => {
+                const t = pt.x ? pt.x.getTime() : 0;
+                if (t > 0 && t < minT) minT = t;
+                if (t > maxT) maxT = t;
+              });
+            });
+            if (minT === Infinity) return;
+            const rangeHours = (maxT - minT) / (1000 * 60 * 60);
+            let step;
+            if (rangeHours <= 12) step = 1;
+            else if (rangeHours <= 24) step = 2;
+            else if (rangeHours <= 48) step = 4;
+            else if (rangeHours <= 96) step = 6;
+            else if (rangeHours <= 192) step = 8;
+            else step = 12;
+            xScale.time.unit = 'hour';
+            xScale.time.stepSize = step;
+          },
+          afterBuildTicks(chart) {
+            // After Chart.js builds the time ticks, tag day-boundary ticks
+            const xScale = chart.scales.x;
+            if (!xScale || !xScale.ticks || xScale.ticks.length === 0) return;
+
+            // Find which day each tick belongs to
+            let lastDay = -1;
+            xScale.ticks.forEach((tick, i) => {
+              const d = new Date(tick.value);
+              const day = d.getDate();
+              if (day !== lastDay) {
+                tick._isDay = true;
+                lastDay = day;
+              }
+            });
+          }
+        }]
+      });
+
+      // Auto-highlight the Weighted Avg line on load
+      const avgIdx = datasets.findIndex(ds => ds.label === 'Weighted Avg');
+      if (avgIdx >= 0) {
+        highlightPlugin._highlight(mainChart, avgIdx);
+      }
+    }
+
+    function renderHeatmap(snapshots, selectedCities, filterZeros, blipSet) {
+      if (snapshots.length === 0) return;
+      const latestIdx = snapshots.length - 1;
+      const latest = snapshots[latestIdx];
+      const table = document.getElementById('heatmapTable');
+
+      let html = '<thead><tr><th>Product</th>';
+      selectedCities.forEach(c => { html += `<th>${c}</th>`; });
+      html += '</tr></thead><tbody>';
+
+      latest.products.forEach(prod => {
+        html += `<tr><td>${prod.model}</td>`;
+        selectedCities.forEach(city => {
+          const val = getValidValue(latest, prod.model, city, filterZeros, blipSet, latestIdx);
+          if (val === null) {
+            html += '<td style="background:#1a1a1a;color:#555;">N/A</td>';
+          } else {
+            const hue = val * 1.2; // 0=red, 120=green
+            const bg = `hsl(${hue}, 70%, 25%)`;
+            const fg = `hsl(${hue}, 70%, 85%)`;
+            html += `<td style="background:${bg};color:${fg};font-weight:600;">${val}%</td>`;
+          }
+        });
+        html += '</tr>';
+      });
+      html += '</tbody>';
+      table.innerHTML = html;
+    }
+
+    let _cityPeriodHours = 0; // 0 = all time
+    let _moverPeriodHours = 24;
+
+    /** Helper: compute average for a set of snapshots for a given city */
+    function _avgForSnaps(snaps, allSnapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet) {
+      let vals = [];
+      snaps.forEach(s => {
+        const si = allSnapshots.indexOf(s);
+        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
+        products.forEach(prod => {
+          const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
+          if (val !== null) vals.push(val);
+        });
+      });
+      return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    }
+
+    function _updatePeriodButtons(containerSelector, dataSpanHours) {
+      document.querySelectorAll(`${containerSelector} .period-btn`).forEach(btn => {
+        const h = parseInt(btn.dataset.hours);
+        if (h > 0 && dataSpanHours < h * 0.5) {
+          btn.classList.add('disabled');
+        } else {
+          btn.classList.remove('disabled');
+        }
+      });
+    }
+
+    function renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+      const grid = document.getElementById('citySummary');
+      grid.innerHTML = '';
+
+      const now = snapshots.length > 0 ? new Date(snapshots[snapshots.length - 1].timestamp).getTime() : Date.now();
+      const earliest = snapshots.length > 0 ? new Date(snapshots[0].timestamp).getTime() : now;
+      const dataSpanHours = (now - earliest) / (1000 * 60 * 60);
+
+      _updatePeriodButtons('#cityPeriodBtns', dataSpanHours);
+
+      // Filter snapshots by selected period
+      let periodSnapshots = snapshots;
+      if (_cityPeriodHours > 0) {
+        const cutoff = now - _cityPeriodHours * 60 * 60 * 1000;
+        periodSnapshots = snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff);
+      }
+
+      selectedCities.forEach(city => {
+        const avg = _avgForSnaps(periodSnapshots, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
+        const display = avg !== null ? avg.toFixed(0) : 'N/A';
+        const cls = avg !== null ? (avg >= 75 ? 'good' : avg >= 50 ? 'ok' : 'bad') : '';
+        const card = document.createElement('div');
+        card.className = 'summary-card';
+        card.innerHTML = `
+          <div class="city-name">${city}</div>
+          <div class="avg-val ${cls}">${display}${avg !== null ? '%' : ''}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    /**
+     * Get the interpolated/extrapolated average for a city at a target time.
+     * Uses the two nearest snapshots on either side of targetMs to interpolate.
+     * If targetMs is before all data, uses earliest; if after all, uses latest.
+     */
+    function _interpolatedAvgAtTime(snapshots, targetMs, city, isAllProducts, selectedProduct, filterZeros, blipSet) {
+      // Build time-series of (timestamp, avg) for this city
+      const series = [];
+      snapshots.forEach((s, si) => {
+        const t = new Date(s.timestamp).getTime();
+        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
+        let vals = [];
+        products.forEach(prod => {
+          const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
+          if (val !== null) vals.push(val);
+        });
+        if (vals.length > 0) {
+          series.push({ t, avg: vals.reduce((a, b) => a + b, 0) / vals.length });
+        }
+      });
+      if (series.length === 0) return null;
+
+      // Find the two points bracketing targetMs
+      let before = null, after = null;
+      for (let i = 0; i < series.length; i++) {
+        if (series[i].t <= targetMs) before = series[i];
+        if (series[i].t >= targetMs && after === null) after = series[i];
+      }
+
+      // Exact match or only one side available
+      if (before && after && before.t === after.t) return before.avg;
+      if (before && after) {
+        // Linear interpolation
+        const frac = (targetMs - before.t) / (after.t - before.t);
+        return before.avg + frac * (after.avg - before.avg);
+      }
+      if (before) return before.avg;
+      if (after) return after.avg;
+      return null;
+    }
+
+    function renderMovers(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+      const grid = document.getElementById('moversGrid');
+      grid.innerHTML = '';
+
+      const now = snapshots.length > 0 ? new Date(snapshots[snapshots.length - 1].timestamp).getTime() : Date.now();
+      const earliest = snapshots.length > 0 ? new Date(snapshots[0].timestamp).getTime() : now;
+      const dataSpanHours = (now - earliest) / (1000 * 60 * 60);
+
+      _updatePeriodButtons('#moverPeriodBtns', dataSpanHours);
+
+      const periodMs = _moverPeriodHours * 60 * 60 * 1000;
+      // "Recent" = last 25% of the period window; "Past" = the 25% window ending at period-ago
+      const recentWindow = Math.max(periodMs * 0.25, 4 * 60 * 60 * 1000); // at least 4h
+
+      const recentSnaps = snapshots.filter(s => new Date(s.timestamp).getTime() >= now - recentWindow);
+
+      // Try to find past snapshots in the normal window
+      const pastSnaps = snapshots.filter(s => {
+        const t = new Date(s.timestamp).getTime();
+        return t >= (now - periodMs - recentWindow) && t <= (now - periodMs);
+      });
+
+      const usePastSnaps = pastSnaps.length > 0;
+
+      if (recentSnaps.length === 0) {
+        grid.innerHTML = '<div style="color:#555;font-size:13px;padding:12px;">Not enough data for this period yet.</div>';
+        return;
+      }
+
+      // Compute deltas for all cities
+      const movers = [];
+      const targetPastMs = now - periodMs;
+      const isExtrapolated = !usePastSnaps;
+
+      selectedCities.forEach(city => {
+        const recent = _avgForSnaps(recentSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
+        let past;
+        if (usePastSnaps) {
+          past = _avgForSnaps(pastSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
+        } else {
+          // Extrapolate: find interpolated value at the target past time
+          past = _interpolatedAvgAtTime(snapshots, targetPastMs, city, isAllProducts, selectedProduct, filterZeros, blipSet);
+        }
+        if (recent !== null && past !== null) {
+          movers.push({ city, delta: recent - past, recent, past, extrapolated: isExtrapolated });
+        }
+      });
+
+      // Sort by absolute delta (biggest moves first)
+      movers.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+
+      movers.forEach(m => {
+        const sign = m.delta >= 0 ? '+' : '';
+        const cls = m.delta >= 0 ? 'good' : 'bad';
+        const arrow = m.delta >= 0 ? '▲' : '▼';
+        const extraNote = m.extrapolated ? ' ~' : '';
+        const card = document.createElement('div');
+        card.className = 'summary-card';
+        card.innerHTML = `
+          <div class="city-name">${m.city}</div>
+          <div class="delta-val ${cls}">${arrow} ${sign}${m.delta.toFixed(1)}%${extraNote}</div>
+          <div class="sub-label">${m.extrapolated ? '~' : ''}${m.past.toFixed(0)}% → ${m.recent.toFixed(0)}%</div>
+        `;
+        grid.appendChild(card);
+      });
+
+      if (movers.length > 0 && movers[0].extrapolated) {
+        const note = document.createElement('div');
+        note.style.cssText = 'color:#555;font-size:11px;padding:4px 0 0 4px;width:100%;';
+        note.textContent = '~ = estimated from interpolated past data (not enough snapshots at exact period boundary)';
+        grid.appendChild(note);
+      }
+    }
+
+    function renderProductChart(snapshots, selectedCities, filterZeros, blipSet) {
+      const ctx = document.getElementById('productChart');
+      if (productChart) {
+        productChart.destroy();
+        productChart = null;
+      }
+
+      document.getElementById('productChartTitle').textContent = 'Average Availability by Product (Store-Weighted)';
+
+      const productAvgs = [];
+      let overallWSum = 0, overallWTotal = 0;
+
+      DATA.all_models.forEach((model, idx) => {
+        let wSum = 0, wTotal = 0;
+        snapshots.forEach((s, si) => {
+          selectedCities.forEach(city => {
+            const sc = s.cities.find(c => c.name === city);
+            const storeCount = (sc && sc.store_count > 0) ? sc.store_count : 0;
+            if (storeCount <= 0) return;
+            const val = getValidValue(s, model, city, filterZeros, blipSet, si);
+            if (val !== null) {
+              wSum += val * storeCount;
+              wTotal += storeCount;
+            }
+          });
+        });
+        if (wTotal > 0) {
+          productAvgs.push({
+            model,
+            avg: wSum / wTotal,
+            count: wTotal,
+            color: PRODUCT_COLORS[idx % PRODUCT_COLORS.length]
+          });
+          overallWSum += wSum;
+          overallWTotal += wTotal;
+        }
+      });
+
+      productAvgs.sort((a, b) => a.avg - b.avg);
+
+      // Add weighted average as first item
+      if (overallWTotal > 0) {
+        productAvgs.unshift({
+          model: '⚖️ Weighted Average (All Products)',
+          avg: overallWSum / overallWTotal,
+          count: overallWTotal,
+          color: '#ffffff',
+          isAverage: true
+        });
+      }
+
+      // Store original colors for highlight/reset
+      const origBgColors = productAvgs.map(p => p.isAverage ? '#ffffff55' : p.color + '99');
+      const origBorderColors = productAvgs.map(p => p.color);
+      const origBorderWidths = productAvgs.map(p => p.isAverage ? 2 : 1);
+
+      // Highlight state
+      let highlightedIdx = -1;
+
+      productChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: productAvgs.map(p => p.model),
+          datasets: [{
+            label: 'Availability',
+            data: productAvgs.map(p => p.avg),
+            backgroundColor: [...origBgColors],
+            borderColor: [...origBorderColors],
+            borderWidth: [...origBorderWidths]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          onClick: (event, elements) => {
+            if (elements.length > 0) {
+              const idx = elements[0].index;
+              if (highlightedIdx === idx) {
+                // Clicking same bar resets
+                resetBarHighlight();
+              } else {
+                highlightBar(idx);
+              }
+            } else {
+              resetBarHighlight();
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: '#aaa',
+                generateLabels: function(chart) {
+                  return productAvgs.map((p, i) => ({
+                    text: p.model,
+                    fontColor: p.color,
+                    fillStyle: p.isAverage ? '#ffffff55' : p.color + '99',
+                    strokeStyle: p.color,
+                    lineWidth: p.isAverage ? 2 : 1,
+                    hidden: false,
+                    index: i
+                  }));
+                }
+              },
+              onClick: (e, legendItem, legend) => {
+                const idx = legendItem.index;
+                if (highlightedIdx === idx) {
+                  resetBarHighlight();
+                } else {
+                  highlightBar(idx);
+                }
+              }
+            },
+            tooltip: {
+              backgroundColor: '#1a1a2e',
+              borderColor: '#333',
+              borderWidth: 1,
+              callbacks: {
+                label: ctx => `${ctx.parsed.x.toFixed(1)}% (weighted across ${productAvgs[ctx.dataIndex].count} store-checks)`
+              }
+            }
+          },
+          scales: {
+            x: {
+              min: 0, max: 100,
+              grid: { color: '#1a1a1a' },
+              ticks: { color: '#666', callback: v => v + '%' }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: '#aaa', font: { size: 11 } }
+            }
+          }
+        }
+      });
+
+      function highlightBar(idx) {
+        highlightedIdx = idx;
+        const ds = productChart.data.datasets[0];
+        ds.backgroundColor = productAvgs.map((p, i) =>
+          i === idx ? (p.isAverage ? '#ffffffcc' : p.color + 'ff') : (p.isAverage ? '#ffffff15' : p.color + '22')
+        );
+        ds.borderColor = productAvgs.map((p, i) =>
+          i === idx ? p.color : p.color + '44'
+        );
+        ds.borderWidth = productAvgs.map((p, i) =>
+          i === idx ? 3 : 1
+        );
+        productChart.update('none');
+      }
+
+      function resetBarHighlight() {
+        highlightedIdx = -1;
+        const ds = productChart.data.datasets[0];
+        ds.backgroundColor = [...origBgColors];
+        ds.borderColor = [...origBorderColors];
+        ds.borderWidth = [...origBorderWidths];
+        productChart.update('none');
+      }
+    }
+
+    let _csvData = ''; // cached for download
+
+    function renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+      const card = document.getElementById('dataMatrixCard');
+      const table = document.getElementById('dataMatrixTable');
+      const title = document.getElementById('dataMatrixTitle');
+
+      if (isAllProducts || snapshots.length === 0) {
+        card.style.display = 'none';
+        return;
+      }
+
+      card.style.display = 'block';
+      title.textContent = `${selectedProduct} — Availability by City Over Time`;
+
+      // Get latest store counts for column headers
+      const latestSnap = snapshots[snapshots.length - 1];
+      function getCityStoreCount(cityName) {
+        const c = latestSnap ? latestSnap.cities.find(c => c.name === cityName) : null;
+        return (c && c.store_count > 0) ? c.store_count : '?';
+      }
+
+      // Build table: rows = timestamps, cols = cities
+      let html = '<thead><tr><th style="min-width:160px;">Timestamp</th>';
+      selectedCities.forEach(c => { html += `<th>${c} (${getCityStoreCount(c)})</th>`; });
+      html += '<th>Weighted Avg</th></tr></thead><tbody>';
+
+      // Also build CSV
+      let csv = 'Timestamp,' + selectedCities.map(c => `${c} (${getCityStoreCount(c)})`).join(',') + ',Weighted Avg\n';
+
+      snapshots.forEach((s, si) => {
+        const ts = s.timestamp.replace('T', ' ').slice(0, 19);
+        html += `<tr><td style="white-space:nowrap;color:#aaa;">${ts}</td>`;
+        let csvRow = ts;
+
+        let wSum = 0, wTotal = 0;
+        selectedCities.forEach(city => {
+          const val = getValidValue(s, selectedProduct, city, filterZeros, blipSet, si);
+          const sc = s.cities.find(c => c.name === city);
+          const storeCount = (sc && sc.store_count > 0) ? sc.store_count : 0;
+
+          if (val === null) {
+            html += '<td style="background:#1a1a1a;color:#555;">—</td>';
+            csvRow += ',';
+          } else {
+            const hue = val * 1.2;
+            const bg = `hsl(${hue}, 70%, 25%)`;
+            const fg = `hsl(${hue}, 70%, 85%)`;
+            html += `<td style="background:${bg};color:${fg};font-weight:600;">${val}%</td>`;
+            csvRow += `,${val}%`;
+            if (storeCount > 0) {
+              wSum += val * storeCount;
+              wTotal += storeCount;
+            }
+          }
+        });
+
+        const wAvg = wTotal > 0 ? (wSum / wTotal).toFixed(1) : '';
+        if (wAvg) {
+          const hue = parseFloat(wAvg) * 1.2;
+          const bg = `hsl(${hue}, 70%, 25%)`;
+          const fg = `hsl(${hue}, 70%, 85%)`;
+          html += `<td style="background:${bg};color:${fg};font-weight:700;">${wAvg}%</td>`;
+        } else {
+          html += '<td style="background:#1a1a1a;color:#555;">—</td>';
+        }
+        csvRow += `,${wAvg ? wAvg + '%' : ''}`;
+
+        html += '</tr>';
+        csv += csvRow + '\n';
+      });
+
+      html += '</tbody>';
+      table.innerHTML = html;
+      _csvData = csv;
+    }
+
+    document.getElementById('downloadCsv').addEventListener('click', () => {
+      if (!_csvData) return;
+      const product = getSelectedProduct();
+      const safeName = product.replace(/[^a-zA-Z0-9]/g, '_');
+      const blob = new Blob([_csvData], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `availability_${safeName}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
