@@ -469,10 +469,18 @@
     <!-- City moves -->
     <div class="chart-card">
       <h3>Largest Moves by City</h3>
-      <div class="period-btns" id="moverPeriodBtns">
-        <button class="period-btn active" data-hours="24">24h</button>
-        <button class="period-btn" data-hours="168">7d</button>
-        <button class="period-btn" data-hours="336">2wk</button>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+        <div class="period-btns" id="moverPeriodBtns">
+          <button class="period-btn active" data-hours="24">24h</button>
+          <button class="period-btn" data-hours="168">7d</button>
+          <button class="period-btn" data-hours="336">2wk</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="color:#888;font-size:12px;">or last</span>
+          <input type="number" id="moverUpdatesInput" min="1" max="500" placeholder="N" style="width:60px;background:#1a1a2e;color:#e0e0e0;border:1px solid #333;padding:6px 8px;border-radius:6px;font-size:13px;text-align:center;">
+          <span style="color:#888;font-size:12px;">updates</span>
+          <button id="moverUpdatesBtn" class="period-btn" style="margin-left:4px;">Go</button>
+        </div>
       </div>
       <div class="summary-grid" id="moversGrid"></div>
     </div>
@@ -780,8 +788,26 @@
           document.querySelectorAll('#moverPeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           _moverPeriodHours = parseInt(btn.dataset.hours);
+          _moverUpdatesCount = null; // Switch back to hours mode
+          document.getElementById('moverUpdatesInput').value = '';
           render();
         });
+      });
+
+      // Mover "last N updates" button
+      document.getElementById('moverUpdatesBtn').addEventListener('click', () => {
+        const input = document.getElementById('moverUpdatesInput');
+        const val = parseInt(input.value);
+        if (val && val > 0) {
+          _moverUpdatesCount = val;
+          document.querySelectorAll('#moverPeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
+          render();
+        }
+      });
+      document.getElementById('moverUpdatesInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('moverUpdatesBtn').click();
+        }
       });
 
       // Time range controls
@@ -1473,6 +1499,7 @@
 
     let _cityPeriodHours = 0; // 0 = all time
     let _moverPeriodHours = 24;
+    let _moverUpdatesCount = null; // null = use hours mode, number = use last N updates mode
 
     /** Helper: compute average for a set of snapshots for a given city */
     function _avgForSnaps(snaps, allSnapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet) {
@@ -1581,19 +1608,39 @@
 
       _updatePeriodButtons('#moverPeriodBtns', dataSpanHours);
 
-      const periodMs = _moverPeriodHours * 60 * 60 * 1000;
-      // "Recent" = last 25% of the period window; "Past" = the 25% window ending at period-ago
-      const recentWindow = Math.max(periodMs * 0.25, 4 * 60 * 60 * 1000); // at least 4h
+      let recentSnaps, pastSnaps, usePastSnaps, isExtrapolated, targetPastMs;
 
-      const recentSnaps = snapshots.filter(s => new Date(s.timestamp).getTime() >= now - recentWindow);
+      // Check if we're in "last N updates" mode
+      if (_moverUpdatesCount !== null && _moverUpdatesCount > 0) {
+        const n = Math.min(_moverUpdatesCount, snapshots.length - 1);
+        if (n < 1 || snapshots.length < 2) {
+          grid.innerHTML = '<div style="color:#555;font-size:13px;padding:12px;">Not enough data updates yet.</div>';
+          return;
+        }
+        // Recent = last snapshot, Past = snapshot N ago
+        recentSnaps = [snapshots[snapshots.length - 1]];
+        pastSnaps = [snapshots[snapshots.length - 1 - n]];
+        usePastSnaps = true;
+        isExtrapolated = false;
+        targetPastMs = null;
+      } else {
+        // Hours-based mode
+        const periodMs = _moverPeriodHours * 60 * 60 * 1000;
+        // "Recent" = last 25% of the period window; "Past" = the 25% window ending at period-ago
+        const recentWindow = Math.max(periodMs * 0.25, 4 * 60 * 60 * 1000); // at least 4h
 
-      // Try to find past snapshots in the normal window
-      const pastSnaps = snapshots.filter(s => {
-        const t = new Date(s.timestamp).getTime();
-        return t >= (now - periodMs - recentWindow) && t <= (now - periodMs);
-      });
+        recentSnaps = snapshots.filter(s => new Date(s.timestamp).getTime() >= now - recentWindow);
 
-      const usePastSnaps = pastSnaps.length > 0;
+        // Try to find past snapshots in the normal window
+        pastSnaps = snapshots.filter(s => {
+          const t = new Date(s.timestamp).getTime();
+          return t >= (now - periodMs - recentWindow) && t <= (now - periodMs);
+        });
+
+        usePastSnaps = pastSnaps.length > 0;
+        isExtrapolated = !usePastSnaps;
+        targetPastMs = now - periodMs;
+      }
 
       if (recentSnaps.length === 0) {
         grid.innerHTML = '<div style="color:#555;font-size:13px;padding:12px;">Not enough data for this period yet.</div>';
@@ -1602,8 +1649,6 @@
 
       // Compute deltas for all cities
       const movers = [];
-      const targetPastMs = now - periodMs;
-      const isExtrapolated = !usePastSnaps;
 
       selectedCities.forEach(city => {
         const recent = _avgForSnaps(recentSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
