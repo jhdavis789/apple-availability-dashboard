@@ -1352,30 +1352,26 @@
               ticks: {
                 color: '#666',
                 maxRotation: 0,
-                autoSkip: false,
-                source: 'auto',
+                autoSkip: true,
+                major: { enabled: true },
                 callback: function(value, index, ticks) {
-                  // value = formatted string from Chart.js, ticks[index].value = epoch ms
                   const raw = ticks[index] ? ticks[index].value : value;
                   const d = new Date(raw);
                   if (isNaN(d.getTime())) return value;
 
                   const hour = d.getHours();
                   const min = d.getMinutes();
-
-                  // Only label on-the-hour ticks
                   if (min !== 0) return '';
 
                   const ampm = hour >= 12 ? 'PM' : 'AM';
                   const h12 = hour % 12 || 12;
                   const timeLine = `${h12} ${ampm}`;
 
-                  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-                  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-                  const dateStr = `${dayNames[d.getDay()]} ${monthNames[d.getMonth()]} ${d.getDate()}`;
-
-                  // Mark this tick with ._isDay if it's a day-boundary tick (4 AM)
-                  if (ticks[index]._isDay) {
+                  // Major ticks (day boundaries) get a second line with the date
+                  if (ticks[index].major) {
+                    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    const dateStr = `${dayNames[d.getDay()]} ${monthNames[d.getMonth()]} ${d.getDate()}`;
                     return [timeLine, dateStr];
                   }
                   return timeLine;
@@ -1423,17 +1419,17 @@
             xScale.time.stepSize = step;
           },
           afterBuildTicks(chart) {
-            // After Chart.js builds the time ticks, tag day-boundary ticks
+            // After Chart.js builds the time ticks, mark day-boundary ticks as major
+            // so they are never auto-skipped and get the date label
             const xScale = chart.scales.x;
             if (!xScale || !xScale.ticks || xScale.ticks.length === 0) return;
 
-            // Find which day each tick belongs to
             let lastDay = -1;
-            xScale.ticks.forEach((tick, i) => {
+            xScale.ticks.forEach(tick => {
               const d = new Date(tick.value);
               const day = d.getDate();
               if (day !== lastDay) {
-                tick._isDay = true;
+                tick.major = true;
                 lastDay = day;
               }
             });
