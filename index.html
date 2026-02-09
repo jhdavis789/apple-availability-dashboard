@@ -154,6 +154,7 @@
     .good { color: #30d158; }
     .ok { color: #ffd60a; }
     .bad { color: #ff453a; }
+    .neutral { color: #8e8e93; }
 
     .period-btns { display: flex; gap: 4px; margin-bottom: 14px; }
     .period-btn {
@@ -1722,8 +1723,8 @@
 
       movers.forEach(m => {
         const sign = m.delta >= 0 ? '+' : '';
-        const cls = m.delta >= 0 ? 'good' : 'bad';
-        const arrow = m.delta >= 0 ? '▲' : '▼';
+        const cls = m.delta > 0 ? 'good' : m.delta < 0 ? 'bad' : 'neutral';
+        const arrow = m.delta > 0 ? '▲' : m.delta < 0 ? '▼' : '';
         const extraNote = m.extrapolated ? ' ~' : '';
         const card = document.createElement('div');
         card.className = 'summary-card';
