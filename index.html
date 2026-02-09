@@ -831,6 +831,8 @@
         if (val && val > 0) {
           _moverUpdatesCount = val;
           document.querySelectorAll('#moverPeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
+          // Also update the time range to show only the last N updates
+          setTimeRangeToLastNUpdates(val);
           render();
         }
       });
@@ -854,6 +856,38 @@
       return new Date(str).getTime();
     }
 
+    // Global time range sync functions
+    function updateTrackFill() {
+      const pctL = ((timeStartMs - timeMin) / (timeMax - timeMin)) * 100;
+      const pctR = ((timeEndMs - timeMin) / (timeMax - timeMin)) * 100;
+      const fill = document.getElementById('trackFill');
+      fill.style.left = pctL + '%';
+      fill.style.width = (pctR - pctL) + '%';
+    }
+
+    function syncSlidersFromMs() {
+      const rangeStart = document.getElementById('rangeStart');
+      const rangeEnd = document.getElementById('rangeEnd');
+      rangeStart.value = Math.round(((timeStartMs - timeMin) / (timeMax - timeMin)) * 1000);
+      rangeEnd.value = Math.round(((timeEndMs - timeMin) / (timeMax - timeMin)) * 1000);
+      updateTrackFill();
+    }
+
+    function syncInputsFromMs() {
+      document.getElementById('timeStart').value = toLocalDatetimeStr(timeStartMs);
+      document.getElementById('timeEnd').value = toLocalDatetimeStr(timeEndMs);
+    }
+
+    function setTimeRangeToLastNUpdates(n) {
+      if (!DATA || !DATA.snapshots || DATA.snapshots.length < 2) return;
+      const snapshots = DATA.snapshots;
+      const startIdx = Math.max(0, snapshots.length - n);
+      timeStartMs = new Date(snapshots[startIdx].timestamp).getTime();
+      timeEndMs = new Date(snapshots[snapshots.length - 1].timestamp).getTime();
+      syncInputsFromMs();
+      syncSlidersFromMs();
+    }
+
     function initTimeRange() {
       const timestamps = DATA.snapshots.map(s => new Date(s.timestamp).getTime());
       timeMin = Math.min(...timestamps);
@@ -869,25 +903,6 @@
 
       startInput.value = toLocalDatetimeStr(timeMin);
       endInput.value = toLocalDatetimeStr(timeMax);
-
-      function updateTrackFill() {
-        const pctL = ((timeStartMs - timeMin) / (timeMax - timeMin)) * 100;
-        const pctR = ((timeEndMs - timeMin) / (timeMax - timeMin)) * 100;
-        const fill = document.getElementById('trackFill');
-        fill.style.left = pctL + '%';
-        fill.style.width = (pctR - pctL) + '%';
-      }
-
-      function syncSlidersFromMs() {
-        rangeStart.value = Math.round(((timeStartMs - timeMin) / (timeMax - timeMin)) * 1000);
-        rangeEnd.value = Math.round(((timeEndMs - timeMin) / (timeMax - timeMin)) * 1000);
-        updateTrackFill();
-      }
-
-      function syncInputsFromMs() {
-        startInput.value = toLocalDatetimeStr(timeStartMs);
-        endInput.value = toLocalDatetimeStr(timeEndMs);
-      }
 
       // Slider -> update text + render
       rangeStart.addEventListener('input', () => {
