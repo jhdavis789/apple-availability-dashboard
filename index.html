@@ -693,6 +693,19 @@
           `Last updated ${days[last.getDay()]} ${months[last.getMonth()]} ${last.getDate()} at ${h12}:${minStr} ${ampm}`;
       }
 
+      // Show website build time in footer
+      if (DATA.generated_at) {
+        const gen = new Date(DATA.generated_at);
+        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const h = gen.getHours(), m = gen.getMinutes();
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        const minStr = m < 10 ? '0' + m : m;
+        document.getElementById('lastUpdatedFooter').textContent =
+          `${days[gen.getDay()]} ${months[gen.getMonth()]} ${gen.getDate()}, ${gen.getFullYear()} at ${h12}:${minStr} ${ampm}`;
+      }
+
       initControls();
       render();
       document.getElementById('loading').style.display = 'none';
@@ -1962,5 +1975,9 @@
 
     loadData();
   </script>
+
+  <footer style="text-align:center;padding:24px;color:#555;font-size:12px;border-top:1px solid #222;margin-top:24px;">
+    Website last updated: <span id="lastUpdatedFooter">—</span>
+  </footer>
 </body>
 </html>
