@@ -383,7 +383,13 @@
 
     <div class="control-group">
       <label>Cities</label>
-      <select id="citySelect" multiple></select>
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <select id="citySelect" multiple></select>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <button id="selectAllCities" class="secondary" style="font-size:11px;padding:4px 8px;">All</button>
+          <button id="clearCities" class="secondary" style="font-size:11px;padding:4px 8px;">None</button>
+        </div>
+      </div>
     </div>
 
     <div class="control-group">
@@ -738,6 +744,16 @@
 
       document.getElementById('resetCities').addEventListener('click', () => {
         [...citySelect.options].forEach(o => o.selected = true);
+        render();
+      });
+
+      document.getElementById('selectAllCities').addEventListener('click', () => {
+        [...citySelect.options].forEach(o => o.selected = true);
+        render();
+      });
+
+      document.getElementById('clearCities').addEventListener('click', () => {
+        [...citySelect.options].forEach(o => o.selected = false);
         render();
       });
 
