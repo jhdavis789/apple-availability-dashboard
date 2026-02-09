@@ -1667,9 +1667,12 @@
           grid.innerHTML = '<div style="color:#555;font-size:13px;padding:12px;">Not enough data updates yet.</div>';
           return;
         }
-        // Recent = last snapshot, Past = snapshot N ago
-        recentSnaps = [snapshots[snapshots.length - 1]];
-        pastSnaps = [snapshots[snapshots.length - 1 - n]];
+        // Use a small window (up to 3 snapshots) around each point
+        // to be resilient to individual ERR/null values
+        const lastIdx = snapshots.length - 1;
+        const pastIdx = lastIdx - n;
+        recentSnaps = snapshots.slice(Math.max(0, lastIdx - 1), lastIdx + 1);
+        pastSnaps = snapshots.slice(Math.max(0, pastIdx - 1), Math.min(snapshots.length, pastIdx + 2));
         usePastSnaps = true;
         isExtrapolated = false;
         targetPastMs = null;

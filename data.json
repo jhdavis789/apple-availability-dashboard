@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-02-09T11:17:22.458710",
-  "total_snapshots": 100,
+  "generated_at": "2026-02-09T12:14:57.479925",
+  "total_snapshots": 102,
   "all_models": [
     "Mac Mini M4 ($599)",
     "Mac Mini M4 16/256 ($599)",
@@ -13253,6 +13253,256 @@
             "Phoenix": 100,
             "Seattle": 88,
             "Miami": 91,
+            "Denver": null,
+            "Atlanta": null
+          }
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-02-09T11:38:26",
+      "file": "availability_matrix_20260209_113826.csv",
+      "file_type": "standard",
+      "cities": [
+        {
+          "name": "NYC",
+          "store_count": 12
+        },
+        {
+          "name": "LA",
+          "store_count": 12
+        },
+        {
+          "name": "SF",
+          "store_count": 12
+        },
+        {
+          "name": "Austin",
+          "store_count": 12
+        },
+        {
+          "name": "Boston",
+          "store_count": 12
+        },
+        {
+          "name": "Chicago",
+          "store_count": 12
+        },
+        {
+          "name": "Houston",
+          "store_count": 12
+        },
+        {
+          "name": "Phoenix",
+          "store_count": 7
+        },
+        {
+          "name": "Seattle",
+          "store_count": 9
+        },
+        {
+          "name": "Miami",
+          "store_count": 12
+        },
+        {
+          "name": "Denver",
+          "store_count": 6
+        },
+        {
+          "name": "Atlanta",
+          "store_count": 12
+        }
+      ],
+      "products": [
+        {
+          "model": "Mac Mini M4 ($599)",
+          "values": {
+            "NYC": 16,
+            "LA": 33,
+            "SF": 0,
+            "Austin": 58,
+            "Boston": 41,
+            "Chicago": 50,
+            "Houston": 58,
+            "Phoenix": 28,
+            "Seattle": 22,
+            "Miami": 8,
+            "Denver": 33,
+            "Atlanta": 16
+          }
+        },
+        {
+          "model": "Mac Mini M4 Pro ($1,399)",
+          "values": {
+            "NYC": 83,
+            "LA": 91,
+            "SF": 75,
+            "Austin": 100,
+            "Boston": 100,
+            "Chicago": 75,
+            "Houston": 100,
+            "Phoenix": 100,
+            "Seattle": 88,
+            "Miami": 83,
+            "Denver": 100,
+            "Atlanta": 100
+          }
+        },
+        {
+          "model": "iMac 24\" M4 8-core ($1,299)",
+          "values": {
+            "NYC": null,
+            "LA": null,
+            "SF": null,
+            "Austin": null,
+            "Boston": null,
+            "Chicago": null,
+            "Houston": null,
+            "Phoenix": 100,
+            "Seattle": 100,
+            "Miami": 91,
+            "Denver": 83,
+            "Atlanta": 100
+          }
+        },
+        {
+          "model": "iMac 24\" M4 10-core ($1,499)",
+          "values": {
+            "NYC": 100,
+            "LA": 100,
+            "SF": 100,
+            "Austin": 100,
+            "Boston": 100,
+            "Chicago": 83,
+            "Houston": 100,
+            "Phoenix": 85,
+            "Seattle": 66,
+            "Miami": 100,
+            "Denver": 83,
+            "Atlanta": 91
+          }
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-02-09T11:41:34",
+      "file": "availability_matrix_20260209_114134.csv",
+      "file_type": "standard",
+      "cities": [
+        {
+          "name": "NYC",
+          "store_count": 12
+        },
+        {
+          "name": "LA",
+          "store_count": 12
+        },
+        {
+          "name": "SF",
+          "store_count": 12
+        },
+        {
+          "name": "Austin",
+          "store_count": 12
+        },
+        {
+          "name": "Boston",
+          "store_count": 12
+        },
+        {
+          "name": "Chicago",
+          "store_count": 12
+        },
+        {
+          "name": "Houston",
+          "store_count": 12
+        },
+        {
+          "name": "Phoenix",
+          "store_count": 7
+        },
+        {
+          "name": "Seattle",
+          "store_count": 9
+        },
+        {
+          "name": "Miami",
+          "store_count": 0
+        },
+        {
+          "name": "Denver",
+          "store_count": 6
+        },
+        {
+          "name": "Atlanta",
+          "store_count": 12
+        }
+      ],
+      "products": [
+        {
+          "model": "Mac Mini M4 ($599)",
+          "values": {
+            "NYC": 16,
+            "LA": 33,
+            "SF": 0,
+            "Austin": 58,
+            "Boston": null,
+            "Chicago": 41,
+            "Houston": 58,
+            "Phoenix": 28,
+            "Seattle": 22,
+            "Miami": null,
+            "Denver": 33,
+            "Atlanta": 16
+          }
+        },
+        {
+          "model": "Mac Mini M4 Pro ($1,399)",
+          "values": {
+            "NYC": 83,
+            "LA": 91,
+            "SF": null,
+            "Austin": null,
+            "Boston": 100,
+            "Chicago": 75,
+            "Houston": 100,
+            "Phoenix": 100,
+            "Seattle": 88,
+            "Miami": 83,
+            "Denver": 100,
+            "Atlanta": 100
+          }
+        },
+        {
+          "model": "iMac 24\" M4 8-core ($1,299)",
+          "values": {
+            "NYC": 100,
+            "LA": 100,
+            "SF": 83,
+            "Austin": 91,
+            "Boston": 75,
+            "Chicago": null,
+            "Houston": null,
+            "Phoenix": null,
+            "Seattle": null,
+            "Miami": null,
+            "Denver": null,
+            "Atlanta": null
+          }
+        },
+        {
+          "model": "iMac 24\" M4 10-core ($1,499)",
+          "values": {
+            "NYC": null,
+            "LA": null,
+            "SF": null,
+            "Austin": null,
+            "Boston": null,
+            "Chicago": null,
+            "Houston": null,
+            "Phoenix": null,
+            "Seattle": null,
+            "Miami": null,
             "Denver": null,
             "Atlanta": null
           }
