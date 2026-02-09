@@ -831,8 +831,6 @@
         if (val && val > 0) {
           _moverUpdatesCount = val;
           document.querySelectorAll('#moverPeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
-          // Also update the time range to show only the last N updates
-          setTimeRangeToLastNUpdates(val);
           render();
         }
       });
