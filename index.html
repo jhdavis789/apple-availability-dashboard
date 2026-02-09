@@ -367,14 +367,6 @@
   </div>
 
   <div class="controls" id="controls">
-    <div class="control-group" style="width:100%;">
-      <label>Quick Views</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button id="qvMacMini" class="view-tab" style="background:#1a1a2e;border-color:#0a84ff;color:#6cb4ff;">🖥 Base Mac Mini — by City</button>
-        <button id="qvAllProducts" class="view-tab" style="background:#1a1a2e;border-color:#30d158;color:#30d158;">📊 All Products — Over Time</button>
-      </div>
-    </div>
-
     <div class="control-group">
       <label>View</label>
       <div class="view-tabs" id="viewTabs">
@@ -439,6 +431,12 @@
     <!-- Stats row -->
     <div class="stats-row" id="statsRow"></div>
     <div class="excluded-info" id="excludedInfo"></div>
+
+    <!-- Quick Views -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <button id="qvMacMini" class="view-tab" style="background:#1a1a2e;border-color:#0a84ff;color:#6cb4ff;padding:8px 16px;">🖥 Base Mac Mini — by City</button>
+      <button id="qvAllProducts" class="view-tab" style="background:#1a1a2e;border-color:#30d158;color:#30d158;padding:8px 16px;">📊 All Products — Over Time</button>
+    </div>
 
     <!-- Main chart area -->
     <div class="chart-card">
