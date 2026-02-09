@@ -410,6 +410,12 @@
 
     <div class="control-group time-range-group">
       <label>Time Range</label>
+      <div class="period-btns" id="timeRangePeriodBtns" style="margin-bottom:8px;">
+        <button class="period-btn" data-hours="24">24h</button>
+        <button class="period-btn" data-hours="168">7d</button>
+        <button class="period-btn" data-hours="336">2wk</button>
+        <button class="period-btn active" data-hours="0">Max</button>
+      </div>
       <div class="time-range-inputs">
         <input type="datetime-local" id="timeStart" step="1">
         <span>to</span>
@@ -903,6 +909,10 @@
       startInput.value = toLocalDatetimeStr(timeMin);
       endInput.value = toLocalDatetimeStr(timeMax);
 
+      function clearPeriodBtnActive() {
+        document.querySelectorAll('#timeRangePeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
+      }
+
       // Slider -> update text + render
       rangeStart.addEventListener('input', () => {
         let val = parseInt(rangeStart.value);
@@ -911,6 +921,7 @@
         timeStartMs = timeMin + (val / 1000) * (timeMax - timeMin);
         syncInputsFromMs();
         updateTrackFill();
+        clearPeriodBtnActive();
         render();
       });
 
@@ -921,6 +932,7 @@
         timeEndMs = timeMin + (val / 1000) * (timeMax - timeMin);
         syncInputsFromMs();
         updateTrackFill();
+        clearPeriodBtnActive();
         render();
       });
 
@@ -931,6 +943,7 @@
           timeStartMs = Math.max(timeMin, Math.min(ms, timeEndMs));
           syncInputsFromMs();
           syncSlidersFromMs();
+          clearPeriodBtnActive();
           render();
         }
       });
@@ -941,6 +954,7 @@
           timeEndMs = Math.min(timeMax, Math.max(ms, timeStartMs));
           syncInputsFromMs();
           syncSlidersFromMs();
+          clearPeriodBtnActive();
           render();
         }
       });
@@ -951,7 +965,28 @@
         timeEndMs = timeMax;
         syncInputsFromMs();
         syncSlidersFromMs();
+        // Activate "Max" button
+        document.querySelectorAll('#timeRangePeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('#timeRangePeriodBtns .period-btn[data-hours="0"]').classList.add('active');
         render();
+      });
+
+      // Time range period buttons (24h, 7d, 2wk, Max)
+      document.querySelectorAll('#timeRangePeriodBtns .period-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const hours = parseInt(btn.dataset.hours);
+          document.querySelectorAll('#timeRangePeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          if (hours === 0) {
+            timeStartMs = timeMin;
+          } else {
+            timeStartMs = Math.max(timeMin, timeMax - hours * 3600000);
+          }
+          timeEndMs = timeMax;
+          syncInputsFromMs();
+          syncSlidersFromMs();
+          render();
+        });
       });
 
       syncSlidersFromMs();
