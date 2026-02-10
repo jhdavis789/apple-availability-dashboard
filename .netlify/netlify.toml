@@ -9,7 +9,6 @@ redirects = []
 [build]
 publish = "/Users/Jackson/.openclaw/workspace/research/apple-availability/dashboard copy/deploy"
 publishOrigin = "default"
-base = "/Users/Jackson/.openclaw/workspace/research/apple-availability/dashboard copy/deploy"
 
 [build.environment]
 
