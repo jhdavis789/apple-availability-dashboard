@@ -1292,32 +1292,10 @@
             return { x: new Date(s.timestamp), y: val };
           });
 
-          // Second pass: interpolate missing values as midpoint of nearest known neighbors
-          // Count real data points — if only 1, don't extrapolate at all
-          const realCount = rawPoints.filter(p => p.y !== null).length;
-          const points = rawPoints.map((pt, i) => {
-            if (pt.y !== null) {
-              return { x: pt.x, y: pt.y, estimated: false };
-            }
-            // If only one real data point, don't extrapolate
-            if (realCount <= 1) return null;
-            // Find previous known value
-            let prev = null;
-            for (let j = i - 1; j >= 0; j--) {
-              if (rawPoints[j].y !== null) { prev = rawPoints[j].y; break; }
-            }
-            // Find next known value
-            let next = null;
-            for (let j = i + 1; j < rawPoints.length; j++) {
-              if (rawPoints[j].y !== null) { next = rawPoints[j].y; break; }
-            }
-            if (prev !== null && next !== null) {
-              return { x: pt.x, y: (prev + next) / 2, estimated: true };
-            } else if (prev !== null) {
-              return { x: pt.x, y: prev, estimated: true };
-            }
-            return null; // no data at all for this city
-          }).filter(pt => pt !== null);
+          // Only keep points with actual data — no interpolation
+          const points = rawPoints
+            .filter(pt => pt.y !== null)
+            .map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
 
           if (points.length > 0) {
             datasets.push({
@@ -1329,16 +1307,7 @@
               pointRadius: 3,
               pointHoverRadius: 5,
               tension: 0.3,
-              fill: false,
-              segment: {
-                borderDash: (ctx) => {
-                  const data = ctx.chart.data.datasets[ctx.datasetIndex].data;
-                  const p0 = data[ctx.p0DataIndex];
-                  const p1 = data[ctx.p1DataIndex];
-                  if (p0.estimated || p1.estimated) return [6, 4];
-                  return undefined;
-                }
-              }
+              fill: false
             });
           }
         });
@@ -1475,9 +1444,7 @@
               itemSort: (a, b) => b.parsed.y - a.parsed.y,
               callbacks: {
                 label: ctx => {
-                  const raw = ctx.raw;
-                  const prefix = (raw && raw.estimated) ? '~' : '';
-                  return `${ctx.dataset.label}: ${prefix}${ctx.parsed.y.toFixed(1)}%`;
+                  return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`;
                 }
               }
             }
