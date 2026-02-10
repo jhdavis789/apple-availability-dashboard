@@ -7,35 +7,125 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #e0e0e0;
+      --text-white: #fff;
+      --text-muted: #888;
+      --text-dim: #666;
+      --text-dimmer: #555;
+      --text-label: #aaa;
+      --text-filter: #bbb;
+      --text-secondary-btn: #aaa;
+      --text-secondary-btn-hover: #ddd;
+      --header-bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      --header-border: #2a2a4a;
+      --controls-bg: #111;
+      --controls-border: #222;
+      --card-bg: #141414;
+      --card-border: #222;
+      --input-bg: #1a1a2e;
+      --input-border: #333;
+      --input-border-hover: #555;
+      --accent: #0a84ff;
+      --accent-hover: #0070e0;
+      --secondary-border: #444;
+      --secondary-border-hover: #666;
+      --grid-color: #1a1a1a;
+      --tick-color: #666;
+      --tooltip-bg: #1a1a2e;
+      --tooltip-border: #333;
+      --summary-bg: #1a1a2e;
+      --summary-border: #2a2a4a;
+      --footer-border: #222;
+      --slider-track: #333;
+      --range-input-scheme: dark;
+    }
+    html[data-theme="light"] {
+      --bg: #f5f5f7;
+      --text: #1d1d1f;
+      --text-white: #000;
+      --text-muted: #6e6e73;
+      --text-dim: #86868b;
+      --text-dimmer: #aeaeb2;
+      --text-label: #6e6e73;
+      --text-filter: #3a3a3c;
+      --text-secondary-btn: #6e6e73;
+      --text-secondary-btn-hover: #1d1d1f;
+      --header-bg: linear-gradient(135deg, #e8e8ed 0%, #d2d2d7 100%);
+      --header-border: #c7c7cc;
+      --controls-bg: #ececf0;
+      --controls-border: #d1d1d6;
+      --card-bg: #fff;
+      --card-border: #d1d1d6;
+      --input-bg: #fff;
+      --input-border: #c7c7cc;
+      --input-border-hover: #8e8e93;
+      --accent: #0071e3;
+      --accent-hover: #0060c0;
+      --secondary-border: #c7c7cc;
+      --secondary-border-hover: #8e8e93;
+      --grid-color: #e5e5ea;
+      --tick-color: #86868b;
+      --tooltip-bg: #fff;
+      --tooltip-border: #d1d1d6;
+      --summary-bg: #f5f5f7;
+      --summary-border: #d1d1d6;
+      --footer-border: #d1d1d6;
+      --slider-track: #c7c7cc;
+      --range-input-scheme: light;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-      background: #0a0a0a;
-      color: #e0e0e0;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
     }
     .header {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background: var(--header-bg);
       padding: 24px 32px;
-      border-bottom: 1px solid #2a2a4a;
+      border-bottom: 1px solid var(--header-border);
+      position: relative;
     }
     .header h1 {
       font-size: 24px;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-white);
       margin-bottom: 4px;
     }
     .header .subtitle {
       font-size: 13px;
-      color: #888;
+      color: var(--text-muted);
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 24px;
+      right: 32px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: background 0.2s, border-color 0.2s;
+      padding: 0;
+    }
+    .theme-toggle:hover {
+      border-color: var(--input-border-hover);
     }
     .controls {
       display: flex;
       flex-wrap: wrap;
       gap: 16px;
       padding: 20px 32px;
-      background: #111;
-      border-bottom: 1px solid #222;
+      background: var(--controls-bg);
+      border-bottom: 1px solid var(--controls-border);
       align-items: flex-end;
     }
     .control-group {
@@ -47,39 +137,39 @@
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #888;
+      color: var(--text-muted);
       font-weight: 600;
     }
     select, button {
-      background: #1a1a2e;
-      color: #e0e0e0;
-      border: 1px solid #333;
+      background: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--input-border);
       padding: 8px 12px;
       border-radius: 6px;
       font-size: 13px;
       cursor: pointer;
       outline: none;
     }
-    select:hover, button:hover { border-color: #555; }
-    select:focus, button:focus { border-color: #0a84ff; }
+    select:hover, button:hover { border-color: var(--input-border-hover); }
+    select:focus, button:focus { border-color: var(--accent); }
     select[multiple] {
       min-height: 120px;
       min-width: 180px;
     }
     button {
-      background: #0a84ff;
-      border-color: #0a84ff;
+      background: var(--accent);
+      border-color: var(--accent);
       color: #fff;
       font-weight: 600;
       padding: 8px 20px;
     }
-    button:hover { background: #0070e0; }
+    button:hover { background: var(--accent-hover); }
     button.secondary {
       background: transparent;
-      border-color: #444;
-      color: #aaa;
+      border-color: var(--secondary-border);
+      color: var(--text-secondary-btn);
     }
-    button.secondary:hover { border-color: #666; color: #ddd; }
+    button.secondary:hover { border-color: var(--secondary-border-hover); color: var(--text-secondary-btn-hover); }
 
     .filter-toggles {
       display: flex;
@@ -91,11 +181,11 @@
       align-items: center;
       gap: 6px;
       font-size: 13px;
-      color: #bbb;
+      color: var(--text-filter);
       cursor: pointer;
     }
     .toggle-label input[type="checkbox"] {
-      accent-color: #0a84ff;
+      accent-color: var(--accent);
       width: 16px;
       height: 16px;
     }
@@ -107,8 +197,8 @@
       gap: 24px;
     }
     .chart-card {
-      background: #141414;
-      border: 1px solid #222;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 20px;
     }
@@ -116,7 +206,7 @@
       font-size: 16px;
       font-weight: 600;
       margin-bottom: 16px;
-      color: #fff;
+      color: var(--text-white);
     }
     .chart-container {
       position: relative;
@@ -128,15 +218,15 @@
       gap: 12px;
     }
     .summary-card {
-      background: #1a1a2e;
-      border: 1px solid #2a2a4a;
+      background: var(--summary-bg);
+      border: 1px solid var(--summary-border);
       border-radius: 10px;
       padding: 16px;
       text-align: center;
     }
     .summary-card .city-name {
       font-size: 13px;
-      color: #888;
+      color: var(--text-muted);
       margin-bottom: 6px;
       font-weight: 600;
       text-transform: uppercase;
@@ -148,7 +238,7 @@
     }
     .summary-card .label {
       font-size: 11px;
-      color: #666;
+      color: var(--text-dim);
       margin-top: 2px;
     }
     .good { color: #30d158; }
@@ -159,15 +249,15 @@
     .period-btns { display: flex; gap: 4px; margin-bottom: 14px; }
     .period-btn {
       padding: 5px 12px; font-size: 11px; border-radius: 5px;
-      background: transparent; border: 1px solid #333; color: #999;
+      background: transparent; border: 1px solid var(--input-border); color: var(--text-muted);
       cursor: pointer; font-weight: 600;
     }
-    .period-btn.active { background: #0a84ff; border-color: #0a84ff; color: #fff; }
+    .period-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
     .period-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
 
     .movers-row {
       display: flex; gap: 10px; flex-wrap: wrap;
-      margin-top: 14px; padding-top: 14px; border-top: 1px solid #222;
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--card-border);
     }
     .summary-card .delta-val {
       font-size: 20px;
@@ -176,7 +266,7 @@
     }
     .summary-card .sub-label {
       font-size: 10px;
-      color: #555;
+      color: var(--text-dimmer);
       margin-top: 2px;
     }
 
@@ -189,13 +279,13 @@
       font-size: 12px;
       border-radius: 6px;
       background: transparent;
-      border: 1px solid #333;
-      color: #999;
+      border: 1px solid var(--input-border);
+      color: var(--text-muted);
       cursor: pointer;
     }
     .view-tab.active {
-      background: #0a84ff;
-      border-color: #0a84ff;
+      background: var(--accent);
+      border-color: var(--accent);
       color: #fff;
     }
     .heatmap-table {
@@ -206,11 +296,11 @@
     .heatmap-table th, .heatmap-table td {
       padding: 8px 10px;
       text-align: center;
-      border: 1px solid #222;
+      border: 1px solid var(--card-border);
     }
     .heatmap-table th {
-      background: #1a1a2e;
-      color: #aaa;
+      background: var(--summary-bg);
+      color: var(--text-label);
       font-weight: 600;
       position: sticky;
       top: 0;
@@ -226,8 +316,8 @@
       flex-wrap: wrap;
     }
     .stat-box {
-      background: #1a1a2e;
-      border: 1px solid #2a2a4a;
+      background: var(--summary-bg);
+      border: 1px solid var(--summary-border);
       border-radius: 10px;
       padding: 16px 24px;
       flex: 1;
@@ -235,7 +325,7 @@
     }
     .stat-box .stat-label {
       font-size: 11px;
-      color: #666;
+      color: var(--text-dim);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 4px;
@@ -243,17 +333,17 @@
     .stat-box .stat-value {
       font-size: 28px;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-white);
     }
     #loading {
       text-align: center;
       padding: 80px;
-      color: #666;
+      color: var(--text-dim);
       font-size: 16px;
     }
     .excluded-info {
       font-size: 11px;
-      color: #666;
+      color: var(--text-dim);
       padding: 4px 0;
     }
 
@@ -268,21 +358,21 @@
       margin-bottom: 8px;
     }
     .time-range-inputs input[type="datetime-local"] {
-      background: #1a1a2e;
-      color: #e0e0e0;
-      border: 1px solid #333;
+      background: var(--input-bg);
+      color: var(--text);
+      border: 1px solid var(--input-border);
       padding: 6px 8px;
       border-radius: 6px;
       font-size: 12px;
       outline: none;
       flex: 1;
-      color-scheme: dark;
+      color-scheme: var(--range-input-scheme);
     }
     .time-range-inputs input[type="datetime-local"]:focus {
-      border-color: #0a84ff;
+      border-color: var(--accent);
     }
     .time-range-inputs span {
-      color: #666;
+      color: var(--text-dim);
       font-size: 12px;
     }
     .dual-range {
@@ -309,8 +399,8 @@
       width: 14px;
       height: 14px;
       border-radius: 50%;
-      background: #0a84ff;
-      border: 2px solid #fff;
+      background: var(--accent);
+      border: 2px solid var(--text-white);
       cursor: pointer;
       pointer-events: all;
       position: relative;
@@ -320,8 +410,8 @@
       width: 14px;
       height: 14px;
       border-radius: 50%;
-      background: #0a84ff;
-      border: 2px solid #fff;
+      background: var(--accent);
+      border: 2px solid var(--text-white);
       cursor: pointer;
       pointer-events: all;
     }
@@ -331,40 +421,41 @@
       left: 0;
       right: 0;
       height: 4px;
-      background: #333;
+      background: var(--slider-track);
       border-radius: 2px;
     }
     .dual-range .track-fill {
       position: absolute;
       top: 10px;
       height: 4px;
-      background: #0a84ff;
+      background: var(--accent);
       border-radius: 2px;
     }
     .time-range-label {
       font-size: 11px;
-      color: #666;
+      color: var(--text-dim);
       text-align: center;
       margin-top: 2px;
     }
     .time-range-reset {
       background: transparent;
-      border: 1px solid #444;
-      color: #aaa;
+      border: 1px solid var(--secondary-border);
+      color: var(--text-label);
       padding: 4px 10px;
       font-size: 11px;
       border-radius: 4px;
       cursor: pointer;
       white-space: nowrap;
     }
-    .time-range-reset:hover { border-color: #666; color: #ddd; }
+    .time-range-reset:hover { border-color: var(--secondary-border-hover); color: var(--text-secondary-btn-hover); }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>Apple Product Availability Tracker</h1>
-    <div class="subtitle">Pickup availability across 12 US cities · <span id="lastUpdated" style="color:#aaa;"></span></div>
+    <div class="subtitle">Pickup availability across 12 US cities · <span id="lastUpdated" style="color:var(--text-label);"></span></div>
     <div class="subtitle" style="margin-top:8px;font-size:13px;"><span style="background:#ffd60a;color:#000;padding:4px 8px;border-radius:4px;text-decoration:underline;font-weight:600;">⚠️ Percentages = % of stores with at least one unit in stock (not inventory depth)</span></div>
+    <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">🌙</button>
   </div>
 
   <div class="controls" id="controls">
@@ -395,7 +486,7 @@
 
     <div class="control-group">
       <label>Custom Avg (city names, comma-sep)</label>
-      <input type="text" id="customAvgInput" placeholder="e.g. NYC, LA, SF" style="background:#1a1a2e;color:#e0e0e0;border:1px solid #333;padding:8px 12px;border-radius:6px;font-size:13px;outline:none;min-width:200px;">
+      <input type="text" id="customAvgInput" placeholder="e.g. NYC, LA, SF" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:8px 12px;border-radius:6px;font-size:13px;outline:none;min-width:200px;">
     </div>
 
     <div class="control-group">
@@ -447,8 +538,8 @@
 
     <!-- Quick Views -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-      <button id="qvMacMini" class="view-tab" style="background:#1a1a2e;border-color:#0a84ff;color:#6cb4ff;padding:8px 16px;">🖥 Base Mac Mini — by City</button>
-      <button id="qvAllProducts" class="view-tab" style="background:#1a1a2e;border-color:#30d158;color:#30d158;padding:8px 16px;">📊 All Products — Over Time</button>
+      <button id="qvMacMini" class="view-tab" style="background:var(--input-bg);border-color:#0a84ff;color:#6cb4ff;padding:8px 16px;">🖥 Base Mac Mini — by City</button>
+      <button id="qvAllProducts" class="view-tab" style="background:var(--input-bg);border-color:#30d158;color:#30d158;padding:8px 16px;">📊 All Products — Over Time</button>
     </div>
 
     <!-- Main chart area -->
@@ -489,9 +580,9 @@
           <button class="period-btn" data-hours="336">2wk</button>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
-          <span style="color:#888;font-size:12px;">or last</span>
-          <input type="number" id="moverUpdatesInput" min="1" max="500" placeholder="N" style="width:60px;background:#1a1a2e;color:#e0e0e0;border:1px solid #333;padding:6px 8px;border-radius:6px;font-size:13px;text-align:center;">
-          <span style="color:#888;font-size:12px;">updates</span>
+          <span style="color:var(--text-muted);font-size:12px;">or last</span>
+          <input type="number" id="moverUpdatesInput" min="1" max="500" placeholder="N" style="width:60px;background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:6px 8px;border-radius:6px;font-size:13px;text-align:center;">
+          <span style="color:var(--text-muted);font-size:12px;">updates</span>
           <button id="moverUpdatesBtn" class="period-btn" style="margin-left:4px;">Go</button>
         </div>
       </div>
@@ -1427,18 +1518,18 @@
           plugins: {
             legend: {
               position: 'top',
-              labels: { color: '#aaa', usePointStyle: true, pointStyle: 'circle', padding: 16 },
+              labels: { color: getThemeColors().tickLabel, usePointStyle: true, pointStyle: 'circle', padding: 16 },
               onClick: (e, legendItem, legend) => {
                 // Clicking a legend item highlights that dataset
                 highlightPlugin._highlight(legend.chart, legendItem.datasetIndex);
               }
             },
             tooltip: {
-              backgroundColor: '#1a1a2e',
-              borderColor: '#333',
+              backgroundColor: getThemeColors().tooltipBg,
+              borderColor: getThemeColors().tooltipBorder,
               borderWidth: 1,
-              titleColor: '#fff',
-              bodyColor: '#ccc',
+              titleColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#1d1d1f' : '#fff',
+              bodyColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#1d1d1f' : '#ccc',
               filter: (tooltipItem) => {
                 // When a line is highlighted, only show that line's tooltip
                 if (highlightPlugin._highlighted >= 0) {
@@ -1459,9 +1550,9 @@
               type: 'time',
               max: new Date(),
               time: { tooltipFormat: 'MMM d, yyyy h:mm a', displayFormats: { hour: 'h a', day: 'MMM d' } },
-              grid: { color: '#1a1a1a' },
+              grid: { color: getThemeColors().grid },
               ticks: {
-                color: '#666',
+                color: getThemeColors().tick,
                 maxRotation: 0,
                 autoSkip: true,
                 major: { enabled: true },
@@ -1492,14 +1583,14 @@
             y: {
               position: 'left',
               min: 0, max: 100,
-              grid: { color: '#1a1a1a' },
-              ticks: { color: '#666', callback: v => v + '%' }
+              grid: { color: getThemeColors().grid },
+              ticks: { color: getThemeColors().tick, callback: v => v + '%' }
             },
             y2: {
               position: 'right',
               min: 0, max: 100,
               grid: { drawOnChartArea: false },
-              ticks: { color: '#666', callback: v => v + '%' }
+              ticks: { color: getThemeColors().tick, callback: v => v + '%' }
             }
           }
         },
@@ -1570,11 +1661,12 @@
         selectedCities.forEach(city => {
           const val = getValidValue(latest, prod.model, city, filterZeros, blipSet, latestIdx);
           if (val === null) {
-            html += '<td style="background:#1a1a1a;color:#555;">N/A</td>';
+            html += `<td style="background:var(--grid-color);color:var(--text-dimmer);">N/A</td>`;
           } else {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
             const hue = val * 1.2; // 0=red, 120=green
-            const bg = `hsl(${hue}, 70%, 25%)`;
-            const fg = `hsl(${hue}, 70%, 85%)`;
+            const bg = isLight ? `hsl(${hue}, 60%, 88%)` : `hsl(${hue}, 70%, 25%)`;
+            const fg = isLight ? `hsl(${hue}, 70%, 30%)` : `hsl(${hue}, 70%, 85%)`;
             html += `<td style="background:${bg};color:${fg};font-weight:600;">${val}%</td>`;
           }
         });
@@ -1701,7 +1793,7 @@
       if (_moverUpdatesCount !== null && _moverUpdatesCount > 0) {
         const n = Math.min(_moverUpdatesCount, snapshots.length - 1);
         if (n < 1 || snapshots.length < 2) {
-          grid.innerHTML = '<div style="color:#555;font-size:13px;padding:12px;">Not enough data updates yet.</div>';
+          grid.innerHTML = '<div style="color:var(--text-dimmer);font-size:13px;padding:12px;">Not enough data updates yet.</div>';
           return;
         }
         // Use a small window (up to 3 snapshots) around each point
@@ -1733,7 +1825,7 @@
       }
 
       if (recentSnaps.length === 0) {
-        grid.innerHTML = '<div style="color:#555;font-size:13px;padding:12px;">Not enough data for this period yet.</div>';
+        grid.innerHTML = '<div style="color:var(--text-dimmer);font-size:13px;padding:12px;">Not enough data for this period yet.</div>';
         return;
       }
 
@@ -1896,8 +1988,8 @@
               }
             },
             tooltip: {
-              backgroundColor: '#1a1a2e',
-              borderColor: '#333',
+              backgroundColor: getThemeColors().tooltipBg,
+              borderColor: getThemeColors().tooltipBorder,
               borderWidth: 1,
               callbacks: {
                 label: ctx => `${ctx.parsed.x.toFixed(1)}% (weighted across ${productAvgs[ctx.dataIndex].count} store-checks)`
@@ -1907,12 +1999,12 @@
           scales: {
             x: {
               min: 0, max: 100,
-              grid: { color: '#1a1a1a' },
-              ticks: { color: '#666', callback: v => v + '%' }
+              grid: { color: getThemeColors().grid },
+              ticks: { color: getThemeColors().tick, callback: v => v + '%' }
             },
             y: {
               grid: { display: false },
-              ticks: { color: '#aaa', font: { size: 11 } }
+              ticks: { color: getThemeColors().tickLabel, font: { size: 11 } }
             }
           }
         }
@@ -1975,9 +2067,10 @@
 
       snapshots.forEach((s, si) => {
         const ts = s.timestamp.replace('T', ' ').slice(0, 19);
-        html += `<tr><td style="white-space:nowrap;color:#aaa;">${ts}</td>`;
+        html += `<tr><td style="white-space:nowrap;color:var(--text-label);">${ts}</td>`;
         let csvRow = ts;
 
+        const _isLight = document.documentElement.getAttribute('data-theme') === 'light';
         let wSum = 0, wTotal = 0;
         selectedCities.forEach(city => {
           const val = getValidValue(s, selectedProduct, city, filterZeros, blipSet, si);
@@ -1985,12 +2078,12 @@
           const storeCount = (sc && sc.store_count > 0) ? sc.store_count : 0;
 
           if (val === null) {
-            html += '<td style="background:#1a1a1a;color:#555;">—</td>';
+            html += `<td style="background:var(--grid-color);color:var(--text-dimmer);">—</td>`;
             csvRow += ',';
           } else {
             const hue = val * 1.2;
-            const bg = `hsl(${hue}, 70%, 25%)`;
-            const fg = `hsl(${hue}, 70%, 85%)`;
+            const bg = _isLight ? `hsl(${hue}, 60%, 88%)` : `hsl(${hue}, 70%, 25%)`;
+            const fg = _isLight ? `hsl(${hue}, 70%, 30%)` : `hsl(${hue}, 70%, 85%)`;
             html += `<td style="background:${bg};color:${fg};font-weight:600;">${val}%</td>`;
             csvRow += `,${val}%`;
             if (storeCount > 0) {
@@ -2003,11 +2096,11 @@
         const wAvg = wTotal > 0 ? (wSum / wTotal).toFixed(1) : '';
         if (wAvg) {
           const hue = parseFloat(wAvg) * 1.2;
-          const bg = `hsl(${hue}, 70%, 25%)`;
-          const fg = `hsl(${hue}, 70%, 85%)`;
+          const bg = _isLight ? `hsl(${hue}, 60%, 88%)` : `hsl(${hue}, 70%, 25%)`;
+          const fg = _isLight ? `hsl(${hue}, 70%, 30%)` : `hsl(${hue}, 70%, 85%)`;
           html += `<td style="background:${bg};color:${fg};font-weight:700;">${wAvg}%</td>`;
         } else {
-          html += '<td style="background:#1a1a1a;color:#555;">—</td>';
+          html += `<td style="background:var(--grid-color);color:var(--text-dimmer);">—</td>`;
         }
         csvRow += `,${wAvg ? wAvg + '%' : ''}`;
 
@@ -2033,10 +2126,65 @@
       URL.revokeObjectURL(url);
     });
 
+    // Theme toggle
+    function getThemeColors() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      return {
+        grid: isLight ? '#e5e5ea' : '#1a1a1a',
+        tick: isLight ? '#86868b' : '#666',
+        tickLabel: isLight ? '#6e6e73' : '#aaa',
+        tooltipBg: isLight ? '#fff' : '#1a1a2e',
+        tooltipBorder: isLight ? '#d1d1d6' : '#333',
+      };
+    }
+
+    function applyThemeToCharts() {
+      const tc = getThemeColors();
+      [mainChart, productChart].forEach(chart => {
+        if (!chart) return;
+        const opts = chart.options;
+        if (opts.plugins && opts.plugins.tooltip) {
+          opts.plugins.tooltip.backgroundColor = tc.tooltipBg;
+          opts.plugins.tooltip.borderColor = tc.tooltipBorder;
+          opts.plugins.tooltip.titleColor = document.documentElement.getAttribute('data-theme') === 'light' ? '#1d1d1f' : '#fff';
+          opts.plugins.tooltip.bodyColor = document.documentElement.getAttribute('data-theme') === 'light' ? '#1d1d1f' : '#e0e0e0';
+        }
+        if (opts.scales) {
+          Object.values(opts.scales).forEach(scale => {
+            if (scale.grid) scale.grid.color = tc.grid;
+            if (scale.ticks) scale.ticks.color = scale.ticks.callback ? tc.tick : tc.tickLabel;
+          });
+        }
+        chart.update('none');
+      });
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const html = document.documentElement;
+      const isCurrentlyLight = html.getAttribute('data-theme') === 'light';
+      const newTheme = isCurrentlyLight ? 'dark' : 'light';
+      html.setAttribute('data-theme', newTheme === 'light' ? 'light' : '');
+      if (newTheme === 'dark') html.removeAttribute('data-theme');
+      else html.setAttribute('data-theme', 'light');
+      document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
+      localStorage.setItem('theme', newTheme);
+      applyThemeToCharts();
+      render(); // re-render heatmaps/data matrix with correct colors
+    });
+
+    // Restore saved theme
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.getElementById('themeToggle').textContent = '☀️';
+      }
+    })();
+
     loadData();
   </script>
 
-  <footer style="text-align:center;padding:24px;color:#555;font-size:12px;border-top:1px solid #222;margin-top:24px;">
+  <footer style="text-align:center;padding:24px;color:var(--text-dimmer);font-size:12px;border-top:1px solid var(--footer-border);margin-top:24px;">
     Website last updated: <span id="lastUpdatedFooter">—</span>
   </footer>
 </body>
