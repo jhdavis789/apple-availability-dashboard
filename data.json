@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-02-10T08:38:33.564464",
-  "total_snapshots": 125,
+  "generated_at": "2026-02-10T09:10:36.743911",
+  "total_snapshots": 126,
   "all_models": [
     "Mac Mini M4 ($599)",
     "Mac Mini M4 16/256 ($599)",
@@ -16140,6 +16140,131 @@
             "Phoenix": 71,
             "Seattle": 66,
             "Miami": 100,
+            "Denver": 83,
+            "Atlanta": 91
+          }
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-02-10T09:08:56",
+      "file": "availability_matrix_20260210_090856.csv",
+      "file_type": "standard",
+      "cities": [
+        {
+          "name": "NYC",
+          "store_count": 12
+        },
+        {
+          "name": "LA",
+          "store_count": 12
+        },
+        {
+          "name": "SF",
+          "store_count": 12
+        },
+        {
+          "name": "Austin",
+          "store_count": 12
+        },
+        {
+          "name": "Boston",
+          "store_count": 12
+        },
+        {
+          "name": "Chicago",
+          "store_count": 12
+        },
+        {
+          "name": "Houston",
+          "store_count": 12
+        },
+        {
+          "name": "Phoenix",
+          "store_count": 7
+        },
+        {
+          "name": "Seattle",
+          "store_count": 9
+        },
+        {
+          "name": "Miami",
+          "store_count": 12
+        },
+        {
+          "name": "Denver",
+          "store_count": 6
+        },
+        {
+          "name": "Atlanta",
+          "store_count": 12
+        }
+      ],
+      "products": [
+        {
+          "model": "Mac Mini M4 ($599)",
+          "values": {
+            "NYC": 8,
+            "LA": 0,
+            "SF": 0,
+            "Austin": 33,
+            "Boston": 33,
+            "Chicago": 33,
+            "Houston": 33,
+            "Phoenix": 14,
+            "Seattle": 11,
+            "Miami": 16,
+            "Denver": 16,
+            "Atlanta": 16
+          }
+        },
+        {
+          "model": "Mac Mini M4 Pro ($1,399)",
+          "values": {
+            "NYC": 83,
+            "LA": 100,
+            "SF": 100,
+            "Austin": 100,
+            "Boston": 100,
+            "Chicago": 75,
+            "Houston": 91,
+            "Phoenix": 100,
+            "Seattle": 88,
+            "Miami": 100,
+            "Denver": 100,
+            "Atlanta": 100
+          }
+        },
+        {
+          "model": "iMac 24\" M4 8-core ($1,299)",
+          "values": {
+            "NYC": 100,
+            "LA": 91,
+            "SF": 83,
+            "Austin": 91,
+            "Boston": 75,
+            "Chicago": 100,
+            "Houston": 91,
+            "Phoenix": 100,
+            "Seattle": 100,
+            "Miami": 100,
+            "Denver": 83,
+            "Atlanta": 100
+          }
+        },
+        {
+          "model": "iMac 24\" M4 10-core ($1,499)",
+          "values": {
+            "NYC": 100,
+            "LA": 91,
+            "SF": 100,
+            "Austin": 100,
+            "Boston": 100,
+            "Chicago": 83,
+            "Houston": 100,
+            "Phoenix": 71,
+            "Seattle": 66,
+            "Miami": 91,
             "Denver": 83,
             "Atlanta": 91
           }
