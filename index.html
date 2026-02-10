@@ -1256,6 +1256,8 @@
        *  Returns null if no valid data. */
       function weightedAvg(snapshot, si, products, cities, filterZeros, blipSet) {
         let totalWeight = 0, weightedSum = 0;
+        const totalPossible = cities.length * products.length;
+        let validCount = 0;
         cities.forEach(city => {
           const sc = getStoreCount(snapshot, city);
           if (sc <= 0) return;
@@ -1264,10 +1266,13 @@
             if (val !== null) {
               weightedSum += val * sc;
               totalWeight += sc;
+              validCount++;
             }
           });
         });
-        return totalWeight > 0 ? weightedSum / totalWeight : null;
+        // Require at least 2/3 of data points to be non-error
+        if (totalWeight <= 0 || validCount < totalPossible * (2 / 3)) return null;
+        return weightedSum / totalWeight;
       }
 
       if (currentView === 'compare' || !isAllProducts) {
