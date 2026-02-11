@@ -518,6 +518,14 @@
           <input type="checkbox" id="showEbayPrices">
           Show eBay Prices
         </label>
+        <label class="toggle-label ebay-sub-toggle" id="ebayMeanLabel" style="display:none;margin-left:24px;opacity:0.4;pointer-events:none;">
+          <input type="checkbox" id="showEbayMean" checked>
+          Mean
+        </label>
+        <label class="toggle-label ebay-sub-toggle" id="ebayMedianLabel" style="display:none;margin-left:24px;opacity:0.4;pointer-events:none;">
+          <input type="checkbox" id="showEbayMedian" checked>
+          Median
+        </label>
       </div>
     </div>
 
@@ -828,6 +836,14 @@
       document.getElementById('dashboard').style.display = 'flex';
     }
 
+    function updateEbaySubToggles() {
+      const ebayOn = document.getElementById('showEbayPrices').checked;
+      document.querySelectorAll('.ebay-sub-toggle').forEach(el => {
+        el.style.opacity = ebayOn ? '1' : '0.4';
+        el.style.pointerEvents = ebayOn ? 'auto' : 'none';
+      });
+    }
+
     function initControls() {
       const productSelect = document.getElementById('productSelect');
       // Add "All Products (Average)" option
@@ -870,12 +886,19 @@
       citySelect.addEventListener('change', render);
       document.getElementById('filterZeros').addEventListener('change', render);
       document.getElementById('showAvailability').addEventListener('change', render);
-      document.getElementById('showEbayPrices').addEventListener('change', render);
+      document.getElementById('showEbayPrices').addEventListener('change', () => {
+        updateEbaySubToggles();
+        render();
+      });
+      document.getElementById('showEbayMean').addEventListener('change', render);
+      document.getElementById('showEbayMedian').addEventListener('change', render);
       document.getElementById('customAvgInput').addEventListener('input', render);
 
-      // Show eBay toggle only if data is available
+      // Show eBay toggles only if data is available
       if (DATA.ebay_prices && DATA.ebay_prices.products.length > 0) {
         document.getElementById('ebayToggleLabel').style.display = 'flex';
+        document.getElementById('ebayMeanLabel').style.display = 'flex';
+        document.getElementById('ebayMedianLabel').style.display = 'flex';
       }
 
       document.getElementById('resetCities').addEventListener('click', () => {
@@ -1533,39 +1556,45 @@
 
       // --- eBay price overlay ---
       const showEbay = document.getElementById('showEbayPrices').checked && DATA.ebay_prices;
+      const showMean = document.getElementById('showEbayMean').checked;
+      const showMedian = document.getElementById('showEbayMedian').checked;
       if (showEbay) {
         const ebayData = DATA.ebay_prices.data;
         if (!isAllProducts) {
           // Single product: look for matching eBay product
           const ebayHistory = ebayData[selectedProduct];
           if (ebayHistory && ebayHistory.length > 0) {
-            datasets.push({
-              label: 'eBay Avg Price',
-              data: ebayHistory.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price })),
-              borderColor: '#30d158',
-              backgroundColor: '#30d15820',
-              borderWidth: 2.5,
-              pointRadius: 5,
-              pointHoverRadius: 7,
-              pointStyle: 'rectRot',
-              tension: 0.3,
-              fill: false,
-              yAxisID: 'y2',
-            });
-            datasets.push({
-              label: 'eBay Median Price',
-              data: ebayHistory.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price })),
-              borderColor: '#ff9f0a',
-              backgroundColor: '#ff9f0a20',
-              borderWidth: 2,
-              borderDash: [6, 3],
-              pointRadius: 5,
-              pointHoverRadius: 7,
-              pointStyle: 'triangle',
-              tension: 0.3,
-              fill: false,
-              yAxisID: 'y2',
-            });
+            if (showMean) {
+              datasets.push({
+                label: 'eBay Mean Price',
+                data: ebayHistory.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price })),
+                borderColor: '#30d158',
+                backgroundColor: '#30d15820',
+                borderWidth: 2.5,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointStyle: 'rectRot',
+                tension: 0.3,
+                fill: false,
+                yAxisID: 'y2',
+              });
+            }
+            if (showMedian) {
+              datasets.push({
+                label: 'eBay Median Price',
+                data: ebayHistory.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price })),
+                borderColor: '#ff9f0a',
+                backgroundColor: '#ff9f0a20',
+                borderWidth: 2,
+                borderDash: [6, 3],
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointStyle: 'triangle',
+                tension: 0.3,
+                fill: false,
+                yAxisID: 'y2',
+              });
+            }
           }
         } else {
           // All products: one avg + median line per eBay product
@@ -1574,34 +1603,38 @@
             const history = ebayData[productName];
             if (!history || history.length === 0) return;
             const color = PRODUCT_COLORS[idx % PRODUCT_COLORS.length];
-            datasets.push({
-              label: `${productName} (eBay Avg)`,
-              data: history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price })),
-              borderColor: color,
-              backgroundColor: color + '20',
-              borderWidth: 2,
-              borderDash: [8, 4],
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              pointStyle: 'rectRot',
-              tension: 0.3,
-              fill: false,
-              yAxisID: 'y2',
-            });
-            datasets.push({
-              label: `${productName} (eBay Median)`,
-              data: history.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price })),
-              borderColor: color,
-              backgroundColor: color + '20',
-              borderWidth: 1.5,
-              borderDash: [3, 3],
-              pointRadius: 3,
-              pointHoverRadius: 5,
-              pointStyle: 'triangle',
-              tension: 0.3,
-              fill: false,
-              yAxisID: 'y2',
-            });
+            if (showMean) {
+              datasets.push({
+                label: `${productName} (eBay Mean)`,
+                data: history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price })),
+                borderColor: color,
+                backgroundColor: color + '20',
+                borderWidth: 2,
+                borderDash: [8, 4],
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointStyle: 'rectRot',
+                tension: 0.3,
+                fill: false,
+                yAxisID: 'y2',
+              });
+            }
+            if (showMedian) {
+              datasets.push({
+                label: `${productName} (eBay Median)`,
+                data: history.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price })),
+                borderColor: color,
+                backgroundColor: color + '20',
+                borderWidth: 1.5,
+                borderDash: [3, 3],
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                pointStyle: 'triangle',
+                tension: 0.3,
+                fill: false,
+                yAxisID: 'y2',
+              });
+            }
           });
         }
       }
@@ -1705,11 +1738,16 @@
 
                   const hour = d.getHours();
                   const min = d.getMinutes();
-                  if (min !== 0) return '';
-
                   const ampm = hour >= 12 ? 'PM' : 'AM';
                   const h12 = hour % 12 || 12;
-                  const timeLine = `${h12} ${ampm}`;
+                  const minStr = min < 10 ? '0' + min : min;
+
+                  // Detect if chart is in minute mode (sub-hour range)
+                  const xScale = this.chart ? this.chart.options.scales.x : null;
+                  const isMinuteMode = xScale && xScale.time && xScale.time.unit === 'minute';
+
+                  if (!isMinuteMode && min !== 0) return '';
+                  const timeLine = isMinuteMode ? `${h12}:${minStr} ${ampm}` : `${h12} ${ampm}`;
 
                   // Major ticks (day boundaries) get a second line with the date
                   if (ticks[index].major) {
@@ -1742,14 +1780,23 @@
             });
             if (minT === Infinity) return;
             const rangeHours = (maxT - minT) / (1000 * 60 * 60);
-            let step;
-            if (rangeHours <= 12) step = 1;
-            else if (rangeHours <= 24) step = 2;
-            else if (rangeHours <= 48) step = 4;
-            else if (rangeHours <= 96) step = 6;
-            else if (rangeHours <= 192) step = 8;
-            else step = 12;
-            xScale.time.unit = 'hour';
+            let unit, step;
+            if (rangeHours < 1) {
+              unit = 'minute';
+              const rangeMins = rangeHours * 60;
+              if (rangeMins <= 10) step = 1;
+              else if (rangeMins <= 30) step = 5;
+              else step = 10;
+            } else {
+              unit = 'hour';
+              if (rangeHours <= 12) step = 1;
+              else if (rangeHours <= 24) step = 2;
+              else if (rangeHours <= 48) step = 4;
+              else if (rangeHours <= 96) step = 6;
+              else if (rangeHours <= 192) step = 8;
+              else step = 12;
+            }
+            xScale.time.unit = unit;
             xScale.time.stepSize = step;
           },
           afterBuildTicks(chart) {
