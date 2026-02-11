@@ -1470,6 +1470,8 @@
           let overallSum = 0, overallWeight = 0;
           snapshots.forEach((s, si) => {
             let wSum = 0, wTotal = 0;
+            let validCount = 0;
+            const totalPossible = selectedCities.length;
             selectedCities.forEach(city => {
               const sc = getStoreCount(s, city);
               if (sc <= 0) return;
@@ -1477,9 +1479,11 @@
               if (val !== null) {
                 wSum += val * sc;
                 wTotal += sc;
+                validCount++;
               }
             });
-            if (wTotal > 0) {
+            // Only include point if more than 2/3 of cities are reporting
+            if (wTotal > 0 && validCount >= totalPossible * (2 / 3)) {
               const avg = wSum / wTotal;
               points.push({ x: new Date(s.timestamp), y: avg });
               overallSum += avg;
