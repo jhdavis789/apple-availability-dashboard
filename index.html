@@ -98,10 +98,20 @@
       font-size: 13px;
       color: var(--text-muted);
     }
-    .theme-toggle {
+    .header-top-right {
       position: absolute;
       top: 24px;
       right: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .last-updated-badge {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .theme-toggle {
       background: var(--input-bg);
       border: 1px solid var(--input-border);
       color: var(--text);
@@ -453,10 +463,13 @@
 <body>
   <div class="header">
     <h1>Apple Product Availability Tracker</h1>
-    <div class="subtitle">Pickup availability across 12 US cities · <span id="lastUpdated" style="color:var(--text-label);"></span></div>
+    <div class="subtitle">Pickup availability across 12 US cities</div>
     <div class="subtitle" style="margin-top:8px;font-size:13px;"><span style="background:#ffd60a;color:#000;padding:4px 8px;border-radius:4px;text-decoration:underline;font-weight:600;">⚠️ Percentages = % of stores with at least one unit in stock (not inventory depth)</span></div>
     <div class="subtitle" style="margin-top:6px;font-size:12px;color:var(--text-dim);">ℹ️ iPhone and some other products are no longer tracked to prioritize API availability for more relevant products. They were consistently available (~95-100%).</div>
-    <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">🌙</button>
+    <div class="header-top-right">
+      <span class="last-updated-badge" id="lastUpdated"></span>
+      <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">🌙</button>
+    </div>
   </div>
 
   <div class="controls" id="controls">
