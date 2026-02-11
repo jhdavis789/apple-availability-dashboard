@@ -583,12 +583,6 @@
     <!-- City summary -->
     <div class="chart-card">
       <h3>City Averages</h3>
-      <div class="period-btns" id="cityPeriodBtns">
-        <button class="period-btn" data-hours="24">24h</button>
-        <button class="period-btn" data-hours="168">7d</button>
-        <button class="period-btn" data-hours="336">2wk</button>
-        <button class="period-btn active" data-hours="0">All Time</button>
-      </div>
       <div class="summary-grid" id="citySummary"></div>
     </div>
 
@@ -927,17 +921,6 @@
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
         render();
-      });
-
-      // City period buttons
-      document.querySelectorAll('#cityPeriodBtns .period-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          if (btn.classList.contains('disabled')) return;
-          document.querySelectorAll('#cityPeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          _cityPeriodHours = parseInt(btn.dataset.hours);
-          render();
-        });
       });
 
       // Mover period buttons
@@ -1304,11 +1287,11 @@
         renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
       }
 
-      // City Averages & Movers use ALL snapshots (ignoring time range) so their
-      // period buttons are independent of the top-level time range selector.
+      // City Averages now uses the same time-filtered snapshots as the main chart.
+      // Movers still uses ALL snapshots so its period buttons are independent.
+      renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
       const allSnaps = getAllSnapshots();
       const allBlipSet = allSnaps.filterZeros ? getBlipSet(allSnaps.snapshots) : null;
-      renderCitySummary(allSnaps.snapshots, selectedCities, allSnaps.filterZeros, isAllProducts, selectedProduct, allBlipSet);
       renderMovers(allSnaps.snapshots, selectedCities, allSnaps.filterZeros, isAllProducts, selectedProduct, allBlipSet);
       renderProductChart(snapshots, selectedCities, filterZeros, blipSet);
       renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
@@ -1825,7 +1808,6 @@
       table.innerHTML = html;
     }
 
-    let _cityPeriodHours = 0; // 0 = all time
     let _moverPeriodHours = 24;
     let _moverUpdatesCount = null; // null = use hours mode, number = use last N updates mode
 
@@ -1858,21 +1840,8 @@
       const grid = document.getElementById('citySummary');
       grid.innerHTML = '';
 
-      const now = snapshots.length > 0 ? new Date(snapshots[snapshots.length - 1].timestamp).getTime() : Date.now();
-      const earliest = snapshots.length > 0 ? new Date(snapshots[0].timestamp).getTime() : now;
-      const dataSpanHours = (now - earliest) / (1000 * 60 * 60);
-
-      _updatePeriodButtons('#cityPeriodBtns', dataSpanHours);
-
-      // Filter snapshots by selected period
-      let periodSnapshots = snapshots;
-      if (_cityPeriodHours > 0) {
-        const cutoff = now - _cityPeriodHours * 60 * 60 * 1000;
-        periodSnapshots = snapshots.filter(s => new Date(s.timestamp).getTime() >= cutoff);
-      }
-
       selectedCities.forEach(city => {
-        const avg = _avgForSnaps(periodSnapshots, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
+        const avg = _avgForSnaps(snapshots, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
         const display = avg !== null ? avg.toFixed(0) : 'N/A';
         const cls = avg !== null ? (avg >= 75 ? 'good' : avg >= 50 ? 'ok' : 'bad') : '';
         const card = document.createElement('div');
