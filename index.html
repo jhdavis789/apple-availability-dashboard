@@ -495,7 +495,11 @@
       <div class="filter-toggles">
         <label class="toggle-label">
           <input type="checkbox" id="filterZeros" checked>
-          Exclude 0% errors (single-call &amp; 0-store)
+          Filter likely errors?
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="showAvailability" checked>
+          Show Availability
         </label>
         <label class="toggle-label" id="ebayToggleLabel" style="display:none;">
           <input type="checkbox" id="showEbayPrices">
@@ -746,6 +750,8 @@
           }
           this._ensureOrigStyles(chart);
           chart.data.datasets.forEach((ds, i) => {
+            // Never dim eBay price datasets (y2 axis)
+            if (ds.yAxisID === 'y2') return;
             if (i === idx) {
               ds.borderColor = this._origStyles[i].borderColor;
               ds.borderWidth = 3;
@@ -856,12 +862,13 @@
       productSelect.addEventListener('change', render);
       citySelect.addEventListener('change', render);
       document.getElementById('filterZeros').addEventListener('change', render);
+      document.getElementById('showAvailability').addEventListener('change', render);
       document.getElementById('showEbayPrices').addEventListener('change', render);
       document.getElementById('customAvgInput').addEventListener('input', render);
 
       // Show eBay toggle only if data is available
       if (DATA.ebay_prices && DATA.ebay_prices.products.length > 0) {
-        document.getElementById('ebayToggleLabel').style.display = '';
+        document.getElementById('ebayToggleLabel').style.display = 'flex';
       }
 
       document.getElementById('resetCities').addEventListener('click', () => {
@@ -1346,6 +1353,7 @@
       }
 
       let datasets = [];
+      const showAvailability = document.getElementById('showAvailability').checked;
 
       /** Helper: get store count for a city in a snapshot */
       function getStoreCount(snapshot, cityName) {
@@ -1377,7 +1385,7 @@
         return weightedSum / totalWeight;
       }
 
-      if (currentView === 'compare' || !isAllProducts) {
+      if (showAvailability && (currentView === 'compare' || !isAllProducts)) {
         // One line per city
         const title = isAllProducts ? 'Average Availability by City' : `${selectedProduct} — Availability by City`;
         document.getElementById('mainChartTitle').textContent = title;
@@ -1471,7 +1479,7 @@
             });
           }
         }
-      } else {
+      } else if (showAvailability) {
         // All products view: one line per product (store-weighted average across selected cities)
         document.getElementById('mainChartTitle').textContent = 'All Products — Store-Weighted Average Across Selected Cities';
 
@@ -1519,6 +1527,12 @@
             fill: false
           });
         });
+      }
+
+      if (!showAvailability) {
+        document.getElementById('mainChartTitle').textContent = isAllProducts
+          ? 'eBay Prices — All Products'
+          : `${selectedProduct} — eBay Prices`;
       }
 
       // --- eBay price overlay ---
@@ -1606,7 +1620,6 @@
           .filter(v => v !== null && v !== undefined);
         if (ebayYValues.length > 0) {
           const rawMax = Math.max(...ebayYValues);
-          // Round up to a nice number
           y2Max = Math.ceil(rawMax / 100) * 100;
           if (y2Max < rawMax * 1.1) y2Max = Math.ceil(rawMax * 1.1 / 50) * 50;
         }
@@ -1614,7 +1627,7 @@
           position: 'right',
           min: 0,
           max: y2Max,
-          grid: { drawOnChartArea: false },
+          grid: { drawOnChartArea: !showAvailability, color: getThemeColors().grid },
           ticks: { color: '#30d158', callback: v => '$' + v.toLocaleString() },
           title: { display: true, text: 'eBay Price ($)', color: '#30d158', font: { size: 12 } }
         };
@@ -1626,6 +1639,15 @@
           ticks: { color: getThemeColors().tick, callback: v => v + '%' }
         };
       }
+
+      // Hide left y-axis when availability is off
+      const yConfig = {
+        position: 'left',
+        min: 0, max: 100,
+        display: showAvailability,
+        grid: { color: getThemeColors().grid },
+        ticks: { color: getThemeColors().tick, callback: v => v + '%' }
+      };
 
       const highlightPlugin = makeHighlightPlugin('mainChart');
       mainChart = new Chart(ctx, {
@@ -1704,12 +1726,7 @@
                 }
               }
             },
-            y: {
-              position: 'left',
-              min: 0, max: 100,
-              grid: { color: getThemeColors().grid },
-              ticks: { color: getThemeColors().tick, callback: v => v + '%' }
-            },
+            y: yConfig,
             y2: y2Config
           }
         },
