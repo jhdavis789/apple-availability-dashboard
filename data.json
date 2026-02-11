@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-02-11T13:11:03.845908",
-  "total_snapshots": 152,
+  "generated_at": "2026-02-11T13:45:42.187071",
+  "total_snapshots": 153,
   "all_models": [
     "Mac Mini M4 ($599)",
     "Mac Mini M4 16/256 ($599)",
@@ -19418,6 +19418,131 @@
           }
         }
       ]
+    },
+    {
+      "timestamp": "2026-02-11T13:43:49",
+      "file": "availability_matrix_20260211_134349.csv",
+      "file_type": "standard",
+      "cities": [
+        {
+          "name": "NYC",
+          "store_count": 12
+        },
+        {
+          "name": "LA",
+          "store_count": 12
+        },
+        {
+          "name": "SF",
+          "store_count": 12
+        },
+        {
+          "name": "Austin",
+          "store_count": 12
+        },
+        {
+          "name": "Boston",
+          "store_count": 12
+        },
+        {
+          "name": "Chicago",
+          "store_count": 12
+        },
+        {
+          "name": "Houston",
+          "store_count": 12
+        },
+        {
+          "name": "Phoenix",
+          "store_count": 7
+        },
+        {
+          "name": "Seattle",
+          "store_count": 9
+        },
+        {
+          "name": "Miami",
+          "store_count": 12
+        },
+        {
+          "name": "Denver",
+          "store_count": 6
+        },
+        {
+          "name": "Atlanta",
+          "store_count": 12
+        }
+      ],
+      "products": [
+        {
+          "model": "Mac Mini M4 ($599)",
+          "values": {
+            "NYC": 8,
+            "LA": 8,
+            "SF": 0,
+            "Austin": 16,
+            "Boston": 0,
+            "Chicago": 16,
+            "Houston": 16,
+            "Phoenix": 14,
+            "Seattle": 0,
+            "Miami": 8,
+            "Denver": 0,
+            "Atlanta": 8
+          }
+        },
+        {
+          "model": "Mac Mini M4 Pro ($1,399)",
+          "values": {
+            "NYC": 100,
+            "LA": 91,
+            "SF": 91,
+            "Austin": 100,
+            "Boston": 100,
+            "Chicago": 100,
+            "Houston": 100,
+            "Phoenix": 100,
+            "Seattle": 88,
+            "Miami": 91,
+            "Denver": 100,
+            "Atlanta": 100
+          }
+        },
+        {
+          "model": "iMac 24\" M4 8-core ($1,299)",
+          "values": {
+            "NYC": 91,
+            "LA": 91,
+            "SF": 100,
+            "Austin": 91,
+            "Boston": 91,
+            "Chicago": 100,
+            "Houston": 91,
+            "Phoenix": 100,
+            "Seattle": 88,
+            "Miami": 83,
+            "Denver": 83,
+            "Atlanta": 100
+          }
+        },
+        {
+          "model": "iMac 24\" M4 10-core ($1,499)",
+          "values": {
+            "NYC": 91,
+            "LA": 91,
+            "SF": 100,
+            "Austin": 100,
+            "Boston": 100,
+            "Chicago": 91,
+            "Houston": 100,
+            "Phoenix": 85,
+            "Seattle": 77,
+            "Miami": 91,
+            "Denver": 83,
+            "Atlanta": 100
+          }
+        }
+      ]
     }
   ],
   "ebay_prices": {
@@ -19433,7 +19558,7 @@
     "data": {
       "M4 Mac Mini (keyword)": [
         {
-          "timestamp": "2026-02-11T19:07:08",
+          "timestamp": "2026-02-11T19:07:08Z",
           "avg_price": 13.49,
           "median_price": 13.94,
           "min_price": 3.99,
@@ -19441,7 +19566,7 @@
           "total_listings": 50
         },
         {
-          "timestamp": "2026-02-11T19:10:04",
+          "timestamp": "2026-02-11T19:10:04Z",
           "avg_price": 780.88,
           "median_price": 569.99,
           "min_price": 26.8,
@@ -19449,7 +19574,7 @@
           "total_listings": 50
         },
         {
-          "timestamp": "2026-02-11T19:18:31",
+          "timestamp": "2026-02-11T19:18:31Z",
           "avg_price": 926.59,
           "median_price": 587.99,
           "min_price": 234.96,
@@ -19457,7 +19582,7 @@
           "total_listings": 25
         },
         {
-          "timestamp": "2026-02-11T19:21:31",
+          "timestamp": "2026-02-11T19:21:31Z",
           "avg_price": 926.59,
           "median_price": 587.99,
           "min_price": 234.96,
@@ -19465,7 +19590,7 @@
           "total_listings": 25
         },
         {
-          "timestamp": "2026-02-11T20:45:43",
+          "timestamp": "2026-02-11T20:45:43Z",
           "avg_price": 903.83,
           "median_price": 589.99,
           "min_price": 234.96,
@@ -19475,7 +19600,7 @@
       ],
       "M4 Mac Mini Pro (keyword)": [
         {
-          "timestamp": "2026-02-11T19:07:09",
+          "timestamp": "2026-02-11T19:07:09Z",
           "avg_price": 15.82,
           "median_price": 15.63,
           "min_price": 7.79,
@@ -19483,7 +19608,7 @@
           "total_listings": 50
         },
         {
-          "timestamp": "2026-02-11T19:10:06",
+          "timestamp": "2026-02-11T19:10:06Z",
           "avg_price": 826.74,
           "median_price": 360.0,
           "min_price": 6.99,
@@ -19491,7 +19616,7 @@
           "total_listings": 50
         },
         {
-          "timestamp": "2026-02-11T19:18:33",
+          "timestamp": "2026-02-11T19:18:33Z",
           "avg_price": 1501.16,
           "median_price": 1440.99,
           "min_price": 209.99,
@@ -19499,7 +19624,7 @@
           "total_listings": 25
         },
         {
-          "timestamp": "2026-02-11T19:21:33",
+          "timestamp": "2026-02-11T19:21:33Z",
           "avg_price": 1501.16,
           "median_price": 1440.99,
           "min_price": 209.99,
@@ -19507,7 +19632,7 @@
           "total_listings": 25
         },
         {
-          "timestamp": "2026-02-11T20:45:45",
+          "timestamp": "2026-02-11T20:45:45Z",
           "avg_price": 1507.16,
           "median_price": 1440.99,
           "min_price": 234.96,
@@ -19517,7 +19642,7 @@
       ],
       "M4 iMac 24 (keyword)": [
         {
-          "timestamp": "2026-02-11T19:07:11",
+          "timestamp": "2026-02-11T19:07:11Z",
           "avg_price": 24.85,
           "median_price": 18.68,
           "min_price": 9.76,
@@ -19525,7 +19650,7 @@
           "total_listings": 50
         },
         {
-          "timestamp": "2026-02-11T19:10:08",
+          "timestamp": "2026-02-11T19:10:08Z",
           "avg_price": 991.18,
           "median_price": 1000.0,
           "min_price": 50.0,
@@ -19533,7 +19658,7 @@
           "total_listings": 50
         },
         {
-          "timestamp": "2026-02-11T19:18:34",
+          "timestamp": "2026-02-11T19:18:34Z",
           "avg_price": 1098.79,
           "median_price": 1099.0,
           "min_price": 479.0,
@@ -19541,7 +19666,7 @@
           "total_listings": 25
         },
         {
-          "timestamp": "2026-02-11T19:21:34",
+          "timestamp": "2026-02-11T19:21:34Z",
           "avg_price": 1098.79,
           "median_price": 1099.0,
           "min_price": 479.0,
@@ -19549,7 +19674,7 @@
           "total_listings": 25
         },
         {
-          "timestamp": "2026-02-11T20:45:47",
+          "timestamp": "2026-02-11T20:45:47Z",
           "avg_price": 1086.43,
           "median_price": 1000.0,
           "min_price": 479.0,
@@ -19559,7 +19684,7 @@
       ],
       "Mac Mini M4 ($599)": [
         {
-          "timestamp": "2026-02-11T19:04:17",
+          "timestamp": "2026-02-11T19:04:17Z",
           "avg_price": 650.06,
           "median_price": 579.95,
           "min_price": 20.0,
@@ -19567,7 +19692,7 @@
           "total_listings": 50
         },
         {
-          "timestamp": "2026-02-11T19:07:02",
+          "timestamp": "2026-02-11T19:07:02Z",
           "avg_price": 650.06,
           "median_price": 579.95,
           "min_price": 20.0,
@@ -19575,7 +19700,7 @@
           "total_listings": 50
         },
         {
-          "timestamp": "2026-02-11T19:09:58",
+          "timestamp": "2026-02-11T19:09:58Z",
           "avg_price": 683.11,
           "median_price": 589.99,
           "min_price": 20.0,
@@ -19583,7 +19708,7 @@
           "total_listings": 50
         },
         {
-          "timestamp": "2026-02-11T19:18:24",
+          "timestamp": "2026-02-11T19:18:24Z",
           "avg_price": 669.43,
           "median_price": 559.99,
           "min_price": 498.99,
@@ -19591,7 +19716,7 @@
           "total_listings": 25
         },
         {
-          "timestamp": "2026-02-11T19:21:25",
+          "timestamp": "2026-02-11T19:21:25Z",
           "avg_price": 673.83,
           "median_price": 564.99,
           "min_price": 498.99,
@@ -19599,7 +19724,7 @@
           "total_listings": 25
         },
         {
-          "timestamp": "2026-02-11T20:45:37",
+          "timestamp": "2026-02-11T20:45:37Z",
           "avg_price": 658.47,
           "median_price": 559.99,
           "min_price": 498.99,
@@ -19609,7 +19734,7 @@
       ],
       "Mac Mini M4 Pro ($1,399)": [
         {
-          "timestamp": "2026-02-11T19:04:18",
+          "timestamp": "2026-02-11T19:04:18Z",
           "avg_price": 1464.72,
           "median_price": 1569.24,
           "min_price": 574.99,
@@ -19617,7 +19742,7 @@
           "total_listings": 8
         },
         {
-          "timestamp": "2026-02-11T19:07:04",
+          "timestamp": "2026-02-11T19:07:04Z",
           "avg_price": 1464.72,
           "median_price": 1569.24,
           "min_price": 574.99,
@@ -19625,7 +19750,7 @@
           "total_listings": 8
         },
         {
-          "timestamp": "2026-02-11T19:09:59",
+          "timestamp": "2026-02-11T19:09:59Z",
           "avg_price": 1494.21,
           "median_price": 1369.78,
           "min_price": 1274.99,
@@ -19633,7 +19758,7 @@
           "total_listings": 7
         },
         {
-          "timestamp": "2026-02-11T19:18:26",
+          "timestamp": "2026-02-11T19:18:26Z",
           "avg_price": 1494.21,
           "median_price": 1369.78,
           "min_price": 1274.99,
@@ -19641,7 +19766,7 @@
           "total_listings": 7
         },
         {
-          "timestamp": "2026-02-11T19:21:26",
+          "timestamp": "2026-02-11T19:21:26Z",
           "avg_price": 1494.21,
           "median_price": 1369.78,
           "min_price": 1274.99,
@@ -19649,7 +19774,7 @@
           "total_listings": 7
         },
         {
-          "timestamp": "2026-02-11T20:45:38",
+          "timestamp": "2026-02-11T20:45:38Z",
           "avg_price": 1494.21,
           "median_price": 1369.78,
           "min_price": 1274.99,
@@ -19659,7 +19784,7 @@
       ],
       "iMac 24\" M4 10-core ($1,499)": [
         {
-          "timestamp": "2026-02-11T19:04:21",
+          "timestamp": "2026-02-11T19:04:21Z",
           "avg_price": 1135.73,
           "median_price": 1149.0,
           "min_price": 28.35,
@@ -19667,7 +19792,7 @@
           "total_listings": 11
         },
         {
-          "timestamp": "2026-02-11T19:07:06",
+          "timestamp": "2026-02-11T19:07:06Z",
           "avg_price": 1135.73,
           "median_price": 1149.0,
           "min_price": 28.35,
@@ -19675,7 +19800,7 @@
           "total_listings": 11
         },
         {
-          "timestamp": "2026-02-11T19:10:02",
+          "timestamp": "2026-02-11T19:10:02Z",
           "avg_price": 1135.73,
           "median_price": 1149.0,
           "min_price": 28.35,
@@ -19683,7 +19808,7 @@
           "total_listings": 11
         },
         {
-          "timestamp": "2026-02-11T19:18:29",
+          "timestamp": "2026-02-11T19:18:29Z",
           "avg_price": 1246.47,
           "median_price": 1300.0,
           "min_price": 479.0,
@@ -19691,7 +19816,7 @@
           "total_listings": 10
         },
         {
-          "timestamp": "2026-02-11T19:21:29",
+          "timestamp": "2026-02-11T19:21:29Z",
           "avg_price": 1246.47,
           "median_price": 1300.0,
           "min_price": 479.0,
@@ -19699,7 +19824,7 @@
           "total_listings": 10
         },
         {
-          "timestamp": "2026-02-11T20:45:41",
+          "timestamp": "2026-02-11T20:45:41Z",
           "avg_price": 1246.47,
           "median_price": 1300.0,
           "min_price": 479.0,
@@ -19709,7 +19834,7 @@
       ],
       "iMac 24\" M4 8-core ($1,299)": [
         {
-          "timestamp": "2026-02-11T19:04:20",
+          "timestamp": "2026-02-11T19:04:20Z",
           "avg_price": 1095.59,
           "median_price": 1029.0,
           "min_price": 489.0,
@@ -19717,7 +19842,7 @@
           "total_listings": 14
         },
         {
-          "timestamp": "2026-02-11T19:07:05",
+          "timestamp": "2026-02-11T19:07:05Z",
           "avg_price": 1095.59,
           "median_price": 1029.0,
           "min_price": 489.0,
@@ -19725,7 +19850,7 @@
           "total_listings": 14
         },
         {
-          "timestamp": "2026-02-11T19:10:01",
+          "timestamp": "2026-02-11T19:10:01Z",
           "avg_price": 1095.59,
           "median_price": 1029.0,
           "min_price": 489.0,
@@ -19733,7 +19858,7 @@
           "total_listings": 14
         },
         {
-          "timestamp": "2026-02-11T19:18:27",
+          "timestamp": "2026-02-11T19:18:27Z",
           "avg_price": 1095.59,
           "median_price": 1029.0,
           "min_price": 489.0,
@@ -19741,7 +19866,7 @@
           "total_listings": 14
         },
         {
-          "timestamp": "2026-02-11T19:21:28",
+          "timestamp": "2026-02-11T19:21:28Z",
           "avg_price": 1095.59,
           "median_price": 1029.0,
           "min_price": 489.0,
@@ -19749,7 +19874,7 @@
           "total_listings": 14
         },
         {
-          "timestamp": "2026-02-11T20:45:40",
+          "timestamp": "2026-02-11T20:45:40Z",
           "avg_price": 1095.59,
           "median_price": 1029.0,
           "min_price": 489.0,

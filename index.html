@@ -1694,7 +1694,7 @@
           scales: {
             x: {
               type: 'time',
-              max: new Date(),
+              max: showAvailability ? new Date() : undefined,
               time: { tooltipFormat: 'MMM d, yyyy h:mm a', displayFormats: { hour: 'h a', day: 'MMM d' } },
               grid: { color: getThemeColors().grid },
               ticks: {
