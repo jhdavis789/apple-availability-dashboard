@@ -496,6 +496,10 @@
           <input type="checkbox" id="filterZeros" checked>
           Exclude 0% errors (single-call &amp; 0-store)
         </label>
+        <label class="toggle-label" id="ebayToggleLabel" style="display:none;">
+          <input type="checkbox" id="showEbayPrices">
+          Show eBay Prices
+        </label>
       </div>
     </div>
 
@@ -851,7 +855,13 @@
       productSelect.addEventListener('change', render);
       citySelect.addEventListener('change', render);
       document.getElementById('filterZeros').addEventListener('change', render);
+      document.getElementById('showEbayPrices').addEventListener('change', render);
       document.getElementById('customAvgInput').addEventListener('input', render);
+
+      // Show eBay toggle only if data is available
+      if (DATA.ebay_prices && DATA.ebay_prices.products.length > 0) {
+        document.getElementById('ebayToggleLabel').style.display = '';
+      }
 
       document.getElementById('resetCities').addEventListener('click', () => {
         [...citySelect.options].forEach(o => o.selected = true);
@@ -1510,6 +1520,112 @@
         });
       }
 
+      // --- eBay price overlay ---
+      const showEbay = document.getElementById('showEbayPrices').checked && DATA.ebay_prices;
+      if (showEbay) {
+        const ebayData = DATA.ebay_prices.data;
+        if (!isAllProducts) {
+          // Single product: look for matching eBay product
+          const ebayHistory = ebayData[selectedProduct];
+          if (ebayHistory && ebayHistory.length > 0) {
+            datasets.push({
+              label: 'eBay Avg Price',
+              data: ebayHistory.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price })),
+              borderColor: '#30d158',
+              backgroundColor: '#30d15820',
+              borderWidth: 2.5,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              pointStyle: 'rectRot',
+              tension: 0.3,
+              fill: false,
+              yAxisID: 'y2',
+            });
+            datasets.push({
+              label: 'eBay Median Price',
+              data: ebayHistory.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price })),
+              borderColor: '#ff9f0a',
+              backgroundColor: '#ff9f0a20',
+              borderWidth: 2,
+              borderDash: [6, 3],
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              pointStyle: 'triangle',
+              tension: 0.3,
+              fill: false,
+              yAxisID: 'y2',
+            });
+          }
+        } else {
+          // All products: one avg + median line per eBay product
+          const ebayProducts = DATA.ebay_prices.products;
+          ebayProducts.forEach((productName, idx) => {
+            const history = ebayData[productName];
+            if (!history || history.length === 0) return;
+            const color = PRODUCT_COLORS[idx % PRODUCT_COLORS.length];
+            datasets.push({
+              label: `${productName} (eBay Avg)`,
+              data: history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price })),
+              borderColor: color,
+              backgroundColor: color + '20',
+              borderWidth: 2,
+              borderDash: [8, 4],
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointStyle: 'rectRot',
+              tension: 0.3,
+              fill: false,
+              yAxisID: 'y2',
+            });
+            datasets.push({
+              label: `${productName} (eBay Median)`,
+              data: history.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price })),
+              borderColor: color,
+              backgroundColor: color + '20',
+              borderWidth: 1.5,
+              borderDash: [3, 3],
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              pointStyle: 'triangle',
+              tension: 0.3,
+              fill: false,
+              yAxisID: 'y2',
+            });
+          });
+        }
+      }
+
+      // Compute y2 axis max from eBay data
+      let y2Max = 100;
+      let y2Config;
+      if (showEbay) {
+        const ebayYValues = datasets
+          .filter(ds => ds.yAxisID === 'y2')
+          .flatMap(ds => ds.data.map(pt => pt.y))
+          .filter(v => v !== null && v !== undefined);
+        if (ebayYValues.length > 0) {
+          const rawMax = Math.max(...ebayYValues);
+          // Round up to a nice number
+          y2Max = Math.ceil(rawMax / 100) * 100;
+          if (y2Max < rawMax * 1.1) y2Max = Math.ceil(rawMax * 1.1 / 50) * 50;
+        }
+        y2Config = {
+          position: 'right',
+          min: 0,
+          max: y2Max,
+          grid: { drawOnChartArea: false },
+          ticks: { color: '#30d158', callback: v => '$' + v.toLocaleString() },
+          title: { display: true, text: 'eBay Price ($)', color: '#30d158', font: { size: 12 } }
+        };
+      } else {
+        y2Config = {
+          position: 'right',
+          min: 0, max: 100,
+          grid: { drawOnChartArea: false },
+          ticks: { color: getThemeColors().tick, callback: v => v + '%' }
+        };
+      }
+
       const highlightPlugin = makeHighlightPlugin('mainChart');
       mainChart = new Chart(ctx, {
         type: 'line',
@@ -1544,6 +1660,9 @@
               itemSort: (a, b) => b.parsed.y - a.parsed.y,
               callbacks: {
                 label: ctx => {
+                  if (ctx.dataset.yAxisID === 'y2') {
+                    return `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}`;
+                  }
                   return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`;
                 }
               }
@@ -1590,12 +1709,7 @@
               grid: { color: getThemeColors().grid },
               ticks: { color: getThemeColors().tick, callback: v => v + '%' }
             },
-            y2: {
-              position: 'right',
-              min: 0, max: 100,
-              grid: { drawOnChartArea: false },
-              ticks: { color: getThemeColors().tick, callback: v => v + '%' }
-            }
+            y2: y2Config
           }
         },
         plugins: [highlightPlugin, {
