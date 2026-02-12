@@ -4,8 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apple Product Availability Dashboard</title>
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9XP43TXQ0T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-9XP43TXQ0T');
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-delaunay@6.0.4/dist/d3-delaunay.min.js"></script>
   <style>
     :root {
       --bg: #0a0a0a;
@@ -458,6 +469,111 @@
       white-space: nowrap;
     }
     .time-range-reset:hover { border-color: var(--secondary-border-hover); color: var(--text-secondary-btn-hover); }
+
+    /* Map container */
+    #mapContainer {
+      width: 100%;
+      height: 600px;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    #mapContainer .leaflet-container {
+      background: var(--card-bg);
+    }
+    .map-legend {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .map-legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .map-tooltip {
+      background: var(--tooltip-bg);
+      border: 1px solid var(--tooltip-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text);
+      pointer-events: none;
+      position: absolute;
+      z-index: 1000;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    /* Map controls bar */
+    .map-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      flex-wrap: wrap;
+    }
+    .map-controls label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .map-time-slider {
+      flex: 1;
+      min-width: 200px;
+    }
+    .map-time-slider input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+    .map-time-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 2px;
+    }
+    .map-mode-btns {
+      display: flex;
+      gap: 4px;
+    }
+    .map-mode-btn {
+      padding: 5px 12px;
+      font-size: 11px;
+      border-radius: 5px;
+      background: transparent;
+      border: 1px solid var(--input-border);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .map-mode-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .map-delta-range {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex: 1;
+      min-width: 200px;
+    }
+    .map-delta-range input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+    }
+    /* Hide main controls in heatmap view */
+    body.heatmap-view .controls .control-group:not(.map-keep) {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -468,21 +584,21 @@
     <div class="subtitle" style="margin-top:6px;font-size:12px;color:var(--text-dim);">ℹ️ iPhone and some other products are no longer tracked to prioritize API availability for more relevant products. They were consistently available (~95-100%).</div>
     <div class="header-top-right">
       <span class="last-updated-badge" id="lastUpdated"></span>
+      <span class="last-updated-badge" id="lastUpdatedSite" style="opacity:0.7;"></span>
       <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">🌙</button>
     </div>
   </div>
 
   <div class="controls" id="controls">
-    <div class="control-group">
+    <div class="control-group map-keep">
       <label>View</label>
       <div class="view-tabs" id="viewTabs">
         <div class="view-tab active" data-view="trends">Trends</div>
         <div class="view-tab" data-view="heatmap">Heatmap</div>
-        <div class="view-tab" data-view="compare">Compare Cities</div>
       </div>
     </div>
 
-    <div class="control-group">
+    <div class="control-group map-keep">
       <label>Product</label>
       <select id="productSelect"></select>
     </div>
@@ -523,7 +639,7 @@
           Mean
         </label>
         <label class="toggle-label ebay-sub-toggle" id="ebayMedianLabel" style="display:none;margin-left:24px;opacity:0.4;pointer-events:none;">
-          <input type="checkbox" id="showEbayMedian" checked>
+          <input type="checkbox" id="showEbayMedian">
           Median
         </label>
       </div>
@@ -562,6 +678,42 @@
   <div id="loading">Loading data...</div>
 
   <div class="dashboard" id="dashboard" style="display:none;">
+    <!-- Heatmap view (hidden by default, first in stack so it's on top) -->
+    <div class="chart-card" id="heatmapCard" style="display:none;">
+      <h3>Store Availability Map</h3>
+      <div class="map-controls">
+        <div class="map-mode-btns">
+          <button class="map-mode-btn active" data-mode="snapshot">Snapshot</button>
+          <button class="map-mode-btn" data-mode="delta">Delta</button>
+        </div>
+        <div id="mapSnapshotControls" class="map-time-slider">
+          <div class="map-time-label" id="mapTimeLabel" style="font-weight:700;text-decoration:underline;font-size:13px;margin-bottom:4px;">Latest</div>
+          <input type="range" id="mapTimeSlider" min="0" max="100" value="100">
+          <div id="mapTimeTicks" style="display:flex;justify-content:space-between;position:relative;height:14px;"></div>
+        </div>
+        <div id="mapDeltaControls" style="display:none;" class="map-delta-range">
+          <div style="flex:1;">
+            <div class="map-time-label" id="mapDeltaSelectedLabel" style="font-weight:700;text-decoration:underline;font-size:13px;margin-bottom:4px;">Full range</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span style="font-size:11px;color:var(--text-muted);font-weight:600;">From</span>
+              <input type="range" id="mapDeltaStart" min="0" max="100" value="0" style="flex:1;">
+              <span style="font-size:11px;color:var(--text-muted);font-weight:600;">To</span>
+              <input type="range" id="mapDeltaEnd" min="0" max="100" value="100" style="flex:1;">
+            </div>
+            <div id="mapDeltaTicks" style="display:flex;justify-content:space-between;position:relative;height:14px;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="mapContainer"></div>
+      <div id="mapStats" style="display:flex;gap:16px;margin-top:8px;font-size:12px;color:var(--text-muted);"></div>
+      <details style="margin-top:12px;">
+        <summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">Show data table</summary>
+        <div style="overflow-x:auto;margin-top:8px;">
+          <table class="heatmap-table" id="heatmapTable"></table>
+        </div>
+      </details>
+    </div>
+
     <!-- Stats row -->
     <div class="stats-row" id="statsRow"></div>
     <div class="excluded-info" id="excludedInfo"></div>
@@ -577,14 +729,6 @@
       <h3 id="mainChartTitle">Availability Over Time</h3>
       <div class="chart-container">
         <canvas id="mainChart"></canvas>
-      </div>
-    </div>
-
-    <!-- Heatmap view (hidden by default) -->
-    <div class="chart-card" id="heatmapCard" style="display:none;">
-      <h3>Latest Snapshot Heatmap</h3>
-      <div style="overflow-x:auto;">
-        <table class="heatmap-table" id="heatmapTable"></table>
       </div>
     </div>
 
@@ -642,6 +786,12 @@
     let timeMax = 0;  // epoch ms — absolute max from data
     let timeStartMs = 0; // current selected start
     let timeEndMs = 0;   // current selected end
+
+    // === Map state ===
+    let leafletMap = null;
+    let voronoiLayer = null;
+    let mapTileLayer = null;
+    let mapTooltipEl = null;
 
     const CITY_COLORS = {
       'NYC': '#ff6384', 'LA': '#36a2eb', 'SF': '#ffce56', 'Austin': '#4bc0c0',
@@ -817,7 +967,7 @@
           `Last updated ${days[last.getDay()]} ${months[last.getMonth()]} ${last.getDate()} at ${h12}:${minStr} ${ampm}`;
       }
 
-      // Show website build time in footer
+      // Show website build time in header top-right
       if (DATA.generated_at) {
         const gen = new Date(DATA.generated_at);
         const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -826,8 +976,8 @@
         const ampm = h >= 12 ? 'PM' : 'AM';
         const h12 = h % 12 || 12;
         const minStr = m < 10 ? '0' + m : m;
-        document.getElementById('lastUpdatedFooter').textContent =
-          `${days[gen.getDay()]} ${months[gen.getMonth()]} ${gen.getDate()}, ${gen.getFullYear()} at ${h12}:${minStr} ${ampm}`;
+        document.getElementById('lastUpdatedSite').textContent =
+          `Site built ${months[gen.getMonth()]} ${gen.getDate()} at ${h12}:${minStr} ${ampm}`;
       }
 
       initControls();
@@ -927,13 +1077,13 @@
 
       // Quick view buttons
       document.getElementById('qvMacMini').addEventListener('click', () => {
-        // Set product to Mac Mini M4 ($599), view to Compare Cities
+        // Set product to Mac Mini M4 ($599), view to Trends
         const ps = document.getElementById('productSelect');
         const macMini = [...ps.options].find(o => o.value === 'Mac Mini M4 ($599)');
         if (macMini) ps.value = macMini.value;
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-        const compareTab = document.querySelector('.view-tab[data-view="compare"]');
-        if (compareTab) { compareTab.classList.add('active'); currentView = 'compare'; }
+        const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
+        if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
         render();
       });
 
@@ -1299,6 +1449,13 @@
       const isAllProducts = selectedProduct === '__ALL__';
       const blipSet = filterZeros ? getBlipSet(snapshots) : null;
 
+      // Toggle heatmap-view class for control hiding
+      if (currentView === 'heatmap') {
+        document.body.classList.add('heatmap-view');
+      } else {
+        document.body.classList.remove('heatmap-view');
+      }
+
       updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
 
       if (currentView === 'trends' || currentView === 'compare') {
@@ -1308,6 +1465,13 @@
         document.getElementById('heatmapCard').style.display = 'block';
         renderHeatmap(snapshots, selectedCities, filterZeros, blipSet);
         renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+        // Initialize & update map
+        if (DATA && DATA.store_map) {
+          setTimeout(() => {
+            initMap();
+            updateMapOverlay();
+          }, 50);
+        }
       }
 
       // City Averages now uses the same time-filtered snapshots as the main chart.
@@ -1457,11 +1621,13 @@
             }
           });
           if (avgPoints.length > 0) {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            const avgColor = isLight ? '#1d1d1f' : '#ffffff';
             datasets.push({
               label: 'Weighted Avg',
               data: avgPoints,
-              borderColor: '#ffffff',
-              backgroundColor: '#ffffff20',
+              borderColor: avgColor,
+              backgroundColor: avgColor + '20',
               borderWidth: 3,
               borderDash: [6, 3],
               pointRadius: 0,
@@ -2078,18 +2244,20 @@
       productAvgs.sort((a, b) => a.avg - b.avg);
 
       // Add weighted average as first item
+      const isLightTheme = document.documentElement.getAttribute('data-theme') === 'light';
+      const avgBarColor = isLightTheme ? '#1d1d1f' : '#ffffff';
       if (overallWTotal > 0) {
         productAvgs.unshift({
           model: '⚖️ Weighted Average (All Products)',
           avg: overallWSum / overallWTotal,
           count: overallWTotal,
-          color: '#ffffff',
+          color: avgBarColor,
           isAverage: true
         });
       }
 
       // Store original colors for highlight/reset
-      const origBgColors = productAvgs.map(p => p.isAverage ? '#ffffff55' : p.color + '99');
+      const origBgColors = productAvgs.map(p => p.isAverage ? avgBarColor + '55' : p.color + '99');
       const origBorderColors = productAvgs.map(p => p.color);
       const origBorderWidths = productAvgs.map(p => p.isAverage ? 2 : 1);
 
@@ -2135,7 +2303,7 @@
                   return productAvgs.map((p, i) => ({
                     text: p.model,
                     fontColor: p.color,
-                    fillStyle: p.isAverage ? '#ffffff55' : p.color + '99',
+                    fillStyle: p.isAverage ? avgBarColor + '55' : p.color + '99',
                     strokeStyle: p.color,
                     lineWidth: p.isAverage ? 2 : 1,
                     hidden: false,
@@ -2179,7 +2347,7 @@
         highlightedIdx = idx;
         const ds = productChart.data.datasets[0];
         ds.backgroundColor = productAvgs.map((p, i) =>
-          i === idx ? (p.isAverage ? '#ffffffcc' : p.color + 'ff') : (p.isAverage ? '#ffffff15' : p.color + '22')
+          i === idx ? (p.isAverage ? avgBarColor + 'cc' : p.color + 'ff') : (p.isAverage ? avgBarColor + '15' : p.color + '22')
         );
         ds.borderColor = productAvgs.map((p, i) =>
           i === idx ? p.color : p.color + '44'
@@ -2334,6 +2502,7 @@
       document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
       localStorage.setItem('theme', newTheme);
       applyThemeToCharts();
+      swapMapTiles();
       render(); // re-render heatmaps/data matrix with correct colors
     });
 
@@ -2346,11 +2515,728 @@
       }
     })();
 
+    // ==========================================================
+    // Interactive Map with Voronoi-Clipped Gradient Circles
+    // ==========================================================
+
+    const MAP_COLORS = {
+      available: [48, 209, 88],    // green
+      unavailable: [255, 59, 48],  // red
+      nodata: [142, 142, 147],     // gray
+      deltaUp: [48, 209, 88],      // green (improved)
+      deltaDown: [255, 59, 48],    // red (declined)
+      deltaFlat: [255, 159, 10],   // orange (no change)
+      deltaNoData: [142, 142, 147],// gray (missing data)
+    };
+    const MILES_RADIUS = 50;
+    /** Clustering distance thresholds by zoom level */
+    function clusterDistanceForZoom(zoom) {
+      if (zoom >= 7) return 0;    // no clustering
+      if (zoom >= 6) return 50;   // city-level (Houston, Austin stay separate)
+      if (zoom >= 5) return 250;  // state-level (Houston+Austin→Texas, NYC+Boston→Northeast)
+      return 500;                 // regional (Southeast, etc.)
+    }
+
+    let mapMode = 'snapshot'; // 'snapshot' or 'delta'
+
+    function milesToPixels(lat, zoom) {
+      const metersPerPixel = (156543.03392 * Math.cos(lat * Math.PI / 180)) / Math.pow(2, zoom);
+      return (MILES_RADIUS * 1609.34) / metersPerPixel;
+    }
+
+    function lerpColor(c1, c2, t) {
+      return [
+        Math.round(c1[0] + (c2[0] - c1[0]) * t),
+        Math.round(c1[1] + (c2[1] - c1[1]) * t),
+        Math.round(c1[2] + (c2[2] - c1[2]) * t),
+      ];
+    }
+
+    /** Map fraction 0..1 to red(0) -> yellow(0.5) -> green(1) */
+    function availabilityColor(fraction) {
+      if (fraction <= 0.5) {
+        return lerpColor(MAP_COLORS.unavailable, [255, 214, 10], fraction * 2);
+      }
+      return lerpColor([255, 214, 10], MAP_COLORS.available, (fraction - 0.5) * 2);
+    }
+
+    /** Delta color: -1 (red) -> 0 (orange) -> +1 (green). null = gray (no data). */
+    function deltaColor(delta, hasData) {
+      if (hasData === false) return MAP_COLORS.deltaNoData;
+      if (delta > 0) return lerpColor(MAP_COLORS.deltaFlat, MAP_COLORS.deltaUp, Math.min(delta, 1));
+      if (delta < 0) return lerpColor(MAP_COLORS.deltaFlat, MAP_COLORS.deltaDown, Math.min(-delta, 1));
+      return MAP_COLORS.deltaFlat;
+    }
+
+    /** Haversine distance in miles between two lat/lng pairs */
+    function haversineMiles(lat1, lng1, lat2, lng2) {
+      const R = 3958.8; // Earth radius in miles
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLng / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    // US state abbreviation to full name
+    const STATE_NAMES = {
+      'AL':'Alabama','AK':'Alaska','AZ':'Arizona','AR':'Arkansas','CA':'California',
+      'CO':'Colorado','CT':'Connecticut','DE':'Delaware','FL':'Florida','GA':'Georgia',
+      'HI':'Hawaii','ID':'Idaho','IL':'Illinois','IN':'Indiana','IA':'Iowa','KS':'Kansas',
+      'KY':'Kentucky','LA':'Louisiana','ME':'Maine','MD':'Maryland','MA':'Massachusetts',
+      'MI':'Michigan','MN':'Minnesota','MS':'Mississippi','MO':'Missouri','MT':'Montana',
+      'NE':'Nebraska','NV':'Nevada','NH':'New Hampshire','NJ':'New Jersey','NM':'New Mexico',
+      'NY':'New York','NC':'North Carolina','ND':'North Dakota','OH':'Ohio','OK':'Oklahoma',
+      'OR':'Oregon','PA':'Pennsylvania','RI':'Rhode Island','SC':'South Carolina',
+      'SD':'South Dakota','TN':'Tennessee','TX':'Texas','UT':'Utah','VT':'Vermont',
+      'VA':'Virginia','WA':'Washington','WV':'West Virginia','WI':'Wisconsin','WY':'Wyoming',
+      'DC':'Washington DC',
+    };
+
+    /** Cluster stores by distance (BFS). distMiles controls merge radius. */
+    function clusterStoresByDistance(stores, distMiles) {
+      const assigned = new Array(stores.length).fill(-1);
+      const clusters = [];
+
+      for (let i = 0; i < stores.length; i++) {
+        if (assigned[i] >= 0) continue;
+        const clusterIdx = clusters.length;
+        const group = [i];
+        assigned[i] = clusterIdx;
+
+        let queue = [i];
+        while (queue.length > 0) {
+          const cur = queue.shift();
+          for (let j = 0; j < stores.length; j++) {
+            if (assigned[j] >= 0) continue;
+            const d = haversineMiles(stores[cur].lat, stores[cur].lng, stores[j].lat, stores[j].lng);
+            if (d <= distMiles) {
+              assigned[j] = clusterIdx;
+              group.push(j);
+              queue.push(j);
+            }
+          }
+        }
+        clusters.push(group);
+      }
+
+      return clusters.map(indices => {
+        const groupStores = indices.map(i => stores[i]);
+        const latAvg = groupStores.reduce((s, st) => s + st.lat, 0) / groupStores.length;
+        const lngAvg = groupStores.reduce((s, st) => s + st.lng, 0) / groupStores.length;
+
+        // Count stores per city and per state
+        const cityCounts = {};
+        const stateCounts = {};
+        groupStores.forEach(s => {
+          const k = `${s.city}, ${s.state}`;
+          cityCounts[k] = (cityCounts[k] || 0) + 1;
+          stateCounts[s.state] = (stateCounts[s.state] || 0) + 1;
+        });
+
+        const states = Object.keys(stateCounts);
+        const topCityEntry = Object.entries(cityCounts).sort((a, b) => b[1] - a[1])[0];
+        const topCity = topCityEntry[0];
+        const [cityName, stateAbbr] = topCity.split(', ');
+
+        // Determine display label based on cluster composition
+        let displayName;
+        if (states.length === 1) {
+          // All same state — use state name
+          displayName = STATE_NAMES[states[0]] || states[0];
+        } else {
+          // Multiple states — use the state with the most stores
+          const topState = Object.entries(stateCounts).sort((a, b) => b[1] - a[1])[0][0];
+          displayName = (STATE_NAMES[topState] || topState) + ' region';
+        }
+
+        return {
+          lat: latAvg,
+          lng: lngAvg,
+          city: displayName,
+          state: stateAbbr || '',
+          name: displayName,
+          stores: groupStores,
+          _isCluster: true,
+          _color: null,
+          _availCount: 0,
+          _totalCount: groupStores.length,
+          _fraction: 0,
+        };
+      });
+    }
+
+    /**
+     * VoronoiHeatmapLayer — Leaflet canvas overlay.
+     * Each store/cluster gets a radial gradient circle clipped to its Voronoi cell,
+     * with center dot and Voronoi boundary lines.
+     */
+    const VoronoiHeatmapLayer = L.Layer.extend({
+      initialize(options) {
+        L.Util.setOptions(this, options);
+        this._items = []; // stores or clusters
+        this._canvas = null;
+      },
+
+      onAdd(map) {
+        this._map = map;
+        this._canvas = L.DomUtil.create('canvas', 'voronoi-canvas');
+        this._canvas.style.position = 'absolute';
+        this._canvas.style.top = '0';
+        this._canvas.style.left = '0';
+        this._canvas.style.pointerEvents = 'none';
+        map.getPanes().overlayPane.appendChild(this._canvas);
+
+        map.on('moveend zoomend resize', this._redraw, this);
+        this._redraw();
+      },
+
+      onRemove(map) {
+        L.DomUtil.remove(this._canvas);
+        map.off('moveend zoomend resize', this._redraw, this);
+      },
+
+      setItems(items) {
+        this._items = items;
+        if (this._map) this._redraw();
+      },
+
+      _redraw() {
+        const map = this._map;
+        const size = map.getSize();
+        const canvas = this._canvas;
+        const dpr = window.devicePixelRatio || 1;
+
+        canvas.width = size.x * dpr;
+        canvas.height = size.y * dpr;
+        canvas.style.width = size.x + 'px';
+        canvas.style.height = size.y + 'px';
+
+        const topLeft = map.containerPointToLayerPoint([0, 0]);
+        L.DomUtil.setPosition(canvas, topLeft);
+
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, size.x, size.y);
+
+        const items = this._items;
+        if (!items || items.length === 0) return;
+
+        const zoom = map.getZoom();
+
+        // Project to pixels
+        const points = items.map(s => {
+          const pt = map.latLngToContainerPoint([s.lat, s.lng]);
+          return [pt.x, pt.y];
+        });
+
+        // Voronoi
+        const delaunay = d3.Delaunay.from(points);
+        const voronoi = delaunay.voronoi([0, 0, size.x, size.y]);
+
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+
+        // Draw gradient circles clipped to both Voronoi cell AND 50mi radius
+        items.forEach((item, i) => {
+          const [px, py] = points[i];
+          const color = item._color || MAP_COLORS.nodata;
+          const opacity = 0.55;
+          const radiusPx = Math.max(10, milesToPixels(item.lat, zoom));
+
+          const cell = voronoi.cellPolygon(i);
+          if (!cell) return;
+
+          ctx.save();
+
+          // Clip to intersection of Voronoi cell and circle
+          ctx.beginPath();
+          ctx.moveTo(cell[0][0], cell[0][1]);
+          for (let j = 1; j < cell.length; j++) {
+            ctx.lineTo(cell[j][0], cell[j][1]);
+          }
+          ctx.closePath();
+          ctx.clip();
+
+          // Second clip: the 50mi circle
+          ctx.beginPath();
+          ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+          ctx.clip();
+
+          // Radial gradient — linear fade
+          const grad = ctx.createRadialGradient(px, py, 0, px, py, radiusPx);
+          grad.addColorStop(0, `rgba(${color[0]},${color[1]},${color[2]},${opacity})`);
+          grad.addColorStop(0.3, `rgba(${color[0]},${color[1]},${color[2]},${opacity * 0.7})`);
+          grad.addColorStop(0.6, `rgba(${color[0]},${color[1]},${color[2]},${opacity * 0.35})`);
+          grad.addColorStop(1, `rgba(${color[0]},${color[1]},${color[2]},0)`);
+          ctx.fillStyle = grad;
+          ctx.fillRect(px - radiusPx, py - radiusPx, radiusPx * 2, radiusPx * 2);
+
+          ctx.restore();
+
+          // Center dot
+          const dotRadius = item._isCluster ? 5 : 3;
+          ctx.beginPath();
+          ctx.arc(px, py, dotRadius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        });
+
+        // Draw Voronoi boundary lines (only within overlapping circle regions)
+        ctx.strokeStyle = isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1;
+        // For each Voronoi edge, draw it clipped to both adjacent circles
+        for (let i = 0; i < items.length; i++) {
+          const cell = voronoi.cellPolygon(i);
+          if (!cell) continue;
+          const [px, py] = points[i];
+          const radiusPx = Math.max(10, milesToPixels(items[i].lat, zoom));
+
+          ctx.save();
+          // Clip to this store's circle
+          ctx.beginPath();
+          ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+          ctx.clip();
+
+          ctx.beginPath();
+          ctx.moveTo(cell[0][0], cell[0][1]);
+          for (let j = 1; j < cell.length; j++) {
+            ctx.lineTo(cell[j][0], cell[j][1]);
+          }
+          ctx.closePath();
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Cluster labels (when clustered)
+        items.forEach((item, i) => {
+          if (!item._isCluster) return;
+          const [px, py] = points[i];
+          const pct = item._totalCount > 0 ? Math.round(item._fraction * 100) : 0;
+          const cityLabel = item.city || item.name;
+          const statsLabel = `${item._availCount}/${item._totalCount} (${pct}%)`;
+
+          ctx.textAlign = 'center';
+
+          // City name label
+          ctx.font = 'bold 12px -apple-system, sans-serif';
+          const cityW = ctx.measureText(cityLabel).width;
+          ctx.font = '10px -apple-system, sans-serif';
+          const statsW = ctx.measureText(statsLabel).width;
+          const maxW = Math.max(cityW, statsW);
+
+          const pillX = px - maxW / 2 - 6;
+          const pillY = py + 8;
+          const pillH = 30;
+          ctx.fillStyle = isLight ? 'rgba(255,255,255,0.88)' : 'rgba(0,0,0,0.75)';
+          ctx.beginPath();
+          ctx.roundRect(pillX, pillY, maxW + 12, pillH, 5);
+          ctx.fill();
+
+          ctx.fillStyle = isLight ? '#1d1d1f' : '#e0e0e0';
+          ctx.font = 'bold 12px -apple-system, sans-serif';
+          ctx.textBaseline = 'top';
+          ctx.fillText(cityLabel, px, pillY + 3);
+
+          ctx.font = '10px -apple-system, sans-serif';
+          ctx.fillStyle = isLight ? '#6e6e73' : '#aaa';
+          ctx.fillText(statsLabel, px, pillY + 17);
+        });
+      },
+
+      findNearest(containerPoint) {
+        if (!this._items || this._items.length === 0) return null;
+        const map = this._map;
+        let minDist = Infinity;
+        let nearest = null;
+        this._items.forEach(s => {
+          const pt = map.latLngToContainerPoint([s.lat, s.lng]);
+          const d = Math.hypot(pt.x - containerPoint.x, pt.y - containerPoint.y);
+          if (d < minDist) { minDist = d; nearest = s; }
+        });
+        return minDist < 100 ? nearest : null;
+      }
+    });
+
+    function getMapTileUrl() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      return isLight
+        ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+    }
+
+    /** Get the store_map snapshot closest to a given timestamp index (0-based) */
+    function getStoreAvailAtIndex(snapIdx) {
+      if (!DATA || !DATA.store_map) return {};
+      const snaps = DATA.store_map.snapshots;
+      if (snapIdx < 0 || snapIdx >= snaps.length) return {};
+      return snaps[snapIdx].a; // {storeNumber: {product: 0|1}}
+    }
+
+    function formatMapTimestamp(isoStr) {
+      const d = new Date(isoStr);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const h = d.getHours(), m = d.getMinutes();
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 || 12;
+      return `${months[d.getMonth()]} ${d.getDate()} ${h12}:${m < 10 ? '0' + m : m} ${ampm}`;
+    }
+
+    function initMap() {
+      if (leafletMap) {
+        leafletMap.invalidateSize();
+        return;
+      }
+
+      const container = document.getElementById('mapContainer');
+      if (!container) return;
+
+      leafletMap = L.map(container, {
+        center: [39.5, -98.5],
+        zoom: 5,
+        zoomControl: true,
+      });
+
+      mapTileLayer = L.tileLayer(getMapTileUrl(), {
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+        maxZoom: 18,
+      }).addTo(leafletMap);
+
+      voronoiLayer = new VoronoiHeatmapLayer();
+      voronoiLayer.addTo(leafletMap);
+
+      // Tooltip
+      mapTooltipEl = document.createElement('div');
+      mapTooltipEl.className = 'map-tooltip';
+      mapTooltipEl.style.display = 'none';
+      container.appendChild(mapTooltipEl);
+
+      leafletMap.on('mousemove', (e) => {
+        if (!voronoiLayer) return;
+        const item = voronoiLayer.findNearest(e.containerPoint);
+        if (item) {
+          let html = '';
+          if (item._isCluster) {
+            const pct = item._totalCount > 0 ? Math.round(item._fraction * 100) : 0;
+            html = `<strong>${item.city}, ${item.state}</strong><br>`;
+            html += `${item._availCount}/${item._totalCount} stores (${pct}%)`;
+            if (mapMode === 'delta' && item._delta !== undefined) {
+              const sign = item._delta > 0 ? '+' : '';
+              html += `<br>Delta: ${sign}${Math.round(item._delta * 100)}%`;
+            }
+          } else {
+            html = `<strong>${item.name}</strong><br>${item.city}, ${item.state}<br>`;
+            if (mapMode === 'delta') {
+              if (item._delta !== undefined) {
+                const sign = item._delta > 0 ? '+' : '';
+                html += `Delta: <span style="color:${item._delta > 0 ? '#30d158' : item._delta < 0 ? '#ff3b30' : '#8e8e93'};">${sign}${Math.round(item._delta * 100)}%</span>`;
+              }
+            } else {
+              const product = getSelectedProduct();
+              if (product === '__ALL__') {
+                const avail = item._availCount || 0;
+                const total = item._totalProducts || 0;
+                html += `${avail}/${total} products available`;
+              } else {
+                const a = item._avail;
+                if (a === undefined) {
+                  html += '<span style="color:#8e8e93;">No data</span>';
+                } else {
+                  html += a ? '<span style="color:#30d158;">Available</span>' : '<span style="color:#ff3b30;">Unavailable</span>';
+                }
+              }
+            }
+          }
+          mapTooltipEl.innerHTML = html;
+          mapTooltipEl.style.display = 'block';
+          mapTooltipEl.style.left = (e.containerPoint.x + 12) + 'px';
+          mapTooltipEl.style.top = (e.containerPoint.y - 12) + 'px';
+        } else {
+          mapTooltipEl.style.display = 'none';
+        }
+      });
+
+      leafletMap.on('mouseout', () => {
+        if (mapTooltipEl) mapTooltipEl.style.display = 'none';
+      });
+
+      // Redraw on zoom change (for clustering)
+      leafletMap.on('zoomend', () => { updateMapOverlay(); });
+
+      // Legend
+      const legend = L.control({ position: 'bottomright' });
+      legend.onAdd = function() {
+        const div = L.DomUtil.create('div', 'map-legend');
+        div.id = 'mapLegend';
+        div.innerHTML =
+          '<span class="map-legend-dot" style="background:rgb(48,209,88);"></span> Available<br>' +
+          '<span class="map-legend-dot" style="background:rgb(255,214,10);"></span> Partial<br>' +
+          '<span class="map-legend-dot" style="background:rgb(255,59,48);"></span> Unavailable<br>' +
+          '<span class="map-legend-dot" style="background:rgb(142,142,147);"></span> No data';
+        return div;
+      };
+      legend.addTo(leafletMap);
+
+      // Map time slider
+      initMapTimeControls();
+
+      // Stats badge
+      if (DATA && DATA.store_map) {
+        const sm = DATA.store_map;
+        const numStores = sm.stores.length;
+        const numSnapshots = sm.snapshots.length;
+        const numCities = new Set(sm.stores.map(s => `${s.city}, ${s.state}`)).size;
+        const totalDatapoints = numStores * numSnapshots;
+        const statsEl = document.getElementById('mapStats');
+        statsEl.innerHTML =
+          `<span><strong>${numCities}</strong> cities</span>` +
+          `<span><strong>${numStores}</strong> stores</span>` +
+          `<span><strong>${numSnapshots}</strong> snapshots</span>` +
+          `<span><strong>${totalDatapoints.toLocaleString()}</strong> data points</span>`;
+      }
+    }
+
+    /** Build evenly-spaced date tick marks for a slider */
+    function buildTimeTicks(container, snaps, numTicks) {
+      container.innerHTML = '';
+      if (snaps.length < 2) return;
+      const count = Math.min(numTicks, snaps.length);
+      for (let i = 0; i < count; i++) {
+        const idx = Math.round(i * (snaps.length - 1) / (count - 1));
+        const label = document.createElement('span');
+        label.style.cssText = 'font-size:9px;color:var(--text-dim);white-space:nowrap;';
+        const d = new Date(snaps[idx].t);
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const h = d.getHours(), m = d.getMinutes();
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        label.textContent = `${months[d.getMonth()]} ${d.getDate()} ${h12}:${m < 10 ? '0' + m : m}${ampm}`;
+        container.appendChild(label);
+      }
+    }
+
+    function initMapTimeControls() {
+      if (!DATA || !DATA.store_map) return;
+      const snaps = DATA.store_map.snapshots;
+      const max = snaps.length - 1;
+
+      // Snapshot slider
+      const slider = document.getElementById('mapTimeSlider');
+      slider.max = max;
+      slider.value = max;
+      document.getElementById('mapTimeLabel').textContent = formatMapTimestamp(snaps[max].t);
+      buildTimeTicks(document.getElementById('mapTimeTicks'), snaps, 7);
+
+      slider.addEventListener('input', () => {
+        const idx = parseInt(slider.value);
+        document.getElementById('mapTimeLabel').textContent = formatMapTimestamp(snaps[idx].t);
+        updateMapOverlay();
+      });
+
+      // Delta controls
+      const dStart = document.getElementById('mapDeltaStart');
+      const dEnd = document.getElementById('mapDeltaEnd');
+      dStart.max = max;
+      dEnd.max = max;
+      dStart.value = 0;
+      dEnd.value = max;
+
+      buildTimeTicks(document.getElementById('mapDeltaTicks'), snaps, 7);
+
+      function updateDeltaLabel() {
+        const si = parseInt(dStart.value);
+        const ei = parseInt(dEnd.value);
+        document.getElementById('mapDeltaSelectedLabel').textContent =
+          formatMapTimestamp(snaps[si].t) + ' → ' + formatMapTimestamp(snaps[ei].t);
+      }
+      updateDeltaLabel();
+
+      dStart.addEventListener('input', () => {
+        if (parseInt(dStart.value) > parseInt(dEnd.value)) dStart.value = dEnd.value;
+        updateDeltaLabel();
+        updateMapOverlay();
+      });
+      dEnd.addEventListener('input', () => {
+        if (parseInt(dEnd.value) < parseInt(dStart.value)) dEnd.value = dStart.value;
+        updateDeltaLabel();
+        updateMapOverlay();
+      });
+
+      // Mode buttons
+      document.querySelectorAll('.map-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.map-mode-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          mapMode = btn.dataset.mode;
+          document.getElementById('mapSnapshotControls').style.display = mapMode === 'snapshot' ? '' : 'none';
+          document.getElementById('mapDeltaControls').style.display = mapMode === 'delta' ? 'flex' : 'none';
+          // Update legend
+          const leg = document.getElementById('mapLegend');
+          if (leg) {
+            if (mapMode === 'delta') {
+              leg.innerHTML =
+                '<span class="map-legend-dot" style="background:rgb(48,209,88);"></span> Improved<br>' +
+                '<span class="map-legend-dot" style="background:rgb(255,159,10);"></span> No change<br>' +
+                '<span class="map-legend-dot" style="background:rgb(255,59,48);"></span> Declined<br>' +
+                '<span class="map-legend-dot" style="background:rgb(142,142,147);"></span> No data';
+            } else {
+              leg.innerHTML =
+                '<span class="map-legend-dot" style="background:rgb(48,209,88);"></span> Available<br>' +
+                '<span class="map-legend-dot" style="background:rgb(255,214,10);"></span> Partial<br>' +
+                '<span class="map-legend-dot" style="background:rgb(255,59,48);"></span> Unavailable<br>' +
+                '<span class="map-legend-dot" style="background:rgb(142,142,147);"></span> No data';
+            }
+          }
+          updateMapOverlay();
+        });
+      });
+    }
+
+    /** Compute per-store availability fraction for a given snapshot index and product */
+    function computeStoreItems(snapIdx) {
+      if (!DATA || !DATA.store_map) return [];
+      const product = getSelectedProduct();
+      const isAll = product === '__ALL__';
+      const avail = getStoreAvailAtIndex(snapIdx);
+
+      return DATA.store_map.stores.map(s => {
+        const store = { ...s, _avail: undefined, _availCount: 0, _totalProducts: 0, _fraction: 0 };
+        const storeAvail = avail[s.id] || {};
+
+        if (isAll) {
+          const products = Object.keys(storeAvail);
+          store._totalProducts = products.length;
+          store._availCount = products.filter(p => storeAvail[p] === 1).length;
+          store._fraction = products.length > 0 ? store._availCount / products.length : 0;
+          store._color = products.length > 0 ? availabilityColor(store._fraction) : MAP_COLORS.nodata;
+        } else {
+          const a = storeAvail[product];
+          store._avail = a;
+          if (a === undefined) {
+            store._color = MAP_COLORS.nodata;
+            store._fraction = 0;
+          } else {
+            store._fraction = a;
+            store._color = a ? MAP_COLORS.available : MAP_COLORS.unavailable;
+            store._availCount = a;
+            store._totalProducts = 1;
+          }
+        }
+        return store;
+      });
+    }
+
+    /** Compute per-store delta between two snapshot indices */
+    function computeDeltaItems(startIdx, endIdx) {
+      if (!DATA || !DATA.store_map) return [];
+      const product = getSelectedProduct();
+      const isAll = product === '__ALL__';
+      const availStart = getStoreAvailAtIndex(startIdx);
+      const availEnd = getStoreAvailAtIndex(endIdx);
+
+      return DATA.store_map.stores.map(s => {
+        const store = { ...s, _delta: 0, _hasData: true };
+        const aStart = availStart[s.id] || {};
+        const aEnd = availEnd[s.id] || {};
+
+        if (isAll) {
+          const allProducts = new Set([...Object.keys(aStart), ...Object.keys(aEnd)]);
+          if (allProducts.size === 0) {
+            store._delta = 0;
+            store._hasData = false;
+            store._color = deltaColor(0, false);
+          } else {
+            const fracStart = [...allProducts].filter(p => aStart[p] === 1).length / allProducts.size;
+            const fracEnd = [...allProducts].filter(p => aEnd[p] === 1).length / allProducts.size;
+            store._delta = fracEnd - fracStart;
+            store._fraction = fracEnd;
+            store._color = deltaColor(store._delta, true);
+          }
+        } else {
+          const vs = aStart[product];
+          const ve = aEnd[product];
+          if (vs === undefined && ve === undefined) {
+            store._delta = 0;
+            store._hasData = false;
+            store._color = deltaColor(0, false);
+          } else {
+            store._delta = (ve || 0) - (vs || 0);
+            store._fraction = ve || 0;
+            store._color = deltaColor(store._delta, true);
+          }
+        }
+        return store;
+      });
+    }
+
+    function updateMapOverlay() {
+      if (!DATA || !DATA.store_map || !voronoiLayer || !leafletMap) return;
+
+      let items;
+      if (mapMode === 'delta') {
+        const si = parseInt(document.getElementById('mapDeltaStart').value);
+        const ei = parseInt(document.getElementById('mapDeltaEnd').value);
+        items = computeDeltaItems(si, ei);
+      } else {
+        const snapIdx = parseInt(document.getElementById('mapTimeSlider').value);
+        items = computeStoreItems(snapIdx);
+      }
+
+      // Hierarchical clustering by zoom level
+      const zoom = leafletMap.getZoom();
+      const clusterDist = clusterDistanceForZoom(zoom);
+      if (clusterDist > 0) {
+        const clusters = clusterStoresByDistance(items, clusterDist);
+        clusters.forEach(c => {
+          if (mapMode === 'delta') {
+            const withData = c.stores.filter(s => s._hasData !== false);
+            if (withData.length === 0) {
+              c._delta = 0;
+              c._fraction = 0;
+              c._color = deltaColor(0, false);
+            } else {
+              const avgDelta = withData.reduce((a, s) => a + (s._delta || 0), 0) / withData.length;
+              c._delta = avgDelta;
+              c._fraction = avgDelta;
+              c._color = deltaColor(avgDelta, true);
+            }
+            c._availCount = c.stores.filter(s => (s._delta || 0) > 0).length;
+          } else {
+            const fracs = c.stores.map(s => s._fraction || 0);
+            const avg = fracs.reduce((a, b) => a + b, 0) / fracs.length;
+            c._fraction = avg;
+            c._color = availabilityColor(avg);
+            const product = getSelectedProduct();
+            const isAll = product === '__ALL__';
+            if (isAll) {
+              c._availCount = c.stores.filter(s => s._fraction > 0.5).length;
+            } else {
+              c._availCount = c.stores.filter(s => s._avail === 1).length;
+            }
+          }
+        });
+        voronoiLayer.setItems(clusters);
+      } else {
+        voronoiLayer.setItems(items);
+      }
+    }
+
+    function swapMapTiles() {
+      if (!mapTileLayer || !leafletMap) return;
+      leafletMap.removeLayer(mapTileLayer);
+      mapTileLayer = L.tileLayer(getMapTileUrl(), {
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+        maxZoom: 18,
+      }).addTo(leafletMap);
+    }
+
     loadData();
   </script>
 
   <footer style="text-align:center;padding:24px;color:var(--text-dimmer);font-size:12px;border-top:1px solid var(--footer-border);margin-top:24px;">
-    Website last updated: <span id="lastUpdatedFooter">—</span>
   </footer>
 </body>
 </html>
