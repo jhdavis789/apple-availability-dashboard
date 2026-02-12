@@ -818,13 +818,13 @@
 
     <!-- City summary -->
     <div class="chart-card heatmap-hide">
-      <h3>City Averages</h3>
+      <h3>City Averages <span id="cityAvgTimeRange" style="font-weight:400;font-size:12px;color:var(--text-muted);margin-left:8px;"></span></h3>
       <div class="summary-grid" id="citySummary"></div>
     </div>
 
     <!-- City moves -->
     <div class="chart-card heatmap-hide">
-      <h3>Largest Moves by City</h3>
+      <h3>Largest Moves by City <span id="moversTimeRange" style="font-weight:400;font-size:12px;color:var(--text-muted);margin-left:8px;"></span></h3>
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
         <div class="period-btns" id="moverPeriodBtns">
           <button class="period-btn active" data-hours="24">24h</button>
@@ -843,7 +843,7 @@
 
     <!-- Per-product chart -->
     <div class="chart-card heatmap-hide">
-      <h3 id="productChartTitle">Product Comparison</h3>
+      <h3 id="productChartTitle">Product Comparison <span id="productChartTimeRange" style="font-weight:400;font-size:12px;color:var(--text-muted);margin-left:8px;"></span></h3>
       <div class="chart-container">
         <canvas id="productChart"></canvas>
       </div>
@@ -852,7 +852,7 @@
     <!-- Data matrix (shown when a specific product is selected) -->
     <div class="chart-card heatmap-hide" id="dataMatrixCard" style="display:none;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 id="dataMatrixTitle" style="margin-bottom:0;">Data Matrix</h3>
+        <h3 id="dataMatrixTitle" style="margin-bottom:0;">Data Matrix <span id="dataMatrixTimeRange" style="font-weight:400;font-size:12px;color:var(--text-muted);margin-left:8px;"></span></h3>
         <button id="downloadCsv" class="secondary" style="font-size:12px;padding:6px 14px;">Download CSV</button>
       </div>
       <div style="overflow-x:auto;max-height:500px;overflow-y:auto;">
@@ -1092,7 +1092,8 @@
             } else {
               ds.borderColor = this._dimColor(this._origStyles[i].borderColor);
               ds.borderWidth = 1;
-              ds.pointRadius = 0;
+              ds.pointRadius = 2;
+              ds.pointBackgroundColor = this._dimColor(this._origStyles[i].borderColor);
               ds.borderDash = [];
             }
           });
@@ -1106,6 +1107,7 @@
             ds.borderColor = this._origStyles[i].borderColor;
             ds.borderWidth = this._origStyles[i].borderWidth;
             ds.pointRadius = this._origStyles[i].pointRadius;
+            ds.pointBackgroundColor = this._origStyles[i].borderColor;
             ds.borderDash = this._origStyles[i].borderDash;
           });
           this._origStyles = [];
@@ -1304,6 +1306,15 @@
 
     function fromLocalDatetimeStr(str) {
       return new Date(str).getTime();
+    }
+
+    function _timeRangeLabel() {
+      const fmt = (ms) => {
+        const d = new Date(ms);
+        const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+        return `${mon} ${d.getDate()}, ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+      };
+      return `${fmt(timeStartMs)} \u2013 ${fmt(timeEndMs)}`;
     }
 
     // Global time range sync functions
@@ -2226,6 +2237,7 @@
     function renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
       const grid = document.getElementById('citySummary');
       grid.innerHTML = '';
+      document.getElementById('cityAvgTimeRange').textContent = _timeRangeLabel();
 
       selectedCities.forEach(city => {
         const avg = _avgForSnaps(snapshots, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
@@ -2378,6 +2390,7 @@
     }
 
     function renderProductChart(snapshots, selectedCities, filterZeros, blipSet) {
+      document.getElementById('productChartTimeRange').textContent = _timeRangeLabel();
       const ctx = document.getElementById('productChart');
       if (productChart) {
         productChart.destroy();
@@ -2545,6 +2558,7 @@
     let _csvData = ''; // cached for download
 
     function renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+      document.getElementById('dataMatrixTimeRange').textContent = _timeRangeLabel();
       const card = document.getElementById('dataMatrixCard');
       const table = document.getElementById('dataMatrixTable');
       const title = document.getElementById('dataMatrixTitle');
