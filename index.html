@@ -1718,9 +1718,7 @@
         </div>
       `;
 
-      excludedInfo.textContent = excludedPoints > 0
-        ? `${excludedPoints} data points excluded by filters (ERR, N/A, error snapshots with 0 stores, or isolated single-call 0% values)`
-        : '';
+      excludedInfo.textContent = '';
     }
 
     function renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
@@ -3382,9 +3380,34 @@
           scales: {
             x: {
               type: 'time',
-              time: { tooltipFormat: 'MMM d, HH:mm' },
+              time: { tooltipFormat: 'MMM d, yyyy h:mm a', displayFormats: { hour: 'h a', day: 'MMM d' } },
               grid: { color: isLight ? '#e5e5ea' : '#1a1a1a' },
-              ticks: { color: isLight ? '#86868b' : '#666' },
+              ticks: {
+                color: isLight ? '#86868b' : '#666',
+                maxRotation: 0,
+                autoSkip: true,
+                major: { enabled: true },
+                callback: function(value, index, ticks) {
+                  const raw = ticks[index] ? ticks[index].value : value;
+                  const d = new Date(raw);
+                  if (isNaN(d.getTime())) return value;
+                  const hour = d.getHours();
+                  const min = d.getMinutes();
+                  const ampm = hour >= 12 ? 'PM' : 'AM';
+                  const h12 = hour % 12 || 12;
+                  const minStr = min < 10 ? '0' + min : min;
+                  const xScale = this.chart ? this.chart.options.scales.x : null;
+                  const isMinuteMode = xScale && xScale.time && xScale.time.unit === 'minute';
+                  if (!isMinuteMode && min !== 0) return '';
+                  const timeLine = isMinuteMode ? `${h12}:${minStr} ${ampm}` : `${h12} ${ampm}`;
+                  if (ticks[index].major) {
+                    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    return [timeLine, `${dayNames[d.getDay()]} ${monthNames[d.getMonth()]} ${d.getDate()}`];
+                  }
+                  return timeLine;
+                }
+              },
               title: { display: true, text: 'Sellout Date', color: isLight ? '#86868b' : '#666' },
             },
             y: {
@@ -3395,7 +3418,45 @@
               title: { display: true, text: 'Cycle Duration', color: isLight ? '#86868b' : '#666' },
             }
           }
-        }
+        },
+        plugins: [{
+          id: 'cycleTimeTicks',
+          beforeUpdate(chart) {
+            const xScale = chart.options.scales.x;
+            if (!xScale || xScale.type !== 'time') return;
+            let minT = Infinity, maxT = -Infinity;
+            chart.data.datasets.forEach(ds => {
+              ds.data.forEach(pt => {
+                const t = pt.x ? pt.x.getTime() : 0;
+                if (t > 0 && t < minT) minT = t;
+                if (t > maxT) maxT = t;
+              });
+            });
+            if (minT === Infinity) return;
+            const rangeHours = (maxT - minT) / (1000 * 60 * 60);
+            let unit, step;
+            if (rangeHours < 1) {
+              unit = 'minute';
+              const rangeMins = rangeHours * 60;
+              step = rangeMins <= 10 ? 1 : rangeMins <= 30 ? 5 : 10;
+            } else {
+              unit = 'hour';
+              step = rangeHours <= 12 ? 1 : rangeHours <= 24 ? 2 : rangeHours <= 48 ? 4 : rangeHours <= 96 ? 6 : rangeHours <= 192 ? 8 : 12;
+            }
+            xScale.time.unit = unit;
+            xScale.time.stepSize = step;
+          },
+          afterBuildTicks(chart) {
+            const xScale = chart.scales.x;
+            if (!xScale || !xScale.ticks || xScale.ticks.length === 0) return;
+            let lastDay = -1;
+            xScale.ticks.forEach(tick => {
+              const d = new Date(tick.value);
+              const day = d.getDate();
+              if (day !== lastDay) { tick.major = true; lastDay = day; }
+            });
+          }
+        }]
       });
     }
 
