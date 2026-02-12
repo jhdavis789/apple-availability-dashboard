@@ -1426,7 +1426,7 @@
       });
 
       // Reset button
-      resetBtn.addEventListener('click', () => {
+      if (resetBtn) resetBtn.addEventListener('click', () => {
         timeStartMs = timeMin;
         timeEndMs = timeMax;
         syncInputsFromMs();
