@@ -734,9 +734,9 @@
       <label>Time Range</label>
       <div class="period-btns" id="timeRangePeriodBtns" style="margin-bottom:8px;">
         <button class="period-btn" data-hours="24">24h</button>
-        <button class="period-btn" data-hours="168">7d</button>
+        <button class="period-btn active" data-hours="168">7d</button>
         <button class="period-btn" data-hours="336">2wk</button>
-        <button class="period-btn active" data-hours="0">Max</button>
+        <button class="period-btn" data-hours="0">Max</button>
       </div>
       <div class="time-range-inputs">
         <input type="datetime-local" id="timeStart" step="1">
@@ -1353,8 +1353,9 @@
       const timestamps = DATA.snapshots.map(s => new Date(s.timestamp).getTime());
       timeMin = Math.min(...timestamps);
       timeMax = Math.max(...timestamps);
-      timeStartMs = timeMin;
       timeEndMs = timeMax;
+      // Default to 7d view
+      timeStartMs = Math.max(timeMin, timeMax - 168 * 3600000);
 
       const startInput = document.getElementById('timeStart');
       const endInput = document.getElementById('timeEnd');
@@ -1362,7 +1363,7 @@
       const rangeEnd = document.getElementById('rangeEnd');
       const resetBtn = document.getElementById('timeReset');
 
-      startInput.value = toLocalDatetimeStr(timeMin);
+      startInput.value = toLocalDatetimeStr(timeStartMs);
       endInput.value = toLocalDatetimeStr(timeMax);
 
       function clearPeriodBtnActive() {
