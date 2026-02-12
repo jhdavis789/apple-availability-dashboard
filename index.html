@@ -570,9 +570,88 @@
       flex: 1;
       accent-color: var(--accent);
     }
-    /* Hide main controls in heatmap view */
+    /* Hide main controls in heatmap/cycles view */
     body.heatmap-view .controls .control-group:not(.map-keep) {
       display: none;
+    }
+    body.cycles-view .controls .control-group:not(.map-keep) {
+      display: none;
+    }
+    body.cycles-view .dashboard > *:not(#cyclesView) {
+      display: none !important;
+    }
+    body.cycles-view #cyclesView {
+      display: block !important;
+    }
+    /* Cycles view styles */
+    .cycles-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .cycles-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-white);
+    }
+    .cycles-stats-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .cycle-stat {
+      background: var(--summary-bg);
+      border: 1px solid var(--summary-border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      flex: 1;
+      min-width: 130px;
+      text-align: center;
+    }
+    .cycle-stat .stat-val {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+    .cycle-stat .stat-lbl {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .ranking-table th, .ranking-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .ranking-table th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      background: var(--card-bg);
+    }
+    .ranking-table td:first-child { font-weight: 600; color: var(--text-white); }
+    .ranking-table tr:hover td { background: var(--summary-bg); }
+    .dur-bar {
+      display: inline-block;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--accent);
+      vertical-align: middle;
+      margin-right: 8px;
     }
   </style>
 </head>
@@ -597,6 +676,7 @@
       <div class="view-tabs" id="viewTabs">
         <div class="view-tab active" data-view="trends">Trends</div>
         <div class="view-tab" data-view="heatmap">Heatmap</div>
+        <div class="view-tab" data-view="cycles">Cycles</div>
       </div>
     </div>
 
@@ -776,12 +856,59 @@
         <table class="heatmap-table" id="dataMatrixTable"></table>
       </div>
     </div>
+
+    <!-- Cycles view (hidden by default) -->
+    <div id="cyclesView" style="display:none;">
+      <!-- Product filter -->
+      <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Filter by product:</span>
+        <div id="cycleProductBtns" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+      </div>
+
+      <div class="cycles-stats-row" id="cyclesStats"></div>
+
+      <div class="cycles-card" style="margin-bottom:20px;">
+        <h3>Store Demand Ranking</h3>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Stores ranked by average time-to-sellout (fastest = highest demand). Based on restock-to-out-of-stock transitions detected in raw API data.</p>
+        <div style="overflow-x:auto;max-height:600px;overflow-y:auto;">
+          <table class="ranking-table" id="rankingTable"></table>
+        </div>
+      </div>
+
+      <div class="cycles-card" style="margin-bottom:20px;">
+        <h3>Sellout Duration Distribution</h3>
+        <div class="chart-container" style="height:300px;">
+          <canvas id="cycleHistChart"></canvas>
+        </div>
+      </div>
+
+      <div class="cycles-card" style="margin-bottom:20px;">
+        <h3>Recent Cycles</h3>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Individual restock-to-sellout events, most recent first.</p>
+        <div style="overflow-x:auto;max-height:500px;overflow-y:auto;">
+          <table class="ranking-table" id="cyclesTable"></table>
+        </div>
+      </div>
+
+      <div class="cycles-card" style="background:var(--summary-bg);border-color:var(--summary-border);">
+        <h3 style="font-size:14px;">Methodology</h3>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
+          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Data source:</strong> Apple's <code style="background:var(--input-bg);padding:2px 5px;border-radius:3px;font-size:11px;">retail/pickup-message</code> API, polled every 1-3 hours across 19 zip codes covering 12 US metro areas (~119 stores). Each poll returns per-store, per-product pickup availability as one of three states: <strong>available</strong> (in stock for pickup), <strong>unavailable</strong> (out of stock), or <strong>ineligible</strong> (not offered at this store).</p>
+          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Cycle detection:</strong> For each (store, product) pair, we build a timeline of availability state changes. A <em>restock</em> is a transition from unavailable/ineligible to available. A <em>sellout</em> is a transition from available back to unavailable/ineligible. One complete cycle = restock followed by sellout. Cycles shorter than 5 minutes are filtered as noise.</p>
+          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Glitch filtering:</strong> Snapshots where &gt;80% of all (store, product) observations show "ineligible" are discarded as backend glitches (e.g., the Feb 9 outage where Apple's system briefly returned rank=0 for all stores).</p>
+          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Demand proxy:</strong> Apple does not expose inventory quantities through any API. Sellout velocity (time from restock to out-of-stock) serves as an indirect demand signal: faster sellouts indicate higher demand or lower stock allocation. Stores selling out within hours likely have both high foot traffic and limited inventory.</p>
+          <p><strong style="color:var(--text);">Limitations:</strong> Polling frequency (1-3 hours) means exact restock/sellout times have up to ~3 hour margin of error. Same-day cycles where both transitions happen between polls may be missed entirely. The "available" flag is binary (at least 1 unit in stock), so a store with 1 unit and a store with 50 units both appear identical until one sells out.</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     let DATA = null;
     let mainChart = null;
     let productChart = null;
+    let cycleHistChart = null;
+    let _cycleProductFilter = '__ALL__'; // current product filter for cycles view
     let currentView = 'trends';
     let timeMin = 0;  // epoch ms — absolute min from data
     let timeMax = 0;  // epoch ms — absolute max from data
@@ -1450,11 +1577,18 @@
       const isAllProducts = selectedProduct === '__ALL__';
       const blipSet = filterZeros ? getBlipSet(snapshots) : null;
 
-      // Toggle heatmap-view class for control hiding
+      // Toggle view-specific body classes for control hiding
+      document.body.classList.remove('heatmap-view', 'cycles-view');
       if (currentView === 'heatmap') {
         document.body.classList.add('heatmap-view');
-      } else {
-        document.body.classList.remove('heatmap-view');
+      } else if (currentView === 'cycles') {
+        document.body.classList.add('cycles-view');
+      }
+
+      // Cycles view: render and return early (CSS handles hiding other elements)
+      if (currentView === 'cycles') {
+        renderCycles();
+        return;
       }
 
       updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
@@ -2884,6 +3018,193 @@
       const ampm = h >= 12 ? 'PM' : 'AM';
       const h12 = h % 12 || 12;
       return `${months[d.getMonth()]} ${d.getDate()} ${h12}:${m < 10 ? '0' + m : m} ${ampm}`;
+    }
+
+    function formatDuration(hours) {
+      if (hours < 1) return `${Math.round(hours * 60)}m`;
+      if (hours < 24) return `${hours.toFixed(1)}h`;
+      const d = Math.floor(hours / 24);
+      const h = (hours % 24).toFixed(1);
+      return `${d}d ${h}h`;
+    }
+
+    function renderCycles() {
+      if (!DATA || !DATA.cycles) {
+        document.getElementById('cyclesStats').innerHTML = '<div style="color:var(--text-dim);padding:40px;text-align:center;">No cycle data available. Run build_data.py with raw API responses.</div>';
+        return;
+      }
+
+      const { cycles: allCycles, store_rankings: allRankings, summary: allSummary } = DATA.cycles;
+
+      // Build product filter buttons
+      const products = [...new Set(allCycles.map(c => c.product))].sort();
+      const btnsEl = document.getElementById('cycleProductBtns');
+      btnsEl.innerHTML = '';
+      const allBtn = document.createElement('button');
+      allBtn.className = 'period-btn' + (_cycleProductFilter === '__ALL__' ? ' active' : '');
+      allBtn.textContent = 'All Products';
+      allBtn.addEventListener('click', () => { _cycleProductFilter = '__ALL__'; renderCycles(); });
+      btnsEl.appendChild(allBtn);
+      products.forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = 'period-btn' + (_cycleProductFilter === p ? ' active' : '');
+        btn.textContent = p.replace(/ \(\$[\d,]+\)/, '');  // shorter label
+        btn.title = p;
+        btn.addEventListener('click', () => { _cycleProductFilter = p; renderCycles(); });
+        btnsEl.appendChild(btn);
+      });
+
+      // Filter cycles by selected product
+      const isAll = _cycleProductFilter === '__ALL__';
+      const cycles = isAll ? allCycles : allCycles.filter(c => c.product === _cycleProductFilter);
+
+      if (cycles.length === 0) {
+        document.getElementById('cyclesStats').innerHTML = '<div style="color:var(--text-dim);padding:20px;text-align:center;">No cycles found for this product.</div>';
+        document.getElementById('rankingTable').innerHTML = '';
+        document.getElementById('cyclesTable').innerHTML = '';
+        if (cycleHistChart) { cycleHistChart.destroy(); cycleHistChart = null; }
+        return;
+      }
+
+      // Compute filtered stats
+      const allHours = cycles.map(c => c.hours);
+      const sameDayCount = cycles.filter(c => c.restock.slice(0, 10) === c.sellout.slice(0, 10)).length;
+      const storesSet = new Set(cycles.map(c => c.store));
+      const productsSet = new Set(cycles.map(c => c.product));
+
+      const statsEl = document.getElementById('cyclesStats');
+      statsEl.innerHTML = `
+        <div class="cycle-stat"><div class="stat-val">${cycles.length}</div><div class="stat-lbl">Total Cycles</div></div>
+        <div class="cycle-stat"><div class="stat-val">${formatDuration(allHours.reduce((a,b) => a+b, 0) / allHours.length)}</div><div class="stat-lbl">Avg Sellout Time</div></div>
+        <div class="cycle-stat"><div class="stat-val">${formatDuration(Math.min(...allHours))}</div><div class="stat-lbl">Fastest Sellout</div></div>
+        <div class="cycle-stat"><div class="stat-val">${(100 * sameDayCount / cycles.length).toFixed(0)}%</div><div class="stat-lbl">Same-Day Sellouts</div></div>
+        <div class="cycle-stat"><div class="stat-val">${storesSet.size}</div><div class="stat-lbl">Stores w/ Cycles</div></div>
+        <div class="cycle-stat"><div class="stat-val">${productsSet.size}</div><div class="stat-lbl">Products</div></div>
+      `;
+
+      // Build filtered store rankings
+      const storeMap = {};
+      cycles.forEach(c => {
+        if (!storeMap[c.store]) storeMap[c.store] = { name: c.store_name, cycles: [], products: new Set() };
+        storeMap[c.store].cycles.push(c);
+        storeMap[c.store].products.add(c.product);
+      });
+      const filteredRankings = Object.entries(storeMap).map(([sn, d]) => {
+        const hrs = d.cycles.map(c => c.hours);
+        return {
+          store: sn, name: d.name, cycles: d.cycles.length,
+          products: d.products.size,
+          avg_hours: hrs.reduce((a,b) => a+b, 0) / hrs.length,
+          fastest: Math.min(...hrs),
+        };
+      }).sort((a, b) => a.avg_hours - b.avg_hours);
+
+      const maxHours = Math.max(...filteredRankings.map(r => r.avg_hours));
+      const rankTable = document.getElementById('rankingTable');
+      let rankHtml = `<thead><tr>
+        <th>#</th><th>Store</th><th>Cycles</th>${isAll ? '<th>Products</th>' : ''}
+        <th>Avg Time to Sellout</th><th>Fastest</th>
+      </tr></thead><tbody>`;
+      filteredRankings.forEach((r, i) => {
+        const barW = Math.max(4, Math.round(200 * r.avg_hours / maxHours));
+        const color = r.avg_hours < 6 ? '#ff453a' : r.avg_hours < 24 ? '#ffd60a' : '#30d158';
+        rankHtml += `<tr>
+          <td>${i + 1}</td>
+          <td>${r.name}</td>
+          <td>${r.cycles}</td>${isAll ? `<td>${r.products}</td>` : ''}
+          <td><span class="dur-bar" style="width:${barW}px;background:${color};"></span>${formatDuration(r.avg_hours)}</td>
+          <td>${formatDuration(r.fastest)}</td>
+        </tr>`;
+      });
+      rankHtml += '</tbody>';
+      rankTable.innerHTML = rankHtml;
+
+      // Duration histogram
+      renderCycleHistogram(cycles);
+
+      // Recent cycles table
+      const cyclesTable = document.getElementById('cyclesTable');
+      const sortedCycles = [...cycles].sort((a, b) => b.sellout.localeCompare(a.sellout));
+      let cycleHtml = `<thead><tr>
+        <th>Store</th>${isAll ? '<th>Product</th>' : ''}<th>Restocked</th><th>Sold Out</th><th>Duration</th>
+      </tr></thead><tbody>`;
+      sortedCycles.slice(0, 100).forEach(c => {
+        const restock = c.restock.replace('T', ' ').slice(0, 16);
+        const sellout = c.sellout.replace('T', ' ').slice(0, 16);
+        const color = c.hours < 6 ? '#ff453a' : c.hours < 24 ? '#ffd60a' : 'var(--text)';
+        cycleHtml += `<tr>
+          <td>${c.store_name}</td>
+          ${isAll ? `<td style="color:var(--text-muted);font-size:12px;">${c.product}</td>` : ''}
+          <td style="white-space:nowrap;font-size:12px;">${restock}</td>
+          <td style="white-space:nowrap;font-size:12px;">${sellout}</td>
+          <td style="color:${color};font-weight:600;">${formatDuration(c.hours)}</td>
+        </tr>`;
+      });
+      cycleHtml += '</tbody>';
+      cyclesTable.innerHTML = cycleHtml;
+    }
+
+    function renderCycleHistogram(cycles) {
+      const canvas = document.getElementById('cycleHistChart');
+      if (cycleHistChart) { cycleHistChart.destroy(); cycleHistChart = null; }
+
+      // Bucket durations: 0-1h, 1-3h, 3-6h, 6-12h, 12-24h, 24-48h, 48h+
+      const buckets = [
+        { label: '<1h', min: 0, max: 1 },
+        { label: '1-3h', min: 1, max: 3 },
+        { label: '3-6h', min: 3, max: 6 },
+        { label: '6-12h', min: 6, max: 12 },
+        { label: '12-24h', min: 12, max: 24 },
+        { label: '1-2d', min: 24, max: 48 },
+        { label: '2d+', min: 48, max: Infinity },
+      ];
+      const counts = buckets.map(() => 0);
+      cycles.forEach(c => {
+        for (let i = 0; i < buckets.length; i++) {
+          if (c.hours >= buckets[i].min && c.hours < buckets[i].max) {
+            counts[i]++;
+            break;
+          }
+        }
+      });
+
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      cycleHistChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: buckets.map(b => b.label),
+          datasets: [{
+            label: 'Cycles',
+            data: counts,
+            backgroundColor: ['#ff453a', '#ff6961', '#ffd60a', '#ffcc00', '#30d158', '#34c759', '#0a84ff'],
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.raw} cycles (${(100 * ctx.raw / cycles.length).toFixed(1)}%)`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: isLight ? '#e5e5ea' : '#1a1a1a' },
+              ticks: { color: isLight ? '#86868b' : '#666' },
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: isLight ? '#e5e5ea' : '#1a1a1a' },
+              ticks: { color: isLight ? '#86868b' : '#666', stepSize: 1 },
+              title: { display: true, text: 'Number of Cycles', color: isLight ? '#86868b' : '#666' },
+            }
+          }
+        }
+      });
     }
 
     function initMap() {
