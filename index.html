@@ -570,9 +570,12 @@
       flex: 1;
       accent-color: var(--accent);
     }
-    /* Hide main controls in heatmap/cycles view */
+    /* Hide main controls and non-map content in heatmap view */
     body.heatmap-view .controls .control-group:not(.map-keep) {
       display: none;
+    }
+    body.heatmap-view .heatmap-hide {
+      display: none !important;
     }
     body.cycles-view .controls .control-group:not(.map-keep) {
       display: none;
@@ -696,7 +699,7 @@
       </div>
     </div>
 
-    <div class="control-group">
+    <div class="control-group" style="display:none;">
       <label>Custom Avg (city names, comma-sep)</label>
       <input type="text" id="customAvgInput" placeholder="e.g. NYC, LA, SF" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:8px 12px;border-radius:6px;font-size:13px;outline:none;min-width:200px;">
     </div>
@@ -800,13 +803,13 @@
     <div class="excluded-info" id="excludedInfo"></div>
 
     <!-- Quick Views -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <div class="heatmap-hide" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
       <button id="qvMacMini" class="view-tab" style="background:var(--input-bg);border-color:#0a84ff;color:#6cb4ff;padding:8px 16px;">🖥 Base Mac Mini — by City</button>
       <button id="qvAllProducts" class="view-tab" style="background:var(--input-bg);border-color:#30d158;color:#30d158;padding:8px 16px;">📊 All Products — Over Time</button>
     </div>
 
     <!-- Main chart area -->
-    <div class="chart-card">
+    <div class="chart-card heatmap-hide">
       <h3 id="mainChartTitle">Availability Over Time</h3>
       <div class="chart-container">
         <canvas id="mainChart"></canvas>
@@ -814,13 +817,13 @@
     </div>
 
     <!-- City summary -->
-    <div class="chart-card">
+    <div class="chart-card heatmap-hide">
       <h3>City Averages</h3>
       <div class="summary-grid" id="citySummary"></div>
     </div>
 
     <!-- City moves -->
-    <div class="chart-card">
+    <div class="chart-card heatmap-hide">
       <h3>Largest Moves by City</h3>
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
         <div class="period-btns" id="moverPeriodBtns">
@@ -839,7 +842,7 @@
     </div>
 
     <!-- Per-product chart -->
-    <div class="chart-card">
+    <div class="chart-card heatmap-hide">
       <h3 id="productChartTitle">Product Comparison</h3>
       <div class="chart-container">
         <canvas id="productChart"></canvas>
@@ -847,7 +850,7 @@
     </div>
 
     <!-- Data matrix (shown when a specific product is selected) -->
-    <div class="chart-card" id="dataMatrixCard" style="display:none;">
+    <div class="chart-card heatmap-hide" id="dataMatrixCard" style="display:none;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
         <h3 id="dataMatrixTitle" style="margin-bottom:0;">Data Matrix</h3>
         <button id="downloadCsv" class="secondary" style="font-size:12px;padding:6px 14px;">Download CSV</button>
