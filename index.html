@@ -1128,6 +1128,71 @@
       };
     }
 
+    // Plugin: drag y2 axis to shift eBay prices, scroll to zoom
+    const y2DragPlugin = {
+      id: 'y2DragZoom',
+      _dragging: false,
+      _startY: 0,
+      _startMin: 0,
+      _startMax: 0,
+      _isOverY2(chart, e) {
+        const y2 = chart.scales.y2;
+        if (!y2 || !y2.options.display) return false;
+        const rect = chart.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        return x >= y2.left - 10 && x <= y2.right + 10 && y >= y2.top && y <= y2.bottom;
+      },
+      afterInit(chart) {
+        const canvas = chart.canvas;
+        canvas.addEventListener('mousedown', (e) => {
+          if (!this._isOverY2(chart, e)) return;
+          this._dragging = true;
+          this._startY = e.clientY;
+          const y2 = chart.options.scales.y2;
+          this._startMin = y2.min;
+          this._startMax = y2.max;
+          canvas.style.cursor = 'ns-resize';
+          e.preventDefault();
+        });
+        canvas.addEventListener('mousemove', (e) => {
+          if (!this._dragging) {
+            canvas.style.cursor = this._isOverY2(chart, e) ? 'ns-resize' : '';
+          }
+        });
+        window.addEventListener('mousemove', (e) => {
+          if (!this._dragging) return;
+          const dy = e.clientY - this._startY;
+          const y2Scale = chart.scales.y2;
+          if (!y2Scale) return;
+          const pxRange = y2Scale.bottom - y2Scale.top;
+          const valRange = this._startMax - this._startMin;
+          const shift = (dy / pxRange) * valRange;
+          chart.options.scales.y2.min = this._startMin + shift;
+          chart.options.scales.y2.max = this._startMax + shift;
+          chart.update('none');
+        });
+        window.addEventListener('mouseup', () => {
+          if (this._dragging) {
+            this._dragging = false;
+            canvas.style.cursor = '';
+          }
+        });
+        canvas.addEventListener('wheel', (e) => {
+          if (!this._isOverY2(chart, e)) return;
+          e.preventDefault();
+          const y2 = chart.options.scales.y2;
+          const range = y2.max - y2.min;
+          const factor = e.deltaY > 0 ? 1.15 : 0.87;
+          const mid = (y2.min + y2.max) / 2;
+          const newRange = range * factor;
+          y2.min = mid - newRange / 2;
+          y2.max = mid + newRange / 2;
+          chart.update('none');
+        }, { passive: false });
+      }
+    };
+
     async function loadData() {
       const resp = await fetch('data.json');
       DATA = await resp.json();
@@ -1795,7 +1860,7 @@
               data: points,
               borderColor: cityColor,
               backgroundColor: cityColor + '20',
-              pointBackgroundColor: cityColor + '99',
+              pointBackgroundColor: cityColor,
               borderWidth: 2,
               pointRadius: 3,
               pointHoverRadius: 5,
@@ -2125,7 +2190,7 @@
             y2: y2Config
           }
         },
-        plugins: [highlightPlugin, {
+        plugins: [highlightPlugin, y2DragPlugin, {
           id: 'customTimeTicks',
           beforeUpdate(chart) {
             // Dynamically set time unit and stepSize based on data range
