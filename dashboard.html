@@ -570,9 +570,91 @@
       flex: 1;
       accent-color: var(--accent);
     }
-    /* Hide main controls in heatmap view */
+    /* Hide main controls and non-map content in heatmap view */
     body.heatmap-view .controls .control-group:not(.map-keep) {
       display: none;
+    }
+    body.heatmap-view .heatmap-hide {
+      display: none !important;
+    }
+    body.cycles-view .controls .control-group:not(.map-keep) {
+      display: none;
+    }
+    body.cycles-view .dashboard > *:not(#cyclesView) {
+      display: none !important;
+    }
+    body.cycles-view #cyclesView {
+      display: block !important;
+    }
+    /* Cycles view styles */
+    .cycles-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .cycles-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-white);
+    }
+    .cycles-stats-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .cycle-stat {
+      background: var(--summary-bg);
+      border: 1px solid var(--summary-border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      flex: 1;
+      min-width: 130px;
+      text-align: center;
+    }
+    .cycle-stat .stat-val {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+    .cycle-stat .stat-lbl {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .ranking-table th, .ranking-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .ranking-table th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      background: var(--card-bg);
+    }
+    .ranking-table td:first-child { font-weight: 600; color: var(--text-white); }
+    .ranking-table tr:hover td { background: var(--summary-bg); }
+    .dur-bar {
+      display: inline-block;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--accent);
+      vertical-align: middle;
+      margin-right: 8px;
     }
   </style>
 </head>
@@ -597,6 +679,7 @@
       <div class="view-tabs" id="viewTabs">
         <div class="view-tab active" data-view="trends">Trends</div>
         <div class="view-tab" data-view="heatmap">Heatmap</div>
+        <div class="view-tab" data-view="cycles">Cycles</div>
       </div>
     </div>
 
@@ -616,7 +699,7 @@
       </div>
     </div>
 
-    <div class="control-group">
+    <div class="control-group" style="display:none;">
       <label>Custom Avg (city names, comma-sep)</label>
       <input type="text" id="customAvgInput" placeholder="e.g. NYC, LA, SF" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:8px 12px;border-radius:6px;font-size:13px;outline:none;min-width:200px;">
     </div>
@@ -720,13 +803,13 @@
     <div class="excluded-info" id="excludedInfo"></div>
 
     <!-- Quick Views -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <div class="heatmap-hide" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
       <button id="qvMacMini" class="view-tab" style="background:var(--input-bg);border-color:#0a84ff;color:#6cb4ff;padding:8px 16px;">🖥 Base Mac Mini — by City</button>
       <button id="qvAllProducts" class="view-tab" style="background:var(--input-bg);border-color:#30d158;color:#30d158;padding:8px 16px;">📊 All Products — Over Time</button>
     </div>
 
     <!-- Main chart area -->
-    <div class="chart-card">
+    <div class="chart-card heatmap-hide">
       <h3 id="mainChartTitle">Availability Over Time</h3>
       <div class="chart-container">
         <canvas id="mainChart"></canvas>
@@ -734,13 +817,13 @@
     </div>
 
     <!-- City summary -->
-    <div class="chart-card">
+    <div class="chart-card heatmap-hide">
       <h3>City Averages</h3>
       <div class="summary-grid" id="citySummary"></div>
     </div>
 
     <!-- City moves -->
-    <div class="chart-card">
+    <div class="chart-card heatmap-hide">
       <h3>Largest Moves by City</h3>
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
         <div class="period-btns" id="moverPeriodBtns">
@@ -759,7 +842,7 @@
     </div>
 
     <!-- Per-product chart -->
-    <div class="chart-card">
+    <div class="chart-card heatmap-hide">
       <h3 id="productChartTitle">Product Comparison</h3>
       <div class="chart-container">
         <canvas id="productChart"></canvas>
@@ -767,7 +850,7 @@
     </div>
 
     <!-- Data matrix (shown when a specific product is selected) -->
-    <div class="chart-card" id="dataMatrixCard" style="display:none;">
+    <div class="chart-card heatmap-hide" id="dataMatrixCard" style="display:none;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
         <h3 id="dataMatrixTitle" style="margin-bottom:0;">Data Matrix</h3>
         <button id="downloadCsv" class="secondary" style="font-size:12px;padding:6px 14px;">Download CSV</button>
@@ -776,12 +859,95 @@
         <table class="heatmap-table" id="dataMatrixTable"></table>
       </div>
     </div>
+
+    <!-- Cycles view (hidden by default) -->
+    <div id="cyclesView" style="display:none;">
+      <!-- Filters row -->
+      <div style="margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Product</span>
+          <div id="cycleProductBtns" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Region</span>
+          <select id="cycleRegionSelect" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:6px 10px;border-radius:6px;font-size:12px;">
+            <option value="__ALL__">All Regions</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Time Range</span>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="datetime-local" id="cycleTimeStart" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:6px 8px;border-radius:6px;font-size:12px;color-scheme:var(--range-input-scheme);">
+            <span style="color:var(--text-dim);font-size:12px;">to</span>
+            <input type="datetime-local" id="cycleTimeEnd" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:6px 8px;border-radius:6px;font-size:12px;color-scheme:var(--range-input-scheme);">
+            <button id="cycleTimeReset" class="secondary" style="font-size:11px;padding:5px 10px;">Reset</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Group by</span>
+          <div style="display:flex;gap:4px;">
+            <button id="cycleGroupStore" class="period-btn active">Store</button>
+            <button id="cycleGroupRegion" class="period-btn">Region</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cycles-stats-row" id="cyclesStats"></div>
+
+      <div class="cycles-card" style="margin-bottom:20px;">
+        <h3 id="rankingTitle">Store Demand Ranking</h3>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;" id="rankingSubtitle">Ranked by average time-to-sellout (fastest = highest demand).</p>
+        <div style="overflow-x:auto;max-height:600px;overflow-y:auto;">
+          <table class="ranking-table" id="rankingTable"></table>
+        </div>
+      </div>
+
+      <div class="cycles-card" style="margin-bottom:20px;">
+        <h3>Sellout Duration Distribution</h3>
+        <div class="chart-container" style="height:300px;">
+          <canvas id="cycleHistChart"></canvas>
+        </div>
+      </div>
+
+      <div class="cycles-card" style="margin-bottom:20px;" id="cycleTimelineCard">
+        <h3>Cycle Duration Over Time by Region</h3>
+        <div class="chart-container" style="height:350px;">
+          <canvas id="cycleTimelineChart"></canvas>
+        </div>
+      </div>
+
+      <div class="cycles-card" style="margin-bottom:20px;">
+        <h3>Recent Cycles</h3>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Individual restock-to-sellout events, most recent first.</p>
+        <div style="overflow-x:auto;max-height:500px;overflow-y:auto;">
+          <table class="ranking-table" id="cyclesTable"></table>
+        </div>
+      </div>
+
+      <div class="cycles-card" style="background:var(--summary-bg);border-color:var(--summary-border);">
+        <h3 style="font-size:14px;">Methodology</h3>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
+          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Data source:</strong> Apple's <code style="background:var(--input-bg);padding:2px 5px;border-radius:3px;font-size:11px;">retail/pickup-message</code> API, polled every 1-3 hours across 19 zip codes covering 12 US metro areas (~119 stores). Each poll returns per-store, per-product pickup availability as one of three states: <strong>available</strong> (in stock for pickup), <strong>unavailable</strong> (out of stock), or <strong>ineligible</strong> (not offered at this store).</p>
+          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Cycle detection:</strong> For each (store, product) pair, we build a timeline of availability state changes. A <em>restock</em> is a transition from unavailable/ineligible to available. A <em>sellout</em> is a transition from available back to unavailable/ineligible. One complete cycle = restock followed by sellout. Cycles shorter than 5 minutes are filtered as noise.</p>
+          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Glitch filtering:</strong> Snapshots where &gt;80% of all (store, product) observations show "ineligible" are discarded as backend glitches (e.g., the Feb 9 outage where Apple's system briefly returned rank=0 for all stores).</p>
+          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Demand proxy:</strong> Apple does not expose inventory quantities through any API. Sellout velocity (time from restock to out-of-stock) serves as an indirect demand signal: faster sellouts indicate higher demand or lower stock allocation. Stores selling out within hours likely have both high foot traffic and limited inventory.</p>
+          <p><strong style="color:var(--text);">Limitations:</strong> Polling frequency (1-3 hours) means exact restock/sellout times have up to ~3 hour margin of error. Same-day cycles where both transitions happen between polls may be missed entirely. The "available" flag is binary (at least 1 unit in stock), so a store with 1 unit and a store with 50 units both appear identical until one sells out.</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     let DATA = null;
     let mainChart = null;
     let productChart = null;
+    let cycleHistChart = null;
+    let cycleTimelineChart = null;
+    let _cycleProductFilter = 'Mac Mini M4 ($599)'; // default to base Mac Mini
+    let _cycleRegionFilter = '__ALL__';
+    let _cycleGroupBy = 'store'; // 'store' or 'region'
+    let _cycleTimeStart = null;  // epoch ms or null
+    let _cycleTimeEnd = null;
     let currentView = 'trends';
     let timeMin = 0;  // epoch ms — absolute min from data
     let timeMax = 0;  // epoch ms — absolute max from data
@@ -1450,11 +1616,18 @@
       const isAllProducts = selectedProduct === '__ALL__';
       const blipSet = filterZeros ? getBlipSet(snapshots) : null;
 
-      // Toggle heatmap-view class for control hiding
+      // Toggle view-specific body classes for control hiding
+      document.body.classList.remove('heatmap-view', 'cycles-view');
       if (currentView === 'heatmap') {
         document.body.classList.add('heatmap-view');
-      } else {
-        document.body.classList.remove('heatmap-view');
+      } else if (currentView === 'cycles') {
+        document.body.classList.add('cycles-view');
+      }
+
+      // Cycles view: render and return early (CSS handles hiding other elements)
+      if (currentView === 'cycles') {
+        renderCycles();
+        return;
       }
 
       updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
@@ -2884,6 +3057,319 @@
       const ampm = h >= 12 ? 'PM' : 'AM';
       const h12 = h % 12 || 12;
       return `${months[d.getMonth()]} ${d.getDate()} ${h12}:${m < 10 ? '0' + m : m} ${ampm}`;
+    }
+
+    function formatDuration(hours) {
+      if (hours < 1) return `${Math.round(hours * 60)}m`;
+      if (hours < 24) return `${hours.toFixed(1)}h`;
+      const d = Math.floor(hours / 24);
+      const h = (hours % 24).toFixed(1);
+      return `${d}d ${h}h`;
+    }
+
+    function _initCycleControls() {
+      // Region dropdown
+      document.getElementById('cycleRegionSelect').addEventListener('change', e => {
+        _cycleRegionFilter = e.target.value;
+        renderCycles();
+      });
+      // Time range
+      document.getElementById('cycleTimeStart').addEventListener('change', e => {
+        _cycleTimeStart = e.target.value ? new Date(e.target.value).getTime() : null;
+        renderCycles();
+      });
+      document.getElementById('cycleTimeEnd').addEventListener('change', e => {
+        _cycleTimeEnd = e.target.value ? new Date(e.target.value).getTime() : null;
+        renderCycles();
+      });
+      document.getElementById('cycleTimeReset').addEventListener('click', () => {
+        _cycleTimeStart = null; _cycleTimeEnd = null;
+        document.getElementById('cycleTimeStart').value = '';
+        document.getElementById('cycleTimeEnd').value = '';
+        renderCycles();
+      });
+      // Group-by toggle
+      document.getElementById('cycleGroupStore').addEventListener('click', () => {
+        _cycleGroupBy = 'store';
+        document.getElementById('cycleGroupStore').classList.add('active');
+        document.getElementById('cycleGroupRegion').classList.remove('active');
+        renderCycles();
+      });
+      document.getElementById('cycleGroupRegion').addEventListener('click', () => {
+        _cycleGroupBy = 'region';
+        document.getElementById('cycleGroupRegion').classList.add('active');
+        document.getElementById('cycleGroupStore').classList.remove('active');
+        renderCycles();
+      });
+    }
+    let _cycleControlsInit = false;
+
+    function renderCycles() {
+      if (!DATA || !DATA.cycles) {
+        document.getElementById('cyclesStats').innerHTML = '<div style="color:var(--text-dim);padding:40px;text-align:center;">No cycle data available. Run build_data.py with raw API responses.</div>';
+        return;
+      }
+      if (!_cycleControlsInit) { _initCycleControls(); _cycleControlsInit = true; }
+
+      const { cycles: allCycles } = DATA.cycles;
+
+      // Build product filter buttons
+      const products = [...new Set(allCycles.map(c => c.product))].sort();
+      // If default filter doesn't exist in data, fall back to all
+      if (_cycleProductFilter !== '__ALL__' && !products.includes(_cycleProductFilter)) {
+        _cycleProductFilter = '__ALL__';
+      }
+      const btnsEl = document.getElementById('cycleProductBtns');
+      btnsEl.innerHTML = '';
+      const mkBtn = (label, value, title) => {
+        const btn = document.createElement('button');
+        btn.className = 'period-btn' + (_cycleProductFilter === value ? ' active' : '');
+        btn.textContent = label;
+        if (title) btn.title = title;
+        btn.addEventListener('click', () => { _cycleProductFilter = value; renderCycles(); });
+        btnsEl.appendChild(btn);
+      };
+      mkBtn('All', '__ALL__');
+      products.forEach(p => mkBtn(p.replace(/ \(\$[\d,]+\)/, ''), p, p));
+
+      // Populate region dropdown (once or when data changes)
+      const regionSel = document.getElementById('cycleRegionSelect');
+      const regions = [...new Set(allCycles.map(c => c.region).filter(Boolean))].sort();
+      if (regionSel.options.length !== regions.length + 1) {
+        regionSel.innerHTML = '<option value="__ALL__">All Regions</option>';
+        regions.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r; opt.textContent = r;
+          regionSel.appendChild(opt);
+        });
+      }
+      regionSel.value = _cycleRegionFilter;
+
+      // Apply filters: product, region, time
+      const isAllProd = _cycleProductFilter === '__ALL__';
+      const isAllRegion = _cycleRegionFilter === '__ALL__';
+      const cycles = allCycles.filter(c => {
+        if (!isAllProd && c.product !== _cycleProductFilter) return false;
+        if (!isAllRegion && c.region !== _cycleRegionFilter) return false;
+        if (_cycleTimeStart) {
+          const t = new Date(c.restock).getTime();
+          if (t < _cycleTimeStart) return false;
+        }
+        if (_cycleTimeEnd) {
+          const t = new Date(c.sellout).getTime();
+          if (t > _cycleTimeEnd) return false;
+        }
+        return true;
+      });
+
+      if (cycles.length === 0) {
+        document.getElementById('cyclesStats').innerHTML = '<div style="color:var(--text-dim);padding:20px;text-align:center;">No cycles match current filters.</div>';
+        document.getElementById('rankingTable').innerHTML = '';
+        document.getElementById('cyclesTable').innerHTML = '';
+        if (cycleHistChart) { cycleHistChart.destroy(); cycleHistChart = null; }
+        if (cycleTimelineChart) { cycleTimelineChart.destroy(); cycleTimelineChart = null; }
+        return;
+      }
+
+      // Stats
+      const hrs = cycles.map(c => c.hours);
+      const sameDayN = cycles.filter(c => c.restock.slice(0, 10) === c.sellout.slice(0, 10)).length;
+      const statsEl = document.getElementById('cyclesStats');
+      statsEl.innerHTML = `
+        <div class="cycle-stat"><div class="stat-val">${cycles.length}</div><div class="stat-lbl">Total Cycles</div></div>
+        <div class="cycle-stat"><div class="stat-val">${formatDuration(hrs.reduce((a,b)=>a+b,0)/hrs.length)}</div><div class="stat-lbl">Avg Sellout Time</div></div>
+        <div class="cycle-stat"><div class="stat-val">${formatDuration(Math.min(...hrs))}</div><div class="stat-lbl">Fastest Sellout</div></div>
+        <div class="cycle-stat"><div class="stat-val">${cycles.length > 0 ? (100*sameDayN/cycles.length).toFixed(0) : 0}%</div><div class="stat-lbl">Same-Day Sellouts</div></div>
+        <div class="cycle-stat"><div class="stat-val">${new Set(cycles.map(c=>c.store)).size}</div><div class="stat-lbl">Stores</div></div>
+        <div class="cycle-stat"><div class="stat-val">${new Set(cycles.map(c=>c.region).filter(Boolean)).size}</div><div class="stat-lbl">Regions</div></div>
+      `;
+
+      // Ranking table: store or region mode
+      const isRegionView = _cycleGroupBy === 'region';
+      document.getElementById('rankingTitle').textContent = isRegionView ? 'Region Demand Ranking' : 'Store Demand Ranking';
+      document.getElementById('rankingSubtitle').textContent = isRegionView
+        ? 'Regions ranked by average time-to-sellout across all stores in the metro area.'
+        : 'Stores ranked by average time-to-sellout (fastest = highest demand).';
+
+      const groupMap = {};
+      cycles.forEach(c => {
+        const key = isRegionView ? (c.region || 'Other') : c.store;
+        if (!groupMap[key]) groupMap[key] = {
+          name: isRegionView ? (c.region || 'Other') : c.store_name,
+          region: c.region || '',
+          city: c.city || '',
+          state: c.state || '',
+          cycles: [], products: new Set(), stores: new Set()
+        };
+        groupMap[key].cycles.push(c);
+        groupMap[key].products.add(c.product);
+        groupMap[key].stores.add(c.store);
+      });
+      const rankings = Object.entries(groupMap).map(([k, d]) => {
+        const h = d.cycles.map(c => c.hours);
+        return {
+          key: k, name: d.name, region: d.region, city: d.city, state: d.state,
+          cycles: d.cycles.length, products: d.products.size, stores: d.stores.size,
+          avg_hours: h.reduce((a,b)=>a+b,0)/h.length,
+          fastest: Math.min(...h),
+        };
+      }).sort((a,b) => a.avg_hours - b.avg_hours);
+
+      const maxH = Math.max(...rankings.map(r => r.avg_hours));
+      const rankTable = document.getElementById('rankingTable');
+      let rh = '<thead><tr><th>#</th>';
+      rh += isRegionView ? '<th>Region</th><th>Stores</th>' : '<th>Store</th><th>Region</th>';
+      rh += '<th>Cycles</th>';
+      if (isAllProd) rh += '<th>Products</th>';
+      rh += '<th>Avg Time to Sellout</th><th>Fastest</th></tr></thead><tbody>';
+      rankings.forEach((r, i) => {
+        const barW = Math.max(4, Math.round(200 * r.avg_hours / maxH));
+        const clr = r.avg_hours < 6 ? '#ff453a' : r.avg_hours < 24 ? '#ffd60a' : '#30d158';
+        rh += `<tr><td>${i+1}</td>`;
+        if (isRegionView) {
+          rh += `<td>${r.name}</td><td>${r.stores}</td>`;
+        } else {
+          rh += `<td>${r.name}${r.city ? ` <span style="color:var(--text-dim);font-size:11px;">${r.city}, ${r.state}</span>` : ''}</td>`;
+          rh += `<td style="font-size:12px;">${r.region || '—'}</td>`;
+        }
+        rh += `<td>${r.cycles}</td>`;
+        if (isAllProd) rh += `<td>${r.products}</td>`;
+        rh += `<td><span class="dur-bar" style="width:${barW}px;background:${clr};"></span>${formatDuration(r.avg_hours)}</td>`;
+        rh += `<td>${formatDuration(r.fastest)}</td></tr>`;
+      });
+      rh += '</tbody>';
+      rankTable.innerHTML = rh;
+
+      // Histogram
+      renderCycleHistogram(cycles);
+
+      // Timeline chart: cycle duration over time by region
+      renderCycleTimeline(cycles);
+
+      // Recent cycles table
+      const tbl = document.getElementById('cyclesTable');
+      const sorted = [...cycles].sort((a,b) => b.sellout.localeCompare(a.sellout));
+      let th = '<thead><tr><th>Store</th><th>Region</th>';
+      if (isAllProd) th += '<th>Product</th>';
+      th += '<th>Restocked</th><th>Sold Out</th><th>Duration</th></tr></thead><tbody>';
+      sorted.slice(0, 150).forEach(c => {
+        const clr = c.hours < 6 ? '#ff453a' : c.hours < 24 ? '#ffd60a' : 'var(--text)';
+        th += `<tr><td>${c.store_name} <span style="color:var(--text-dim);font-size:11px;">${c.city ? c.city + ', ' + c.state : ''}</span></td>`;
+        th += `<td style="font-size:12px;">${c.region || '—'}</td>`;
+        if (isAllProd) th += `<td style="color:var(--text-muted);font-size:12px;">${c.product}</td>`;
+        th += `<td style="white-space:nowrap;font-size:12px;">${c.restock.replace('T',' ').slice(0,16)}</td>`;
+        th += `<td style="white-space:nowrap;font-size:12px;">${c.sellout.replace('T',' ').slice(0,16)}</td>`;
+        th += `<td style="color:${clr};font-weight:600;">${formatDuration(c.hours)}</td></tr>`;
+      });
+      th += '</tbody>';
+      tbl.innerHTML = th;
+    }
+
+    function renderCycleHistogram(cycles) {
+      const canvas = document.getElementById('cycleHistChart');
+      if (cycleHistChart) { cycleHistChart.destroy(); cycleHistChart = null; }
+      const buckets = [
+        { label: '<1h', min: 0, max: 1 }, { label: '1-3h', min: 1, max: 3 },
+        { label: '3-6h', min: 3, max: 6 }, { label: '6-12h', min: 6, max: 12 },
+        { label: '12-24h', min: 12, max: 24 }, { label: '1-2d', min: 24, max: 48 },
+        { label: '2d+', min: 48, max: Infinity },
+      ];
+      const counts = buckets.map(() => 0);
+      cycles.forEach(c => {
+        for (let i = 0; i < buckets.length; i++) {
+          if (c.hours >= buckets[i].min && c.hours < buckets[i].max) { counts[i]++; break; }
+        }
+      });
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      cycleHistChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: buckets.map(b => b.label),
+          datasets: [{ label: 'Cycles', data: counts,
+            backgroundColor: ['#ff453a','#ff6961','#ffd60a','#ffcc00','#30d158','#34c759','#0a84ff'],
+            borderRadius: 4 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false },
+            tooltip: { callbacks: { label: ctx => `${ctx.raw} cycles (${(100*ctx.raw/cycles.length).toFixed(1)}%)` } } },
+          scales: {
+            x: { grid: { color: isLight ? '#e5e5ea' : '#1a1a1a' }, ticks: { color: isLight ? '#86868b' : '#666' } },
+            y: { beginAtZero: true, grid: { color: isLight ? '#e5e5ea' : '#1a1a1a' },
+              ticks: { color: isLight ? '#86868b' : '#666', stepSize: 1 },
+              title: { display: true, text: 'Number of Cycles', color: isLight ? '#86868b' : '#666' } }
+          }
+        }
+      });
+    }
+
+    function renderCycleTimeline(cycles) {
+      const canvas = document.getElementById('cycleTimelineChart');
+      if (cycleTimelineChart) { cycleTimelineChart.destroy(); cycleTimelineChart = null; }
+      if (cycles.length === 0) return;
+
+      // Group by region, plot sellout time (x) vs duration (y)
+      const regionCycles = {};
+      cycles.forEach(c => {
+        const r = c.region || 'Other';
+        if (!regionCycles[r]) regionCycles[r] = [];
+        regionCycles[r].push({ x: new Date(c.sellout), y: c.hours, store: c.store_name });
+      });
+
+      const regionColors = {
+        'NYC': '#ff6384', 'LA': '#36a2eb', 'SF': '#ffce56', 'Austin': '#4bc0c0',
+        'Boston': '#9966ff', 'Chicago': '#ff9f40', 'Houston': '#c9cbcf',
+        'Phoenix': '#e8575a', 'Seattle': '#2bbf6e', 'Miami': '#f5a623',
+        'Denver': '#a855f7', 'Atlanta': '#fb923c', 'Other': '#888',
+      };
+
+      const datasets = Object.entries(regionCycles).sort((a,b) => a[0].localeCompare(b[0])).map(([region, pts]) => ({
+        label: region,
+        data: pts.sort((a,b) => a.x - b.x),
+        borderColor: regionColors[region] || '#888',
+        backgroundColor: (regionColors[region] || '#888') + '80',
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        showLine: pts.length > 1,
+        borderWidth: 1.5,
+        tension: 0,
+      }));
+
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      cycleTimelineChart = new Chart(canvas, {
+        type: 'scatter',
+        data: { datasets },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: isLight ? '#1d1d1f' : '#e0e0e0', usePointStyle: true, pointStyle: 'circle' } },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const d = ctx.raw;
+                  return `${ctx.dataset.label}: ${d.store || ''} — ${formatDuration(d.y)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'time',
+              time: { tooltipFormat: 'MMM d, HH:mm' },
+              grid: { color: isLight ? '#e5e5ea' : '#1a1a1a' },
+              ticks: { color: isLight ? '#86868b' : '#666' },
+              title: { display: true, text: 'Sellout Date', color: isLight ? '#86868b' : '#666' },
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: isLight ? '#e5e5ea' : '#1a1a1a' },
+              ticks: { color: isLight ? '#86868b' : '#666',
+                callback: v => formatDuration(v) },
+              title: { display: true, text: 'Cycle Duration', color: isLight ? '#86868b' : '#666' },
+            }
+          }
+        }
+      });
     }
 
     function initMap() {
