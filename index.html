@@ -177,6 +177,42 @@
       min-height: 120px;
       min-width: 180px;
     }
+    .multi-dropdown { position: relative; min-width: 180px; }
+    .multi-dropdown .md-trigger {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--input-bg); color: var(--text);
+      border: 1px solid var(--input-border); padding: 8px 12px;
+      border-radius: 6px; font-size: 13px; cursor: pointer;
+      user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .multi-dropdown .md-trigger:hover { border-color: var(--input-border-hover); }
+    .multi-dropdown.open .md-trigger { border-color: var(--accent); }
+    .multi-dropdown .md-trigger::after { content: '\25BE'; margin-left: 8px; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+    .multi-dropdown .md-menu {
+      display: none; position: absolute; top: 100%; left: 0;
+      z-index: 1000; background: var(--input-bg);
+      border: 1px solid var(--input-border); border-radius: 6px;
+      margin-top: 2px; max-height: 300px; overflow-y: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4); min-width: 220px;
+    }
+    .multi-dropdown.open .md-menu { display: block; }
+    .multi-dropdown .md-option {
+      display: flex; align-items: center; padding: 6px 10px;
+      cursor: pointer; font-size: 13px; position: relative;
+    }
+    .multi-dropdown .md-option:hover { background: rgba(255,255,255,0.05); }
+    [data-theme="light"] .multi-dropdown .md-option:hover { background: rgba(0,0,0,0.05); }
+    .multi-dropdown .md-option input[type="checkbox"] { margin-right: 8px; accent-color: var(--accent); flex-shrink: 0; }
+    .multi-dropdown .md-option .md-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .multi-dropdown .md-option .md-only-btn {
+      display: none; font-size: 10px; padding: 2px 6px;
+      background: var(--accent); color: #fff; border: none; border-radius: 3px;
+      cursor: pointer; flex-shrink: 0; margin-left: 6px;
+    }
+    .multi-dropdown .md-option:hover .md-only-btn { display: inline-block; }
+    .multi-dropdown .md-option .md-only-btn.md-always { display: inline-block; }
+    .multi-dropdown .md-divider { height: 1px; background: var(--input-border); margin: 4px 0; }
+    [data-theme="light"] .multi-dropdown .md-menu { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
     button {
       background: var(--accent);
       border-color: var(--accent);
@@ -691,18 +727,12 @@
 
     <div class="control-group map-keep">
       <label>Product</label>
-      <select id="productSelect"></select>
+      <div id="productDropdown" class="multi-dropdown"></div>
     </div>
 
     <div class="control-group">
       <label>Cities</label>
-      <div style="display:flex;gap:8px;align-items:flex-start;">
-        <select id="citySelect" multiple></select>
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <button id="selectAllCities" class="secondary" style="font-size:11px;padding:4px 8px;">All</button>
-          <button id="clearCities" class="secondary" style="font-size:11px;padding:4px 8px;">None</button>
-        </div>
-      </div>
+      <div id="cityDropdown" class="multi-dropdown"></div>
     </div>
 
     <div class="control-group" style="display:none;">
@@ -885,7 +915,7 @@
       <div style="margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">
         <div style="display:flex;flex-direction:column;gap:6px;">
           <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Product</span>
-          <div id="cycleProductBtns" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+          <div id="cycleProductDropdown" class="multi-dropdown" style="min-width:200px;"></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;">
           <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Region</span>
@@ -968,7 +998,8 @@
     let productChart = null;
     let cycleHistChart = null;
     let cycleTimelineChart = null;
-    let _cycleProductFilter = 'Mac Mini M4 ($599)'; // default to base Mac Mini
+    let _cycleProductFilter = 'Mac Mini M4 ($599)'; // legacy — now using _cycleProductDropdown
+    let _cycleProductDropdown = null;
     let _cycleRegionFilter = '__ALL__';
     let _cycleGroupBy = 'region'; // 'store' or 'region'
     let _cycleTimeStart = null;  // epoch ms or null
@@ -1468,6 +1499,147 @@
       document.getElementById('dashboard').style.display = 'flex';
     }
 
+    /* ── MultiDropdown reusable component ────────────────────────── */
+    class MultiDropdown {
+      /**
+       * @param {HTMLElement} el  – container div (gets .multi-dropdown class)
+       * @param {Object} opts
+       * @param {Array<{value:string,label:string}>} opts.items – regular options
+       * @param {{value:string,label:string,btnLabel:string,isSelectAll:boolean}} [opts.header]
+       *        Special top option.  isSelectAll=true → toggling it checks/unchecks all items.
+       * @param {Array<string>} [opts.initialSelected] – values to pre-select
+       * @param {Function} [opts.onChange] – called with getSelected() after every change
+       */
+      constructor(el, opts) {
+        this.el = el;
+        this.items = opts.items || [];
+        this.header = opts.header || null;
+        this.selected = new Set(opts.initialSelected != null
+          ? opts.initialSelected
+          : this.items.map(i => i.value));
+        if (this.header && this.header.isSelectAll && this.items.every(i => this.selected.has(i.value))) {
+          this.selected.add(this.header.value);
+        }
+        this.onChange = opts.onChange || (() => {});
+        this._build();
+      }
+
+      /** Selected regular-item values (header value excluded when isSelectAll) */
+      getSelected() {
+        return this.items.filter(i => this.selected.has(i.value)).map(i => i.value);
+      }
+
+      /** Whether the header special option is checked */
+      isHeaderSelected() { return this.header ? this.selected.has(this.header.value) : false; }
+
+      _build() {
+        this.el.innerHTML = '';
+        this.triggerEl = document.createElement('div');
+        this.triggerEl.className = 'md-trigger';
+        this.el.appendChild(this.triggerEl);
+
+        this.menuEl = document.createElement('div');
+        this.menuEl.className = 'md-menu';
+        this.el.appendChild(this.menuEl);
+
+        this.triggerEl.addEventListener('click', e => { e.stopPropagation(); this.el.classList.toggle('open'); });
+        document.addEventListener('click', e => { if (!this.el.contains(e.target)) this.el.classList.remove('open'); });
+
+        this._renderOptions();
+        this._updateTrigger();
+      }
+
+      _renderOptions() {
+        this.menuEl.innerHTML = '';
+        if (this.header) {
+          this._addRow(this.header.value, this.header.label, this.header.btnLabel || 'all', true);
+          const d = document.createElement('div'); d.className = 'md-divider'; this.menuEl.appendChild(d);
+        }
+        this.items.forEach(item => this._addRow(item.value, item.label, 'only', false));
+      }
+
+      _addRow(value, label, btnLabel, isHeader) {
+        const row = document.createElement('div');
+        row.className = 'md-option';
+        row.dataset.value = value;
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = this.selected.has(value);
+
+        const lbl = document.createElement('span');
+        lbl.className = 'md-label';
+        lbl.textContent = label;
+
+        const btn = document.createElement('button');
+        btn.className = 'md-only-btn' + (isHeader ? ' md-always' : '');
+        btn.textContent = btnLabel;
+
+        row.appendChild(cb); row.appendChild(lbl); row.appendChild(btn);
+
+        row.addEventListener('click', e => { if (e.target === btn) return; e.stopPropagation(); this._toggle(value); });
+
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          if (btnLabel === 'all') {
+            this.items.forEach(i => this.selected.add(i.value));
+          } else {
+            // "only" — keep header state for non-selectAll headers (e.g. city Average)
+            const keepHeader = this.header && !this.header.isSelectAll && this.selected.has(this.header.value);
+            this.selected.clear();
+            this.selected.add(value);
+            if (keepHeader) this.selected.add(this.header.value);
+          }
+          this._sync();
+        });
+
+        this.menuEl.appendChild(row);
+      }
+
+      _toggle(value) {
+        const opt = this.header && this.header.value === value ? this.header : null;
+        if (this.selected.has(value)) {
+          this.selected.delete(value);
+          if (opt && opt.isSelectAll) this.items.forEach(i => this.selected.delete(i.value));
+        } else {
+          this.selected.add(value);
+          if (opt && opt.isSelectAll) this.items.forEach(i => this.selected.add(i.value));
+        }
+        this._sync();
+      }
+
+      _sync() {
+        if (this.header && this.header.isSelectAll) {
+          if (this.items.every(i => this.selected.has(i.value))) this.selected.add(this.header.value);
+          else this.selected.delete(this.header.value);
+        }
+        this._updateCheckboxes();
+        this._updateTrigger();
+        this.onChange(this.getSelected());
+      }
+
+      _updateCheckboxes() {
+        this.menuEl.querySelectorAll('.md-option').forEach(row => {
+          const cb = row.querySelector('input[type="checkbox"]');
+          if (cb) cb.checked = this.selected.has(row.dataset.value);
+        });
+      }
+
+      _updateTrigger() {
+        const sel = this.getSelected();
+        const total = this.items.length;
+        if (sel.length === 0) this.triggerEl.textContent = 'None selected';
+        else if (sel.length === 1) {
+          const item = this.items.find(i => i.value === sel[0]);
+          this.triggerEl.textContent = item ? item.label : sel[0];
+        }
+        else if (sel.length === total) this.triggerEl.textContent = this.header ? this.header.label : 'All selected';
+        else this.triggerEl.textContent = sel.length + ' selected';
+      }
+    }
+
+    let _productDropdown, _cityDropdown;
+
     function updateEbaySubToggles() {
       const ebayOn = document.getElementById('showEbayPrices').checked;
       document.querySelectorAll('.ebay-sub-toggle').forEach(el => {
@@ -1477,13 +1649,6 @@
     }
 
     function initControls() {
-      const productSelect = document.getElementById('productSelect');
-      // Add "All Products (Average)" option
-      const allOpt = document.createElement('option');
-      allOpt.value = '__ALL__';
-      allOpt.textContent = 'All Products (Average)';
-      productSelect.appendChild(allOpt);
-
       // Only include models that have data in recent snapshots (last 10)
       const recentSnapshots = DATA.snapshots.slice(-10);
       const modelsWithData = DATA.all_models.filter(model => {
@@ -1494,28 +1659,23 @@
         });
       });
 
-      modelsWithData.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        productSelect.appendChild(opt);
-      });
-
-      // Default to Mac Mini M4 ($599) on load
+      // Product multi-dropdown
       const defaultProduct = modelsWithData.find(m => m === 'Mac Mini M4 ($599)');
-      if (defaultProduct) productSelect.value = defaultProduct;
-
-      const citySelect = document.getElementById('citySelect');
-      DATA.all_cities.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c;
-        opt.textContent = c;
-        opt.selected = true;
-        citySelect.appendChild(opt);
+      _productDropdown = new MultiDropdown(document.getElementById('productDropdown'), {
+        items: modelsWithData.map(m => ({ value: m, label: m })),
+        header: { value: '__ALL__', label: 'All Products (Average)', btnLabel: 'all', isSelectAll: true },
+        initialSelected: defaultProduct ? [defaultProduct] : [modelsWithData[0]],
+        onChange: () => render()
       });
 
-      productSelect.addEventListener('change', render);
-      citySelect.addEventListener('change', render);
+      // City multi-dropdown with "Average" special option
+      _cityDropdown = new MultiDropdown(document.getElementById('cityDropdown'), {
+        items: DATA.all_cities.map(c => ({ value: c, label: c })),
+        header: { value: '__AVG__', label: 'Average (All Cities)', btnLabel: 'all', isSelectAll: false },
+        initialSelected: [...DATA.all_cities],
+        onChange: () => render()
+      });
+
       document.getElementById('filterZeros').addEventListener('change', render);
       document.getElementById('showAvailability').addEventListener('change', render);
       document.getElementById('showEbayPrices').addEventListener('change', () => {
@@ -1553,18 +1713,8 @@
       });
 
       document.getElementById('resetCities').addEventListener('click', () => {
-        [...citySelect.options].forEach(o => o.selected = true);
-        render();
-      });
-
-      document.getElementById('selectAllCities').addEventListener('click', () => {
-        [...citySelect.options].forEach(o => o.selected = true);
-        render();
-      });
-
-      document.getElementById('clearCities').addEventListener('click', () => {
-        [...citySelect.options].forEach(o => o.selected = false);
-        render();
+        _cityDropdown.items.forEach(i => _cityDropdown.selected.add(i.value));
+        _cityDropdown._sync();
       });
 
       document.querySelectorAll('.view-tab').forEach(tab => {
@@ -1578,10 +1728,9 @@
 
       // Quick view buttons
       document.getElementById('qvMacMini').addEventListener('click', () => {
-        // Set product to Mac Mini M4 ($599), view to Trends
-        const ps = document.getElementById('productSelect');
-        const macMini = [...ps.options].find(o => o.value === 'Mac Mini M4 ($599)');
-        if (macMini) ps.value = macMini.value;
+        _productDropdown.selected.clear();
+        _productDropdown.selected.add('Mac Mini M4 ($599)');
+        _productDropdown._sync();
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
@@ -1589,8 +1738,9 @@
       });
 
       document.getElementById('qvAllProducts').addEventListener('click', () => {
-        // Set product to All Products, view to Trends
-        document.getElementById('productSelect').value = '__ALL__';
+        _productDropdown.items.forEach(i => _productDropdown.selected.add(i.value));
+        _productDropdown.selected.add('__ALL__');
+        _productDropdown._sync();
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
@@ -1861,12 +2011,25 @@
     }
 
     function getSelectedCities() {
-      const sel = document.getElementById('citySelect');
-      return [...sel.selectedOptions].map(o => o.value);
+      return _cityDropdown ? _cityDropdown.getSelected() : DATA.all_cities.slice();
     }
 
+    /** Returns array of selected product model names */
+    function getSelectedProducts() {
+      return _productDropdown ? _productDropdown.getSelected() : [];
+    }
+
+    /** Whether the city "Average" line should be shown */
+    function isCityAverageOn() {
+      return _cityDropdown ? _cityDropdown.isHeaderSelected() : false;
+    }
+
+    /** Backward-compat: single product string or '__ALL__' */
     function getSelectedProduct() {
-      return document.getElementById('productSelect').value;
+      const prods = getSelectedProducts();
+      const allModels = _productDropdown ? _productDropdown.items.length : 0;
+      if (prods.length === allModels) return '__ALL__';
+      return prods.length === 1 ? prods[0] : prods[0] || '__ALL__';
     }
 
     function getCustomAvgCities() {
@@ -1996,8 +2159,9 @@
     function render() {
       const { snapshots, filterZeros } = getFilteredSnapshots();
       const selectedCities = getSelectedCities();
-      const selectedProduct = getSelectedProduct();
-      const isAllProducts = selectedProduct === '__ALL__';
+      const selectedProducts = getSelectedProducts();
+      const isAllProducts = _productDropdown ? selectedProducts.length === _productDropdown.items.length : false;
+      const selectedProduct = isAllProducts ? '__ALL__' : (selectedProducts[0] || '__ALL__');
       const blipSet = filterZeros ? getBlipSet(snapshots) : null;
 
       // Toggle view-specific body classes for control hiding
@@ -2014,15 +2178,15 @@
         return;
       }
 
-      updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+      updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
 
       if (currentView === 'trends' || currentView === 'compare') {
         document.getElementById('heatmapCard').style.display = 'none';
-        renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+        renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
       } else {
         document.getElementById('heatmapCard').style.display = 'block';
         renderHeatmap(snapshots, selectedCities, filterZeros, blipSet);
-        renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+        renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
         // Initialize & update map
         if (DATA && DATA.store_map) {
           setTimeout(() => {
@@ -2034,15 +2198,15 @@
 
       // City Averages now uses the same time-filtered snapshots as the main chart.
       // Movers still uses ALL snapshots so its period buttons are independent.
-      renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+      renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
       const allSnaps = getAllSnapshots();
       const allBlipSet = allSnaps.filterZeros ? getBlipSet(allSnaps.snapshots) : null;
-      renderMovers(allSnaps.snapshots, selectedCities, allSnaps.filterZeros, isAllProducts, selectedProduct, allBlipSet);
+      renderMovers(allSnaps.snapshots, selectedCities, allSnaps.filterZeros, isAllProducts, selectedProduct, allBlipSet, selectedProducts);
       renderProductChart(snapshots, selectedCities, filterZeros, blipSet);
-      renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
+      renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
     }
 
-    function updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+    function updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
       const statsRow = document.getElementById('statsRow');
       const excludedInfo = document.getElementById('excludedInfo');
 
@@ -2050,8 +2214,8 @@
       let excludedPoints = 0;
       let validValues = [];
 
+      const products = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
       snapshots.forEach((s, si) => {
-        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
         products.forEach(prod => {
           selectedCities.forEach(city => {
             totalPoints++;
@@ -2083,7 +2247,7 @@
       excludedInfo.textContent = '';
     }
 
-    function renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+    function renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
       const ctx = document.getElementById('mainChart');
 
       if (mainChart) {
@@ -2124,25 +2288,21 @@
         return weightedSum / totalWeight;
       }
 
+      const _prods = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
       if (showAvailability && (currentView === 'compare' || !isAllProducts)) {
-        // One line per city
-        const title = isAllProducts ? 'Average Availability by City' : `${selectedProduct} — Availability by City`;
+        // One line per city (averaging across selected products)
+        let title;
+        if (_prods.length === 1) title = `${_prods[0]} — Availability by City`;
+        else title = `${_prods.length} Products (Avg) — Availability by City`;
         document.getElementById('mainChartTitle').textContent = title;
 
         selectedCities.forEach(city => {
-          // First pass: collect raw values (null where missing)
           const rawPoints = snapshots.map((s, si) => {
             let val = null;
-            if (isAllProducts) {
-              const vals = s.products
-                .map(p => getValidValue(s, p.model, city, filterZeros, blipSet, si))
-                .filter(v => v !== null);
-              if (vals.length > 0) {
-                val = vals.reduce((a, b) => a + b, 0) / vals.length;
-              }
-            } else {
-              val = getValidValue(s, selectedProduct, city, filterZeros, blipSet, si);
-            }
+            const vals = _prods
+              .map(p => getValidValue(s, p, city, filterZeros, blipSet, si))
+              .filter(v => v !== null);
+            if (vals.length > 0) val = vals.reduce((a, b) => a + b, 0) / vals.length;
             return { x: new Date(s.timestamp), y: val };
           });
 
@@ -2168,21 +2328,18 @@
           }
         });
 
-        // Add weighted average line (weighted by store count per city)
-        if (selectedCities.length > 1) {
+        // "Average (All Cities)" line — enabled via city dropdown toggle
+        if (isCityAverageOn()) {
           const avgPoints = [];
-          const products = isAllProducts ? DATA.all_models : [selectedProduct];
           snapshots.forEach((s, si) => {
-            const val = weightedAvg(s, si, products, selectedCities, filterZeros, blipSet);
-            if (val !== null) {
-              avgPoints.push({ x: new Date(s.timestamp), y: val });
-            }
+            const val = weightedAvg(s, si, _prods, DATA.all_cities, filterZeros, blipSet);
+            if (val !== null) avgPoints.push({ x: new Date(s.timestamp), y: val });
           });
           if (avgPoints.length > 0) {
             const isLight = document.documentElement.getAttribute('data-theme') === 'light';
             const avgColor = isLight ? '#1d1d1f' : '#ffffff';
             datasets.push({
-              label: 'Weighted Avg',
+              label: 'Average (All Cities)',
               data: avgPoints,
               borderColor: avgColor,
               backgroundColor: avgColor + '20',
@@ -2196,16 +2353,13 @@
           }
         }
 
-        // Add custom weighted average line if user specified cities
+        // Custom weighted average line if user specified cities
         const customCities = getCustomAvgCities();
         if (customCities.length > 0) {
           const customPoints = [];
-          const products = isAllProducts ? DATA.all_models : [selectedProduct];
           snapshots.forEach((s, si) => {
-            const val = weightedAvg(s, si, products, customCities, filterZeros, blipSet);
-            if (val !== null) {
-              customPoints.push({ x: new Date(s.timestamp), y: val });
-            }
+            const val = weightedAvg(s, si, _prods, customCities, filterZeros, blipSet);
+            if (val !== null) customPoints.push({ x: new Date(s.timestamp), y: val });
           });
           if (customPoints.length > 0) {
             datasets.push({
@@ -2275,7 +2429,7 @@
       if (!showAvailability) {
         document.getElementById('mainChartTitle').textContent = isAllProducts
           ? 'eBay Prices — All Products'
-          : `${selectedProduct} — eBay Prices`;
+          : _prods.length === 1 ? `${_prods[0]} — eBay Prices` : `${_prods.length} Products — eBay Prices`;
       }
 
       // --- eBay price overlay ---
@@ -2284,9 +2438,9 @@
       const showMedian = document.getElementById('showEbayMedian').checked;
       if (showEbay) {
         const ebayData = DATA.ebay_prices.data;
-        if (!isAllProducts) {
+        if (_prods.length === 1) {
           // Single product: look for matching eBay product
-          const ebayHistory = ebayData[selectedProduct];
+          const ebayHistory = ebayData[_prods[0]];
           if (ebayHistory && ebayHistory.length > 0) {
             if (showMean) {
               const meanFiltered = ebayHistory.filter(d => d.avg_price !== null);
@@ -2358,8 +2512,8 @@
             }
           }
         } else {
-          // All products: one avg + median line per eBay product
-          const ebayProducts = DATA.ebay_prices.products;
+          // Multiple products: one avg + median line per selected product with eBay data
+          const ebayProducts = _prods.filter(p => ebayData[p] && ebayData[p].length > 0);
           ebayProducts.forEach((productName, idx) => {
             const history = ebayData[productName];
             if (!history || history.length === 0) return;
@@ -2404,13 +2558,16 @@
       const showLeadTimes = document.getElementById('showLeadTimes').checked && DATA.lead_times;
       if (showLeadTimes && !isAllProducts) {
         const ltSnapshots = DATA.lead_times.snapshots;
-        const selectedCities = getSelectedCities();
-        selectedCities.forEach(city => {
+        const ltCities = getSelectedCities();
+        ltCities.forEach(city => {
           const points = [];
           ltSnapshots.forEach(snap => {
             const cityData = snap.data[city];
-            if (cityData && cityData[selectedProduct] !== undefined) {
-              points.push({ x: new Date(snap.t), y: cityData[selectedProduct] });
+            if (!cityData) return;
+            // Average lead time across selected products
+            const vals = _prods.map(p => cityData[p]).filter(v => v !== undefined && v !== null);
+            if (vals.length > 0) {
+              points.push({ x: new Date(snap.t), y: vals.reduce((a,b) => a+b, 0) / vals.length });
             }
           });
           if (points.length > 0) {
@@ -2588,11 +2745,11 @@
     let _moverUpdatesCount = null; // null = use hours mode, number = use last N updates mode
 
     /** Helper: compute average for a set of snapshots for a given city */
-    function _avgForSnaps(snaps, allSnapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet) {
+    function _avgForSnaps(snaps, allSnapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts) {
       let vals = [];
+      const products = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
       snaps.forEach(s => {
         const si = allSnapshots.indexOf(s);
-        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
         products.forEach(prod => {
           const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
           if (val !== null) vals.push(val);
@@ -2612,13 +2769,13 @@
       });
     }
 
-    function renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+    function renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
       const grid = document.getElementById('citySummary');
       grid.innerHTML = '';
       document.getElementById('cityAvgTimeRange').textContent = _timeRangeLabel();
 
       selectedCities.forEach(city => {
-        const avg = _avgForSnaps(snapshots, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
+        const avg = _avgForSnaps(snapshots, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts);
         const display = avg !== null ? avg.toFixed(0) : 'N/A';
         const cls = avg !== null ? (avg >= 75 ? 'good' : avg >= 50 ? 'ok' : 'bad') : '';
         const card = document.createElement('div');
@@ -2636,12 +2793,12 @@
      * Uses the two nearest snapshots on either side of targetMs to interpolate.
      * If targetMs is before all data, uses earliest; if after all, uses latest.
      */
-    function _interpolatedAvgAtTime(snapshots, targetMs, city, isAllProducts, selectedProduct, filterZeros, blipSet) {
+    function _interpolatedAvgAtTime(snapshots, targetMs, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts) {
       // Build time-series of (timestamp, avg) for this city
       const series = [];
+      const products = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
       snapshots.forEach((s, si) => {
         const t = new Date(s.timestamp).getTime();
-        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
         let vals = [];
         products.forEach(prod => {
           const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
@@ -2672,7 +2829,7 @@
       return null;
     }
 
-    function renderMovers(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+    function renderMovers(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
       const grid = document.getElementById('moversGrid');
       grid.innerHTML = '';
 
@@ -2728,13 +2885,12 @@
       const movers = [];
 
       selectedCities.forEach(city => {
-        const recent = _avgForSnaps(recentSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
+        const recent = _avgForSnaps(recentSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts);
         let past;
         if (usePastSnaps) {
-          past = _avgForSnaps(pastSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
+          past = _avgForSnaps(pastSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts);
         } else {
-          // Extrapolate: find interpolated value at the target past time
-          past = _interpolatedAvgAtTime(snapshots, targetPastMs, city, isAllProducts, selectedProduct, filterZeros, blipSet);
+          past = _interpolatedAvgAtTime(snapshots, targetPastMs, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts);
         }
         if (recent !== null && past !== null) {
           movers.push({ city, delta: recent - past, recent, past, extrapolated: isExtrapolated });
@@ -2936,19 +3092,20 @@
 
     let _csvData = ''; // cached for download
 
-    function renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
+    function renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
       document.getElementById('dataMatrixTimeRange').textContent = _timeRangeLabel();
       const card = document.getElementById('dataMatrixCard');
       const table = document.getElementById('dataMatrixTable');
       const title = document.getElementById('dataMatrixTitle');
+      const _prods = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
 
-      if (isAllProducts || snapshots.length === 0) {
+      if (_prods.length !== 1 || snapshots.length === 0) {
         card.style.display = 'none';
         return;
       }
 
       card.style.display = 'block';
-      title.textContent = `${selectedProduct} — Availability by City Over Time`;
+      title.textContent = `${_prods[0]} — Availability by City Over Time`;
 
       // Get latest store counts for column headers
       const latestSnap = snapshots[snapshots.length - 1];
@@ -3015,8 +3172,8 @@
 
     document.getElementById('downloadCsv').addEventListener('click', () => {
       if (!_csvData) return;
-      const product = getSelectedProduct();
-      const safeName = product.replace(/[^a-zA-Z0-9]/g, '_');
+      const prods = getSelectedProducts();
+      const safeName = (prods.length === 1 ? prods[0] : prods.length + '_products').replace(/[^a-zA-Z0-9]/g, '_');
       const blob = new Blob([_csvData], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -3548,24 +3705,17 @@
 
       const { cycles: allCycles } = DATA.cycles;
 
-      // Build product filter buttons
+      // Build product multi-dropdown for cycles
       const products = [...new Set(allCycles.map(c => c.product))].sort();
-      // If default filter doesn't exist in data, fall back to all
-      if (_cycleProductFilter !== '__ALL__' && !products.includes(_cycleProductFilter)) {
-        _cycleProductFilter = '__ALL__';
+      if (!_cycleProductDropdown) {
+        const defaultProd = products.includes('Mac Mini M4 ($599)') ? ['Mac Mini M4 ($599)'] : products;
+        _cycleProductDropdown = new MultiDropdown(document.getElementById('cycleProductDropdown'), {
+          items: products.map(p => ({ value: p, label: p })),
+          header: { value: '__ALL__', label: 'All Products', btnLabel: 'all', isSelectAll: true },
+          initialSelected: defaultProd,
+          onChange: () => renderCycles()
+        });
       }
-      const btnsEl = document.getElementById('cycleProductBtns');
-      btnsEl.innerHTML = '';
-      const mkBtn = (label, value, title) => {
-        const btn = document.createElement('button');
-        btn.className = 'period-btn' + (_cycleProductFilter === value ? ' active' : '');
-        btn.textContent = label;
-        if (title) btn.title = title;
-        btn.addEventListener('click', () => { _cycleProductFilter = value; renderCycles(); });
-        btnsEl.appendChild(btn);
-      };
-      mkBtn('All', '__ALL__');
-      products.forEach(p => mkBtn(p.replace(/ \(\$[\d,]+\)/, ''), p, p));
 
       // Populate region dropdown (once or when data changes)
       const regionSel = document.getElementById('cycleRegionSelect');
@@ -3581,10 +3731,11 @@
       regionSel.value = _cycleRegionFilter;
 
       // Apply filters: product, region, time
-      const isAllProd = _cycleProductFilter === '__ALL__';
+      const cycleSelectedProds = _cycleProductDropdown ? _cycleProductDropdown.getSelected() : products;
+      const isAllProd = cycleSelectedProds.length === products.length;
       const isAllRegion = _cycleRegionFilter === '__ALL__';
       const cycles = allCycles.filter(c => {
-        if (!isAllProd && c.product !== _cycleProductFilter) return false;
+        if (!isAllProd && !cycleSelectedProds.includes(c.product)) return false;
         if (!isAllRegion && c.region !== _cycleRegionFilter) return false;
         if (_cycleTimeStart) {
           const t = new Date(c.restock).getTime();
@@ -3894,8 +4045,8 @@
                 html += `Delta: <span style="color:${item._delta > 0 ? '#30d158' : item._delta < 0 ? '#ff3b30' : '#8e8e93'};">${sign}${Math.round(item._delta * 100)}%</span>`;
               }
             } else {
-              const product = getSelectedProduct();
-              if (product === '__ALL__') {
+              const prods = getSelectedProducts();
+              if (prods.length !== 1) {
                 const avail = item._availCount || 0;
                 const total = item._totalProducts || 0;
                 html += `${avail}/${total} products available`;
@@ -4076,25 +4227,25 @@
       });
     }
 
-    /** Compute per-store availability fraction for a given snapshot index and product */
+    /** Compute per-store availability fraction for a given snapshot index and product(s) */
     function computeStoreItems(snapIdx) {
       if (!DATA || !DATA.store_map) return [];
-      const product = getSelectedProduct();
-      const isAll = product === '__ALL__';
+      const prods = getSelectedProducts();
       const avail = getStoreAvailAtIndex(snapIdx);
 
       return DATA.store_map.stores.map(s => {
         const store = { ...s, _avail: undefined, _availCount: 0, _totalProducts: 0, _fraction: 0 };
         const storeAvail = avail[s.id] || {};
 
-        if (isAll) {
-          const products = Object.keys(storeAvail);
-          store._totalProducts = products.length;
-          store._availCount = products.filter(p => storeAvail[p] === 1).length;
-          store._fraction = products.length > 0 ? store._availCount / products.length : 0;
-          store._color = products.length > 0 ? availabilityColor(store._fraction) : MAP_COLORS.nodata;
+        if (prods.length !== 1) {
+          // Multi-product: show fraction of selected products available
+          const tracked = prods.length > 0 ? prods : Object.keys(storeAvail);
+          store._totalProducts = tracked.length;
+          store._availCount = tracked.filter(p => storeAvail[p] === 1).length;
+          store._fraction = tracked.length > 0 ? store._availCount / tracked.length : 0;
+          store._color = tracked.length > 0 ? availabilityColor(store._fraction) : MAP_COLORS.nodata;
         } else {
-          const a = storeAvail[product];
+          const a = storeAvail[prods[0]];
           store._avail = a;
           if (a === undefined) {
             store._color = MAP_COLORS.nodata;
@@ -4113,8 +4264,7 @@
     /** Compute per-store delta between two snapshot indices */
     function computeDeltaItems(startIdx, endIdx) {
       if (!DATA || !DATA.store_map) return [];
-      const product = getSelectedProduct();
-      const isAll = product === '__ALL__';
+      const prods = getSelectedProducts();
       const availStart = getStoreAvailAtIndex(startIdx);
       const availEnd = getStoreAvailAtIndex(endIdx);
 
@@ -4123,26 +4273,22 @@
         const aStart = availStart[s.id] || {};
         const aEnd = availEnd[s.id] || {};
 
-        if (isAll) {
-          const allProducts = new Set([...Object.keys(aStart), ...Object.keys(aEnd)]);
-          if (allProducts.size === 0) {
-            store._delta = 0;
-            store._hasData = false;
-            store._color = deltaColor(0, false);
+        if (prods.length !== 1) {
+          const tracked = prods.length > 0 ? prods : [...new Set([...Object.keys(aStart), ...Object.keys(aEnd)])];
+          if (tracked.length === 0) {
+            store._delta = 0; store._hasData = false; store._color = deltaColor(0, false);
           } else {
-            const fracStart = [...allProducts].filter(p => aStart[p] === 1).length / allProducts.size;
-            const fracEnd = [...allProducts].filter(p => aEnd[p] === 1).length / allProducts.size;
+            const fracStart = tracked.filter(p => aStart[p] === 1).length / tracked.length;
+            const fracEnd = tracked.filter(p => aEnd[p] === 1).length / tracked.length;
             store._delta = fracEnd - fracStart;
             store._fraction = fracEnd;
             store._color = deltaColor(store._delta, true);
           }
         } else {
-          const vs = aStart[product];
-          const ve = aEnd[product];
+          const vs = aStart[prods[0]];
+          const ve = aEnd[prods[0]];
           if (vs === undefined && ve === undefined) {
-            store._delta = 0;
-            store._hasData = false;
-            store._color = deltaColor(0, false);
+            store._delta = 0; store._hasData = false; store._color = deltaColor(0, false);
           } else {
             store._delta = (ve || 0) - (vs || 0);
             store._fraction = ve || 0;
@@ -4190,9 +4336,8 @@
             const avg = fracs.reduce((a, b) => a + b, 0) / fracs.length;
             c._fraction = avg;
             c._color = availabilityColor(avg);
-            const product = getSelectedProduct();
-            const isAll = product === '__ALL__';
-            if (isAll) {
+            const _clProds = getSelectedProducts();
+            if (_clProds.length !== 1) {
               c._availCount = c.stores.filter(s => s._fraction > 0.5).length;
             } else {
               c._availCount = c.stores.filter(s => s._avail === 1).length;
