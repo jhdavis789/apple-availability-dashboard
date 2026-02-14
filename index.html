@@ -852,8 +852,8 @@
 
     <!-- Quick Views -->
     <div class="heatmap-hide" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-      <button id="qvMacMini" class="view-tab" style="background:var(--input-bg);border-color:#0a84ff;color:#6cb4ff;padding:8px 16px;">🖥 Base Mac Mini — by City</button>
-      <button id="qvAllProducts" class="view-tab" style="background:var(--input-bg);border-color:#30d158;color:#30d158;padding:8px 16px;">📊 All Products — Over Time</button>
+      <button id="qvMacMini" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #0a84ff;color:#6cb4ff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">🖥 Base Mac Mini — by City</button>
+      <button id="qvAllProducts" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #30d158;color:#30d158;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">📊 All Products — Over Time</button>
     </div>
 
     <!-- Main chart area -->
@@ -930,10 +930,10 @@
         <div style="display:flex;flex-direction:column;gap:6px;">
           <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Time Range</span>
           <div style="display:flex;gap:4px;margin-bottom:4px;" id="cyclePeriodBtns">
-            <button class="period-btn active" data-hours="0">Max</button>
+            <button class="period-btn" data-hours="0">Max</button>
             <button class="period-btn" data-hours="24">24h</button>
             <button class="period-btn" data-hours="168">1w</button>
-            <button class="period-btn" data-hours="336">2w</button>
+            <button class="period-btn active" data-hours="336">2w</button>
           </div>
           <div style="display:flex;gap:6px;align-items:center;">
             <input type="datetime-local" id="cycleTimeStart" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:6px 8px;border-radius:6px;font-size:12px;color-scheme:var(--range-input-scheme);">
@@ -1006,8 +1006,8 @@
     let _cycleProductDropdown = null;
     let _cycleRegionFilter = '__ALL__';
     let _cycleGroupBy = 'region'; // 'store' or 'region'
-    let _cycleTimeStart = null;  // epoch ms or null
-    let _cycleTimeEnd = null;
+    let _cycleTimeStart = Date.now() - 336 * 3600000;  // default 2w
+    let _cycleTimeEnd = Date.now();
     let _cycleSortKey = 'avg_hours';
     let _cycleSortDir = 'asc';
     let currentView = 'trends';
@@ -1575,27 +1575,40 @@
         lbl.className = 'md-label';
         lbl.textContent = label;
 
-        const btn = document.createElement('button');
-        btn.className = 'md-only-btn' + (isHeader ? ' md-always' : '');
-        btn.textContent = btnLabel;
+        row.appendChild(cb); row.appendChild(lbl);
 
-        row.appendChild(cb); row.appendChild(lbl); row.appendChild(btn);
+        row.addEventListener('click', e => { if (e.target.tagName === 'BUTTON') return; e.stopPropagation(); this._toggle(value); });
 
-        row.addEventListener('click', e => { if (e.target === btn) return; e.stopPropagation(); this._toggle(value); });
+        const self = this;
+        const addBtn = (text, action, alwaysShow) => {
+          const btn = document.createElement('button');
+          btn.className = 'md-only-btn' + (alwaysShow ? ' md-always' : '');
+          btn.textContent = text;
+          btn.addEventListener('click', e => { e.stopPropagation(); action(); self._sync(); });
+          row.appendChild(btn);
+        };
 
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          if (btnLabel === 'all') {
+        if (isHeader && this.header && !this.header.isSelectAll) {
+          // Non-selectAll header: show "only" (just this toggle) + "all" (select all items)
+          addBtn('only', () => {
+            this.selected.clear();
+            this.selected.add(value);
+          }, true);
+          addBtn('all', () => {
             this.items.forEach(i => this.selected.add(i.value));
-          } else {
-            // "only" — keep header state for non-selectAll headers (e.g. city Average)
+          }, true);
+        } else if (btnLabel === 'all') {
+          addBtn('all', () => {
+            this.items.forEach(i => this.selected.add(i.value));
+          }, isHeader);
+        } else {
+          addBtn('only', () => {
             const keepHeader = this.header && !this.header.isSelectAll && this.selected.has(this.header.value);
             this.selected.clear();
             this.selected.add(value);
             if (keepHeader) this.selected.add(this.header.value);
-          }
-          this._sync();
-        });
+          }, isHeader);
+        }
 
         this.menuEl.appendChild(row);
       }
@@ -1676,7 +1689,7 @@
       _cityDropdown = new MultiDropdown(document.getElementById('cityDropdown'), {
         items: DATA.all_cities.map(c => ({ value: c, label: c })),
         header: { value: '__AVG__', label: 'Average (All Cities)', btnLabel: 'all', isSelectAll: false },
-        initialSelected: [...DATA.all_cities],
+        initialSelected: ['__AVG__', ...DATA.all_cities],
         onChange: () => render()
       });
 
@@ -3700,6 +3713,12 @@
           renderCycles();
         });
       });
+      // Populate datetime inputs with 2w default
+      if (_cycleTimeStart && _cycleTimeEnd) {
+        const fmt = d => new Date(d).toISOString().slice(0, 16);
+        document.getElementById('cycleTimeStart').value = fmt(_cycleTimeStart);
+        document.getElementById('cycleTimeEnd').value = fmt(_cycleTimeEnd);
+      }
       // Group-by toggle
       document.getElementById('cycleGroupStore').addEventListener('click', () => {
         _cycleGroupBy = 'store';
