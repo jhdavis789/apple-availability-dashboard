@@ -2586,7 +2586,7 @@
 
       // --- Lead time overlay ---
       const showLeadTimes = document.getElementById('showLeadTimes').checked && DATA.lead_times;
-      if (showLeadTimes && !isAllProducts) {
+      if (showLeadTimes) {
         const ltSnapshots = DATA.lead_times.snapshots;
         const ltCities = getSelectedCities();
         ltCities.forEach(city => {
@@ -2607,13 +2607,13 @@
               data: points,
               borderColor: cityColor,
               backgroundColor: 'transparent',
-              borderWidth: 1.5,
-              borderDash: [4, 4],
-              pointRadius: 1.5,
-              pointHoverRadius: 3,
+              borderWidth: 2,
+              borderDash: [6, 3],
+              pointRadius: 2.5,
+              pointHoverRadius: 4,
               pointStyle: 'rect',
               pointBackgroundColor: cityColor,
-              tension: 0.3,
+              stepped: 'before',
               fill: false,
               yAxisID: 'y2',
             });
@@ -2644,13 +2644,13 @@
         };
       } else if (showLeadTimes) {
         const ltYValues = datasets.filter(ds => ds.yAxisID === 'y2').flatMap(ds => ds.data.map(pt => pt.y)).filter(v => v != null);
-        y2Max = ltYValues.length > 0 ? Math.ceil(Math.max(...ltYValues) + 0.5) : 2;
+        y2Max = ltYValues.length > 0 ? Math.max(2, Math.ceil(Math.max(...ltYValues) + 0.5)) : 2;
         y2Config = {
           position: 'right',
-          min: 0,
+          min: -0.08,
           max: y2Max,
           grid: { drawOnChartArea: !showAvailability, color: getThemeColors().grid },
-          ticks: { color: '#64d2ff', callback: v => v.toFixed(1) + 'd' },
+          ticks: { color: '#64d2ff', callback: v => v < 0 ? '' : v.toFixed(1) + 'd' },
           title: { display: true, text: 'Avg Lead Time (days)', color: '#64d2ff', font: { size: 12 } }
         };
       } else {
