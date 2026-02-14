@@ -767,6 +767,10 @@
           <input type="checkbox" id="showLeadTimes">
           Show Lead Times
         </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="showSelectedAvg">
+          Avg Selected Cities
+        </label>
       </div>
     </div>
 
@@ -1698,6 +1702,7 @@
         document.getElementById('leadTimeToggleLabel').style.display = 'flex';
       }
       document.getElementById('showLeadTimes').addEventListener('change', render);
+      document.getElementById('showSelectedAvg').addEventListener('change', render);
 
       // Reset axes button
       document.getElementById('resetGraphBtn').addEventListener('click', () => {
@@ -2345,6 +2350,31 @@
               backgroundColor: avgColor + '20',
               borderWidth: 3,
               borderDash: [6, 3],
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              tension: 0.3,
+              fill: false
+            });
+          }
+        }
+
+        // "Avg Selected Cities" line — enabled via checkbox toggle
+        if (document.getElementById('showSelectedAvg').checked && selectedCities.length > 1) {
+          const selAvgPoints = [];
+          snapshots.forEach((s, si) => {
+            const val = weightedAvg(s, si, _prods, selectedCities, filterZeros, blipSet);
+            if (val !== null) selAvgPoints.push({ x: new Date(s.timestamp), y: val });
+          });
+          if (selAvgPoints.length > 0) {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            const selAvgColor = isLight ? '#5856d6' : '#bf5af2';
+            datasets.push({
+              label: 'Avg Selected Cities',
+              data: selAvgPoints,
+              borderColor: selAvgColor,
+              backgroundColor: selAvgColor + '20',
+              borderWidth: 3,
+              borderDash: [8, 4],
               pointRadius: 0,
               pointHoverRadius: 5,
               tension: 0.3,
