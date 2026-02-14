@@ -1645,13 +1645,22 @@
       _updateTrigger() {
         const sel = this.getSelected();
         const total = this.items.length;
-        if (sel.length === 0) this.triggerEl.textContent = 'None selected';
-        else if (sel.length === 1) {
+        const headerOn = this.header && this.selected.has(this.header.value);
+        if (sel.length === 0) {
+          this.triggerEl.textContent = headerOn ? this.header.label : 'None selected';
+        } else if (sel.length === 1 && !headerOn) {
           const item = this.items.find(i => i.value === sel[0]);
           this.triggerEl.textContent = item ? item.label : sel[0];
         }
-        else if (sel.length === total) this.triggerEl.textContent = this.header ? this.header.label : 'All selected';
-        else this.triggerEl.textContent = sel.length + ' selected';
+        else if (sel.length === total) {
+          if (headerOn && !this.header.isSelectAll) this.triggerEl.textContent = 'All Cities + Avg';
+          else this.triggerEl.textContent = this.header ? this.header.label : 'All selected';
+        }
+        else {
+          let text = sel.length + ' selected';
+          if (headerOn && !this.header.isSelectAll) text += ' + Avg';
+          this.triggerEl.textContent = text;
+        }
       }
     }
 
@@ -2747,8 +2756,8 @@
         plugins: [highlightPlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin]
       });
 
-      // Auto-highlight the Weighted Avg line on load
-      const avgIdx = datasets.findIndex(ds => ds.label === 'Weighted Avg');
+      // Auto-highlight the Average line on load
+      const avgIdx = datasets.findIndex(ds => ds.label === 'Average (All Cities)');
       if (avgIdx >= 0) {
         highlightPlugin._highlight(mainChart, avgIdx);
       }
