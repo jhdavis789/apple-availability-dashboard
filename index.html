@@ -1749,6 +1749,12 @@
           document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
           currentView = tab.dataset.view;
+          // Reset to Mac Mini only when switching to heatmap
+          if (currentView === 'heatmap') {
+            _productDropdown.selected.clear();
+            _productDropdown.selected.add('Mac Mini M4 ($599)');
+            _productDropdown._sync();
+          }
           render();
         });
       });
