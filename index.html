@@ -856,6 +856,16 @@
       <button id="qvAllProducts" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #30d158;color:#30d158;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">📊 All Products — Over Time</button>
     </div>
 
+    <!-- Compare mode toggle -->
+    <div class="heatmap-hide" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Lines show</span>
+      <div id="compareBtns" style="display:flex;gap:2px;">
+        <button class="period-btn active" data-mode="cities">Cities</button>
+        <button class="period-btn" data-mode="products">Products</button>
+        <button class="period-btn" data-mode="both">City × Product</button>
+      </div>
+    </div>
+
     <!-- Main chart area -->
     <div class="chart-card heatmap-hide" style="position:relative;">
       <h3 id="mainChartTitle">Availability Over Time</h3>
@@ -1011,6 +1021,7 @@
     let _cycleSortKey = 'avg_hours';
     let _cycleSortDir = 'asc';
     let currentView = 'trends';
+    let _compareMode = 'cities'; // 'cities', 'products', 'both'
     let timeMin = 0;  // epoch ms — absolute min from data
     let timeMax = 0;  // epoch ms — absolute max from data
     let timeStartMs = 0; // current selected start
@@ -1774,10 +1785,25 @@
         _productDropdown.items.forEach(i => _productDropdown.selected.add(i.value));
         _productDropdown.selected.add('__ALL__');
         _productDropdown._sync();
+        // Switch to "products" compare mode
+        _compareMode = 'products';
+        document.querySelectorAll('#compareBtns .period-btn').forEach(b => b.classList.remove('active'));
+        const prodBtn = document.querySelector('#compareBtns .period-btn[data-mode="products"]');
+        if (prodBtn) prodBtn.classList.add('active');
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
         render();
+      });
+
+      // Compare mode toggle
+      document.querySelectorAll('#compareBtns .period-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#compareBtns .period-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          _compareMode = btn.dataset.mode;
+          render();
+        });
       });
 
       // Mover period buttons
@@ -2322,44 +2348,110 @@
       }
 
       const _prods = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
-      if (showAvailability && (currentView === 'compare' || !isAllProducts)) {
-        // One line per city (averaging across selected products)
-        let title;
-        if (_prods.length === 1) title = `${_prods[0]} — Availability by City`;
-        else title = `${_prods.length} Products (Avg) — Availability by City`;
-        document.getElementById('mainChartTitle').textContent = title;
+      const PROD_DASHES = [[], [6,3], [2,2], [8,4,2,4], [4,4], [10,5], [1,4], [8,2]];
 
-        selectedCities.forEach(city => {
-          const rawPoints = snapshots.map((s, si) => {
-            let val = null;
-            const vals = _prods
-              .map(p => getValidValue(s, p, city, filterZeros, blipSet, si))
-              .filter(v => v !== null);
-            if (vals.length > 0) val = vals.reduce((a, b) => a + b, 0) / vals.length;
+      if (showAvailability) {
+        const mode = _compareMode;
+
+        // --- Helper: build points for a single line (one product, one city) ---
+        function buildLine(prod, city) {
+          return snapshots.map((s, si) => {
+            const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
             return { x: new Date(s.timestamp), y: val };
+          }).filter(pt => pt.y !== null).map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
+        }
+
+        // --- Helper: build points averaging products for a city ---
+        // Requires at least 2/3 of products to have data to avoid jumps from partial snapshots
+        function buildCityLine(prods, city) {
+          const minRequired = Math.max(1, Math.ceil(prods.length * 2 / 3));
+          return snapshots.map((s, si) => {
+            const vals = prods.map(p => getValidValue(s, p, city, filterZeros, blipSet, si)).filter(v => v !== null);
+            if (vals.length < minRequired) return { x: new Date(s.timestamp), y: null };
+            return { x: new Date(s.timestamp), y: vals.reduce((a,b) => a+b, 0) / vals.length };
+          }).filter(pt => pt.y !== null).map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
+        }
+
+        // --- Helper: build points averaging cities for a product ---
+        function buildProductLine(prod, cities) {
+          return snapshots.map((s, si) => {
+            let wSum = 0, wTotal = 0, validCount = 0;
+            cities.forEach(city => {
+              const sc = getStoreCount(s, city);
+              if (sc <= 0) return;
+              const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
+              if (val !== null) { wSum += val * sc; wTotal += sc; validCount++; }
+            });
+            if (wTotal <= 0 || validCount < cities.length * (2/3)) return { x: new Date(s.timestamp), y: null };
+            return { x: new Date(s.timestamp), y: wSum / wTotal };
+          }).filter(pt => pt.y !== null).map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
+        }
+
+        if (mode === 'cities') {
+          // One line per city, averaging across selected products
+          let title;
+          if (_prods.length === 1) title = `${_prods[0]} — Availability by City`;
+          else title = `${_prods.length} Products (Avg) — Availability by City`;
+          document.getElementById('mainChartTitle').textContent = title;
+
+          selectedCities.forEach(city => {
+            const points = buildCityLine(_prods, city);
+            if (points.length > 0) {
+              const cityColor = CITY_COLORS[city] || '#888';
+              datasets.push({
+                label: city, data: points,
+                borderColor: cityColor, backgroundColor: cityColor + '20',
+                pointBackgroundColor: cityColor, borderWidth: 2,
+                pointRadius: 1.8, pointHoverRadius: 3, tension: 0.3, fill: false
+              });
+            }
           });
 
-          // Only keep points with actual data — no interpolation
-          const points = rawPoints
-            .filter(pt => pt.y !== null)
-            .map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
+        } else if (mode === 'products') {
+          // One line per product, store-weighted average across selected cities
+          const citiesToAvg = selectedCities.length > 0 ? selectedCities : DATA.all_cities;
+          let title;
+          if (citiesToAvg.length === DATA.all_cities.length) title = 'Availability by Product — All Cities';
+          else if (citiesToAvg.length === 1) title = `${citiesToAvg[0]} — Availability by Product`;
+          else title = `${citiesToAvg.length} Cities (Avg) — Availability by Product`;
+          document.getElementById('mainChartTitle').textContent = title;
 
-          if (points.length > 0) {
+          _prods.forEach((prod, pi) => {
+            const points = buildProductLine(prod, citiesToAvg);
+            if (points.length > 0) {
+              const color = PRODUCT_COLORS[pi % PRODUCT_COLORS.length];
+              datasets.push({
+                label: prod, data: points,
+                borderColor: color, backgroundColor: color + '20',
+                pointBackgroundColor: color, borderWidth: 2,
+                pointRadius: 1.8, pointHoverRadius: 3, tension: 0.3, fill: false
+              });
+            }
+          });
+
+        } else if (mode === 'both') {
+          // One line per city × product combination
+          let title = `${selectedCities.length} ${selectedCities.length === 1 ? 'City' : 'Cities'} × ${_prods.length} ${_prods.length === 1 ? 'Product' : 'Products'}`;
+          document.getElementById('mainChartTitle').textContent = title;
+
+          selectedCities.forEach(city => {
             const cityColor = CITY_COLORS[city] || '#888';
-            datasets.push({
-              label: city,
-              data: points,
-              borderColor: cityColor,
-              backgroundColor: cityColor + '20',
-              pointBackgroundColor: cityColor,
-              borderWidth: 2,
-              pointRadius: 1.8,
-              pointHoverRadius: 3,
-              tension: 0.3,
-              fill: false
+            _prods.forEach((prod, pi) => {
+              const points = buildLine(prod, city);
+              if (points.length > 0) {
+                // Short product label: take text before the price
+                const shortProd = prod.replace(/\s*\([^)]*\)$/, '');
+                datasets.push({
+                  label: `${city} — ${shortProd}`, data: points,
+                  borderColor: cityColor, backgroundColor: cityColor + '20',
+                  pointBackgroundColor: cityColor, borderWidth: 2,
+                  borderDash: PROD_DASHES[pi % PROD_DASHES.length],
+                  pointRadius: 1.8, pointHoverRadius: 3, tension: 0.3, fill: false
+                });
+              }
             });
-          }
-        });
+          });
+        }
 
         // "Average (All Cities)" line — enabled via city dropdown toggle
         if (isCityAverageOn()) {
@@ -2372,16 +2464,10 @@
             const isLight = document.documentElement.getAttribute('data-theme') === 'light';
             const avgColor = isLight ? '#1d1d1f' : '#ffffff';
             datasets.push({
-              label: 'Average (All Cities)',
-              data: avgPoints,
-              borderColor: avgColor,
-              backgroundColor: avgColor + '20',
-              borderWidth: 3,
-              borderDash: [6, 3],
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              tension: 0.3,
-              fill: false
+              label: 'Average (All Cities)', data: avgPoints,
+              borderColor: avgColor, backgroundColor: avgColor + '20',
+              borderWidth: 3, borderDash: [6, 3], pointRadius: 0,
+              pointHoverRadius: 5, tension: 0.3, fill: false
             });
           }
         }
@@ -2397,16 +2483,10 @@
             const isLight = document.documentElement.getAttribute('data-theme') === 'light';
             const selAvgColor = isLight ? '#5856d6' : '#bf5af2';
             datasets.push({
-              label: 'Avg Selected Cities',
-              data: selAvgPoints,
-              borderColor: selAvgColor,
-              backgroundColor: selAvgColor + '20',
-              borderWidth: 3,
-              borderDash: [8, 4],
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              tension: 0.3,
-              fill: false
+              label: 'Avg Selected Cities', data: selAvgPoints,
+              borderColor: selAvgColor, backgroundColor: selAvgColor + '20',
+              borderWidth: 3, borderDash: [8, 4], pointRadius: 0,
+              pointHoverRadius: 5, tension: 0.3, fill: false
             });
           }
         }
@@ -2421,67 +2501,13 @@
           });
           if (customPoints.length > 0) {
             datasets.push({
-              label: 'Custom Avg (' + customCities.join(', ') + ')',
-              data: customPoints,
-              borderColor: '#ffd60a',
-              backgroundColor: '#ffd60a20',
-              borderWidth: 3,
-              borderDash: [3, 3],
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              tension: 0.3,
-              fill: false
+              label: 'Custom Avg (' + customCities.join(', ') + ')', data: customPoints,
+              borderColor: '#ffd60a', backgroundColor: '#ffd60a20',
+              borderWidth: 3, borderDash: [3, 3], pointRadius: 0,
+              pointHoverRadius: 5, tension: 0.3, fill: false
             });
           }
         }
-      } else if (showAvailability) {
-        // All products view: one line per product (store-weighted average across selected cities)
-        document.getElementById('mainChartTitle').textContent = 'All Products — Store-Weighted Average Across Selected Cities';
-
-        // First pass: compute each product's overall weighted avg for sorting
-        const modelStats = DATA.all_models.map((model, idx) => {
-          const points = [];
-          let overallSum = 0, overallWeight = 0;
-          snapshots.forEach((s, si) => {
-            let wSum = 0, wTotal = 0;
-            let validCount = 0;
-            const totalPossible = selectedCities.length;
-            selectedCities.forEach(city => {
-              const sc = getStoreCount(s, city);
-              if (sc <= 0) return;
-              const val = getValidValue(s, model, city, filterZeros, blipSet, si);
-              if (val !== null) {
-                wSum += val * sc;
-                wTotal += sc;
-                validCount++;
-              }
-            });
-            // Only include point if more than 2/3 of cities are reporting
-            if (wTotal > 0 && validCount >= totalPossible * (2 / 3)) {
-              const avg = wSum / wTotal;
-              points.push({ x: new Date(s.timestamp), y: avg });
-              overallSum += avg;
-              overallWeight++;
-            }
-          });
-          return { model, idx, points, overallAvg: overallWeight > 0 ? overallSum / overallWeight : -1 };
-        }).filter(m => m.points.length > 0);
-
-        // Sort by overall weighted average (lowest first so worst products are easy to spot)
-        modelStats.sort((a, b) => a.overallAvg - b.overallAvg);
-
-        modelStats.forEach((m, sortIdx) => {
-          datasets.push({
-            label: `${m.model} (${m.overallAvg.toFixed(0)}%)`,
-            data: m.points,
-            borderColor: PRODUCT_COLORS[sortIdx % PRODUCT_COLORS.length],
-            borderWidth: 2,
-            pointRadius: 1.2,
-            pointHoverRadius: 3,
-            tension: 0.3,
-            fill: false
-          });
-        });
       }
 
       if (!showAvailability) {
