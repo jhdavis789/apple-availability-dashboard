@@ -140,6 +140,25 @@
     .theme-toggle:hover {
       border-color: var(--input-border-hover);
     }
+    .share-btn {
+      background: transparent;
+      border: 1px solid var(--secondary-border);
+      color: var(--text-secondary-btn);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .share-btn:hover {
+      border-color: var(--secondary-border-hover);
+      color: var(--text-secondary-btn-hover);
+    }
+    .share-btn.copied {
+      border-color: #30d158;
+      color: #30d158;
+    }
     .controls {
       display: flex;
       flex-wrap: wrap;
@@ -710,6 +729,7 @@
         <span class="last-updated-badge" id="lastUpdatedSite" style="opacity:0.7;"></span>
         <span class="last-updated-badge" id="headerStats" style="opacity:0.7;"></span>
       </div>
+      <button class="share-btn" id="shareViewBtn" title="Copy shareable URL to clipboard">Share View</button>
       <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">🌙</button>
     </div>
   </div>
@@ -1746,6 +1766,7 @@
         `${totalSnapshots.toLocaleString()} snapshots · ${totalDatapoints.toLocaleString()} data points`;
 
       initControls();
+      deserializeState(window.location.hash);
       render();
       document.getElementById('loading').style.display = 'none';
       document.getElementById('dashboard').style.display = 'flex';
@@ -2257,6 +2278,146 @@
 
       syncSlidersFromMs();
       updateTrackFill();
+    }
+
+    /* ── Share View: URL state serialization ─────────────────────── */
+
+    function serializeState() {
+      const params = new URLSearchParams();
+
+      // View (default: trends)
+      if (currentView !== 'trends') params.set('v', currentView);
+
+      // Products — encode as comma-separated indices into dropdown items
+      if (_productDropdown) {
+        const allItems = _productDropdown.items;
+        const selected = _productDropdown.getSelected();
+        if (selected.length !== allItems.length) {
+          const indices = selected.map(v => allItems.findIndex(i => i.value === v)).filter(i => i >= 0);
+          params.set('p', indices.join(','));
+        }
+      }
+
+      // Cities
+      if (_cityDropdown) {
+        const avg = _cityDropdown.isHeaderSelected();
+        if (!avg) params.set('avg', '0');
+        const cities = _cityDropdown.getSelected();
+        if (cities.length > 0) params.set('c', cities.join(','));
+      }
+
+      // Time range — always include
+      params.set('ts', String(Math.round(timeStartMs)));
+      params.set('te', String(Math.round(timeEndMs)));
+
+      // Checkboxes (only include non-defaults)
+      if (!document.getElementById('filterZeros').checked) params.set('fz', '0');
+      if (!document.getElementById('showAvailability').checked) params.set('sa', '0');
+      if (document.getElementById('showEbayPrices').checked) params.set('ebay', '1');
+      if (!document.getElementById('showEbayMean').checked) params.set('emean', '0');
+      if (document.getElementById('showEbayMedian').checked) params.set('emed', '1');
+      if (document.getElementById('showLeadTimes').checked) params.set('lt', '1');
+
+      // Cycles
+      if (_cycleGroupBy !== 'region') params.set('cg', _cycleGroupBy);
+      if (_cycleRegionFilter !== '__ALL__') params.set('cr', _cycleRegionFilter);
+
+      // Theme
+      if (document.documentElement.getAttribute('data-theme') === 'light') params.set('theme', 'light');
+
+      return params.toString();
+    }
+
+    function deserializeState(hash) {
+      if (!hash || hash.length <= 1) return;
+      const str = hash.startsWith('#') ? hash.slice(1) : hash;
+      if (!str) return;
+      const params = new URLSearchParams(str);
+
+      // View
+      const v = params.get('v');
+      if (v && ['trends', 'heatmap', 'cycles'].includes(v)) {
+        currentView = v;
+        document.querySelectorAll('.view-tab').forEach(t => {
+          t.classList.toggle('active', t.dataset.view === v);
+        });
+      }
+
+      // Products
+      if (params.has('p') && _productDropdown) {
+        const indices = params.get('p').split(',').map(Number).filter(n => !isNaN(n));
+        _productDropdown.selected.clear();
+        indices.forEach(idx => {
+          if (idx >= 0 && idx < _productDropdown.items.length) {
+            _productDropdown.selected.add(_productDropdown.items[idx].value);
+          }
+        });
+        _productDropdown._updateCheckboxes();
+        _productDropdown._updateTrigger();
+      }
+
+      // Cities
+      if (params.has('avg') || params.has('c')) {
+        if (_cityDropdown) {
+          _cityDropdown.selected.clear();
+          if (params.get('avg') !== '0') _cityDropdown.selected.add('__AVG__');
+          const c = params.get('c');
+          if (c) {
+            c.split(',').forEach(city => {
+              if (_cityDropdown.items.some(i => i.value === city)) {
+                _cityDropdown.selected.add(city);
+              }
+            });
+          }
+          _cityDropdown._updateCheckboxes();
+          _cityDropdown._updateTrigger();
+        }
+      }
+
+      // Time range
+      if (params.has('ts')) {
+        const ts = Number(params.get('ts'));
+        if (!isNaN(ts) && ts >= timeMin && ts <= timeMax) timeStartMs = ts;
+      }
+      if (params.has('te')) {
+        const te = Number(params.get('te'));
+        if (!isNaN(te) && te >= timeMin && te <= timeMax) timeEndMs = te;
+      }
+      if (params.has('ts') || params.has('te')) {
+        syncInputsFromMs();
+        syncSlidersFromMs();
+        document.querySelectorAll('#timeRangePeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
+      }
+
+      // Checkboxes
+      if (params.has('fz')) document.getElementById('filterZeros').checked = params.get('fz') === '1';
+      if (params.has('sa')) document.getElementById('showAvailability').checked = params.get('sa') === '1';
+      if (params.has('ebay')) {
+        document.getElementById('showEbayPrices').checked = params.get('ebay') === '1';
+        updateEbaySubToggles();
+      }
+      if (params.has('emean')) document.getElementById('showEbayMean').checked = params.get('emean') === '1';
+      if (params.has('emed')) document.getElementById('showEbayMedian').checked = params.get('emed') === '1';
+      if (params.has('lt')) document.getElementById('showLeadTimes').checked = params.get('lt') === '1';
+
+      // Cycles
+      if (params.has('cg')) {
+        const cg = params.get('cg');
+        if (cg === 'store' || cg === 'region') _cycleGroupBy = cg;
+      }
+      if (params.has('cr')) _cycleRegionFilter = params.get('cr');
+
+      // Theme (overrides localStorage)
+      if (params.has('theme')) {
+        const theme = params.get('theme');
+        if (theme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+          document.getElementById('themeToggle').textContent = '☀️';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          document.getElementById('themeToggle').textContent = '🌙';
+        }
+      }
     }
 
     function _baseFilteredSnapshots() {
@@ -3530,6 +3691,33 @@
         document.getElementById('themeToggle').textContent = '☀️';
       }
     })();
+
+    // Share View button
+    document.getElementById('shareViewBtn').addEventListener('click', () => {
+      const hash = serializeState();
+      window.location.hash = hash;
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('shareViewBtn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Share View'; btn.classList.remove('copied'); }, 2000);
+      }).catch(() => {
+        // Fallback for older browsers / insecure contexts
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        const btn = document.getElementById('shareViewBtn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Share View'; btn.classList.remove('copied'); }, 2000);
+      });
+    });
 
     // ==========================================================
     // Interactive Map with Voronoi-Clipped Gradient Circles
