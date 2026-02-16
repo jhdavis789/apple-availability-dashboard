@@ -1325,6 +1325,193 @@
     };
 
     // Plugin: scroll wheel on x-axis to zoom in/out
+    /**
+     * Interpolating crosshair tooltip plugin.
+     * Shows interpolated values for ALL visible datasets at the cursor's x position.
+     * Right-click toggles persistent data labels.
+     */
+    let _crosshairPinned = false;
+    const crosshairTooltipPlugin = {
+      id: 'crosshairTooltip',
+      _tooltipEl: null,
+      _lastX: null,
+
+      /** Binary-search interpolate: given sorted [{x:Date,y:number}], find y at targetMs */
+      _interpolate(data, targetMs) {
+        if (!data || data.length === 0) return null;
+        const first = data[0].x instanceof Date ? data[0].x.getTime() : +data[0].x;
+        const last = data[data.length - 1].x instanceof Date ? data[data.length - 1].x.getTime() : +data[data.length - 1].x;
+        if (targetMs <= first) return data[0].y;
+        if (targetMs >= last) return data[data.length - 1].y;
+        let lo = 0, hi = data.length - 1;
+        while (lo < hi - 1) {
+          const mid = (lo + hi) >> 1;
+          const mx = data[mid].x instanceof Date ? data[mid].x.getTime() : +data[mid].x;
+          if (mx <= targetMs) lo = mid;
+          else hi = mid;
+        }
+        const t0 = data[lo].x instanceof Date ? data[lo].x.getTime() : +data[lo].x;
+        const t1 = data[hi].x instanceof Date ? data[hi].x.getTime() : +data[hi].x;
+        if (t1 === t0) return data[lo].y;
+        const frac = (targetMs - t0) / (t1 - t0);
+        return data[lo].y + frac * (data[hi].y - data[lo].y);
+      },
+
+      _getTooltipEl(chart) {
+        if (!this._tooltipEl) {
+          this._tooltipEl = document.createElement('div');
+          this._tooltipEl.className = 'crosshair-tooltip';
+          this._tooltipEl.style.cssText = 'position:absolute;pointer-events:none;z-index:100;' +
+            'background:var(--tooltip-bg);border:1px solid var(--tooltip-border);border-radius:8px;' +
+            'padding:8px 12px;font-size:12px;line-height:1.6;white-space:nowrap;display:none;' +
+            'box-shadow:0 4px 12px rgba(0,0,0,0.3);max-height:400px;overflow-y:auto;';
+          chart.canvas.parentElement.style.position = 'relative';
+          chart.canvas.parentElement.appendChild(this._tooltipEl);
+        }
+        return this._tooltipEl;
+      },
+
+      afterInit(chart) {
+        // Right-click toggles pin/unpin of the crosshair tooltip
+        chart.canvas.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          _crosshairPinned = !_crosshairPinned;
+          if (!_crosshairPinned) {
+            // Unpin: hide tooltip and crosshair
+            this._lastX = null;
+            const el = this._getTooltipEl(chart);
+            el.style.display = 'none';
+            chart.draw();
+          }
+        });
+      },
+
+      afterEvent(chart, args) {
+        if (_crosshairPinned) return; // Pinned — don't update
+        const evt = args.event;
+        if (evt.type === 'mouseout') {
+          this._lastX = null;
+          const el = this._getTooltipEl(chart);
+          el.style.display = 'none';
+          chart.draw();
+          return;
+        }
+        if (evt.type === 'mousemove') {
+          const area = chart.chartArea;
+          if (evt.x < area.left || evt.x > area.right || evt.y < area.top || evt.y > area.bottom) {
+            this._lastX = null;
+            const el = this._getTooltipEl(chart);
+            el.style.display = 'none';
+            chart.draw();
+            return;
+          }
+          this._lastX = evt.x;
+          this._showTooltip(chart, evt.x, evt.y);
+          chart.draw();
+        }
+      },
+
+      afterDraw(chart) {
+        if (this._lastX === null) return;
+        const ctx = chart.ctx;
+        const area = chart.chartArea;
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = document.documentElement.getAttribute('data-theme') === 'light'
+          ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(this._lastX, area.top);
+        ctx.lineTo(this._lastX, area.bottom);
+        ctx.stroke();
+        ctx.restore();
+      },
+
+      _showTooltip(chart, mouseX, mouseY) {
+        const el = this._getTooltipEl(chart);
+        const xScale = chart.scales.x;
+        if (!xScale) { el.style.display = 'none'; return; }
+
+        const targetMs = xScale.getValueForPixel(mouseX);
+        const targetDate = new Date(targetMs);
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const h = targetDate.getHours(), m = targetDate.getMinutes();
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        const timeStr = `${months[targetDate.getMonth()]} ${targetDate.getDate()}, ${h12}:${m < 10 ? '0' + m : m} ${ampm}`;
+
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        const titleColor = isLight ? '#1d1d1f' : '#fff';
+        const bodyColor = isLight ? '#1d1d1f' : '#ccc';
+
+        let lines = [];
+        chart.data.datasets.forEach((ds, i) => {
+          if (chart.getDatasetMeta(i).hidden) return;
+          // Skip sigma bands
+          if (ds.label && ds.label.includes('\u03c3')) return;
+
+          const val = this._interpolate(ds.data, targetMs);
+          if (val === null) return;
+
+          const color = ds.borderColor || '#888';
+          let formatted;
+          if (ds.yAxisID === 'y2') {
+            if (ds.label && ds.label.includes('Lead Time')) {
+              formatted = val.toFixed(2) + ' days';
+            } else {
+              formatted = '$' + val.toFixed(2);
+              // Find nearest eBay data point for total_listings
+              if (ds._ebayData && ds._ebayData.length > 0) {
+                let nearest = ds._ebayData[0], bestDist = Infinity;
+                for (const d of ds._ebayData) {
+                  const dist = Math.abs(new Date(d.timestamp).getTime() - targetMs);
+                  if (dist < bestDist) { bestDist = dist; nearest = d; }
+                }
+                if (nearest.total_listings != null) formatted += ` (${nearest.total_listings} listings)`;
+              }
+            }
+          } else {
+            formatted = val.toFixed(1) + '%';
+          }
+
+          lines.push({ label: ds.label, color, formatted, y: val });
+        });
+
+        if (lines.length === 0) { el.style.display = 'none'; return; }
+
+        // Sort: availability lines descending, then eBay/lead time
+        lines.sort((a, b) => b.y - a.y);
+
+        let html = `<div style="color:${titleColor};font-weight:600;margin-bottom:4px;">${timeStr}${_crosshairPinned ? ' <span style="opacity:0.5;font-size:10px;">(pinned)</span>' : ''}</div>`;
+        lines.forEach(l => {
+          html += `<div style="color:${bodyColor};"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l.color};margin-right:6px;"></span>${l.label}: <strong>${l.formatted}</strong></div>`;
+        });
+
+        el.innerHTML = html;
+        el.style.display = 'block';
+
+        // Position: prefer right of cursor, flip if near edge
+        const tooltipW = el.offsetWidth;
+        const tooltipH = el.offsetHeight;
+        let left = mouseX + 16;
+        if (left + tooltipW > chart.canvas.clientWidth - 10) {
+          left = mouseX - tooltipW - 16;
+        }
+        let top = mouseY - tooltipH / 2;
+        top = Math.max(chart.chartArea.top, Math.min(top, chart.chartArea.bottom - tooltipH));
+
+        el.style.left = left + 'px';
+        el.style.top = top + 'px';
+      },
+
+      destroy(chart) {
+        if (this._tooltipEl && this._tooltipEl.parentElement) {
+          this._tooltipEl.parentElement.removeChild(this._tooltipEl);
+          this._tooltipEl = null;
+        }
+      }
+    };
+
     /** Draw a dotted vertical "now" line when the chart extends into the future */
     const nowLinePlugin = {
       id: 'nowLine',
@@ -2324,6 +2511,7 @@
         mainChart.destroy();
         mainChart = null;
       }
+      _crosshairPinned = false;
 
       let datasets = [];
       const showAvailability = document.getElementById('showAvailability').checked;
@@ -2736,41 +2924,7 @@
                 highlightPlugin._highlight(legend.chart, legendItem.datasetIndex);
               }
             },
-            tooltip: {
-              backgroundColor: getThemeColors().tooltipBg,
-              borderColor: getThemeColors().tooltipBorder,
-              borderWidth: 1,
-              titleColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#1d1d1f' : '#fff',
-              bodyColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#1d1d1f' : '#ccc',
-              filter: (tooltipItem) => {
-                // When a line is highlighted, only show that line's tooltip
-                if (highlightPlugin._highlighted >= 0) {
-                  return tooltipItem.datasetIndex === highlightPlugin._highlighted;
-                }
-                return true;
-              },
-              itemSort: (a, b) => b.parsed.y - a.parsed.y,
-              callbacks: {
-                label: ctx => {
-                  if (ctx.dataset.yAxisID === 'y2') {
-                    // Skip sigma band labels
-                    if (ctx.dataset.label.includes('\u03c3')) return null;
-                    // Lead time datasets
-                    if (ctx.dataset.label.includes('Lead Time')) {
-                      return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} days`;
-                    }
-                    let label = `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}`;
-                    // Show total listings count for eBay data
-                    if (ctx.dataset._ebayData && ctx.dataIndex < ctx.dataset._ebayData.length) {
-                      const listings = ctx.dataset._ebayData[ctx.dataIndex].total_listings;
-                      if (listings != null) label += ` (${listings} listings)`;
-                    }
-                    return label;
-                  }
-                  return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`;
-                }
-              }
-            }
+            tooltip: { enabled: false }
           },
           scales: {
             x: _makeTimeAxisConfig({ max: new Date() }),
@@ -2778,7 +2932,7 @@
             y2: y2Config
           }
         },
-        plugins: [highlightPlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin, nowLinePlugin]
+        plugins: [highlightPlugin, crosshairTooltipPlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin, nowLinePlugin]
       });
 
       // Auto-highlight the Average line on load
