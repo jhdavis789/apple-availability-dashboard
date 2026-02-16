@@ -2619,7 +2619,7 @@
                 label: city, data: points,
                 borderColor: cityColor, backgroundColor: cityColor + '20',
                 pointBackgroundColor: cityColor, borderWidth: 2,
-                pointRadius: 1.8, pointHoverRadius: 3, tension: 0.3, fill: false
+                pointRadius: 1, pointHoverRadius: 2.5, pointBorderWidth: 0, tension: 0.3, fill: false
               });
             }
           });
@@ -2640,7 +2640,7 @@
                 label: prod, data: points,
                 borderColor: color, backgroundColor: color + '20',
                 pointBackgroundColor: color, borderWidth: 2,
-                pointRadius: 1.8, pointHoverRadius: 3, tension: 0.3, fill: false
+                pointRadius: 1, pointHoverRadius: 2.5, pointBorderWidth: 0, tension: 0.3, fill: false
               });
             }
           });
@@ -2661,7 +2661,7 @@
                   borderColor: cityColor, backgroundColor: cityColor + '20',
                   pointBackgroundColor: cityColor, borderWidth: 2,
                   borderDash: PROD_DASHES[pi % PROD_DASHES.length],
-                  pointRadius: 1.8, pointHoverRadius: 3, tension: 0.3, fill: false
+                  pointRadius: 1, pointHoverRadius: 2.5, pointBorderWidth: 0, tension: 0.3, fill: false
                 });
               }
             });
@@ -2731,8 +2731,9 @@
                 borderColor: '#30d158',
                 backgroundColor: '#30d15820',
                 borderWidth: 2.5,
-                pointRadius: 3,
-                pointHoverRadius: 5,
+                pointRadius: 1.5,
+                pointHoverRadius: 3,
+                pointBorderWidth: 0,
                 pointStyle: 'rectRot',
                 tension: 0.3,
                 fill: false,
@@ -2749,8 +2750,9 @@
                 backgroundColor: '#ff9f0a20',
                 borderWidth: 2,
                 borderDash: [6, 3],
-                pointRadius: 3,
-                pointHoverRadius: 5,
+                pointRadius: 1.5,
+                pointHoverRadius: 3,
+                pointBorderWidth: 0,
                 pointStyle: 'triangle',
                 tension: 0.3,
                 fill: false,
@@ -2806,8 +2808,9 @@
                 backgroundColor: color + '20',
                 borderWidth: 2,
                 borderDash: [8, 4],
-                pointRadius: 2.5,
-                pointHoverRadius: 4,
+                pointRadius: 1.5,
+                pointHoverRadius: 3,
+                pointBorderWidth: 0,
                 pointStyle: 'rectRot',
                 tension: 0.3,
                 fill: false,
@@ -2822,8 +2825,9 @@
                 backgroundColor: color + '20',
                 borderWidth: 1.5,
                 borderDash: [3, 3],
-                pointRadius: 1.8,
-                pointHoverRadius: 3,
+                pointRadius: 1,
+                pointHoverRadius: 2.5,
+                pointBorderWidth: 0,
                 pointStyle: 'triangle',
                 tension: 0.3,
                 fill: false,
@@ -2859,8 +2863,9 @@
               backgroundColor: 'transparent',
               borderWidth: 2,
               borderDash: [6, 3],
-              pointRadius: 2.5,
-              pointHoverRadius: 4,
+              pointRadius: 1.5,
+              pointHoverRadius: 3,
+              pointBorderWidth: 0,
               pointStyle: 'rect',
               pointBackgroundColor: cityColor,
               stepped: 'before',
@@ -2929,6 +2934,7 @@
           responsive: true,
           maintainAspectRatio: false,
           interaction: { mode: 'nearest', intersect: true },
+          elements: { point: { borderWidth: 0, hoverBorderWidth: 0 } },
           onClick: () => {}, // enable click events for plugin
           plugins: {
             legend: {
