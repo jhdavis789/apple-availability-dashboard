@@ -702,14 +702,13 @@
 </head>
 <body>
   <div class="header">
-    <h1>Apple Product Availability Tracker</h1>
-    <div class="subtitle">Pickup availability across 12 US cities</div>
+    <h1>Apple Product Availability Tracker <span style="font-size:14px;font-weight:400;color:var(--text-muted);margin-left:8px;">Jackson Davis // JAOD</span></h1>
     <div class="subtitle" style="margin-top:8px;font-size:13px;"><span style="background:#ffd60a;color:#000;padding:4px 8px;border-radius:4px;text-decoration:underline;font-weight:600;">⚠️ Percentages = % of stores with at least one unit in stock (not inventory depth)</span></div>
-    <div class="subtitle" style="margin-top:6px;font-size:12px;color:var(--text-dim);">ℹ️ iPhone and some other products are no longer tracked to prioritize API availability for more relevant products. They were consistently available (~95-100%).</div>
     <div class="header-top-right">
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
         <span class="last-updated-badge" id="lastUpdated"></span>
         <span class="last-updated-badge" id="lastUpdatedSite" style="opacity:0.7;"></span>
+        <span class="last-updated-badge" id="headerStats" style="opacity:0.7;"></span>
       </div>
       <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">🌙</button>
     </div>
@@ -767,10 +766,6 @@
           <input type="checkbox" id="showLeadTimes">
           Show Lead Times
         </label>
-        <label class="toggle-label">
-          <input type="checkbox" id="showSelectedAvg">
-          Avg Selected Cities
-        </label>
       </div>
     </div>
 
@@ -778,8 +773,8 @@
       <label>Time Range</label>
       <div class="period-btns" id="timeRangePeriodBtns" style="margin-bottom:8px;">
         <button class="period-btn" data-hours="24">24h</button>
-        <button class="period-btn active" data-hours="168">7d</button>
-        <button class="period-btn" data-hours="336">2wk</button>
+        <button class="period-btn" data-hours="168">7d</button>
+        <button class="period-btn active" data-hours="336">2wk</button>
         <button class="period-btn" data-hours="0">Max</button>
       </div>
       <div class="time-range-inputs">
@@ -799,6 +794,14 @@
       <label>&nbsp;</label>
       <div style="display:flex;gap:8px;">
         <button id="resetCities" class="secondary">Reset</button>
+      </div>
+    </div>
+
+    <div class="control-group heatmap-hide">
+      <label>Quick Views</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button id="qvMacMini" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #0a84ff;color:#6cb4ff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">Mac Mini — by City</button>
+        <button id="qvAllProducts" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #30d158;color:#30d158;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">All Products</button>
       </div>
     </div>
   </div>
@@ -846,30 +849,17 @@
       </details>
     </div>
 
-    <!-- Stats row -->
-    <div class="stats-row" id="statsRow"></div>
-    <div class="excluded-info" id="excludedInfo"></div>
-
-    <!-- Quick Views -->
-    <div class="heatmap-hide" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-      <button id="qvMacMini" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #0a84ff;color:#6cb4ff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">🖥 Base Mac Mini — by City</button>
-      <button id="qvAllProducts" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #30d158;color:#30d158;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">📊 All Products — Over Time</button>
-    </div>
-
-    <!-- Compare mode toggle -->
-    <div class="heatmap-hide" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-      <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Lines show</span>
-      <div id="compareBtns" style="display:flex;gap:2px;">
-        <button class="period-btn active" data-mode="cities">Cities</button>
-        <button class="period-btn" data-mode="products">Products</button>
-        <button class="period-btn" data-mode="both">City × Product</button>
-      </div>
-    </div>
+    <!-- Stats row (hidden, stats moved to header) -->
+    <div class="stats-row" id="statsRow" style="display:none;"></div>
+    <div class="excluded-info" id="excludedInfo" style="display:none;"></div>
 
     <!-- Main chart area -->
     <div class="chart-card heatmap-hide" style="position:relative;">
       <h3 id="mainChartTitle">Availability Over Time</h3>
-      <button id="resetGraphBtn" class="secondary" style="display:none;position:absolute;top:12px;right:12px;font-size:11px;padding:4px 10px;z-index:10;">Reset axes</button>
+      <div style="position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:10;">
+        <button id="downloadChartCsv" class="secondary" style="font-size:11px;padding:4px 10px;" title="Download raw data as CSV">CSV</button>
+        <button id="resetGraphBtn" class="secondary" style="display:none;font-size:11px;padding:4px 10px;">Reset axes</button>
+      </div>
       <div class="chart-container">
         <canvas id="mainChart"></canvas>
       </div>
@@ -998,6 +988,7 @@
         <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
           <p style="margin-bottom:10px;"><strong style="color:var(--text);">Data source:</strong> Apple's <code style="background:var(--input-bg);padding:2px 5px;border-radius:3px;font-size:11px;">retail/pickup-message</code> API, polled every 1-3 hours across 19 zip codes covering 12 US metro areas (~119 stores). Each poll returns per-store, per-product pickup availability as one of three states: <strong>available</strong> (in stock for pickup), <strong>unavailable</strong> (out of stock), or <strong>ineligible</strong> (not offered at this store).</p>
           <p style="margin-bottom:10px;"><strong style="color:var(--text);">Cycle detection:</strong> For each (store, product) pair, we build a timeline of availability state changes. A <em>restock</em> is a transition from unavailable/ineligible to available. A <em>sellout</em> is a transition from available back to unavailable/ineligible. One complete cycle = restock followed by sellout. Cycles shorter than 5 minutes are filtered as noise.</p>
+          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Store hours adjustment:</strong> Cycle durations reflect <em>open hours only</em>. Each store's operating schedule (e.g., 9 AM–9 PM Mon–Sat, 10 AM–8 PM Sun) is extracted from the Apple API and used to subtract hours the store was closed. A cycle spanning overnight only counts the hours the store was actually open for business. Store timezones are accounted for.</p>
           <p style="margin-bottom:10px;"><strong style="color:var(--text);">Glitch filtering:</strong> Snapshots where &gt;80% of all (store, product) observations show "ineligible" are discarded as backend glitches (e.g., the Feb 9 outage where Apple's system briefly returned rank=0 for all stores).</p>
           <p style="margin-bottom:10px;"><strong style="color:var(--text);">Demand proxy:</strong> Apple does not expose inventory quantities through any API. Sellout velocity (time from restock to out-of-stock) serves as an indirect demand signal: faster sellouts indicate higher demand or lower stock allocation. Stores selling out within hours likely have both high foot traffic and limited inventory.</p>
           <p><strong style="color:var(--text);">Limitations:</strong> Polling frequency (1-3 hours) means exact restock/sellout times have up to ~3 hour margin of error. Same-day cycles where both transitions happen between polls may be missed entirely. The "available" flag is binary (at least 1 unit in stock), so a store with 1 unit and a store with 50 units both appear identical until one sells out.</p>
@@ -1021,7 +1012,6 @@
     let _cycleSortKey = 'avg_hours';
     let _cycleSortDir = 'asc';
     let currentView = 'trends';
-    let _compareMode = 'cities'; // 'cities', 'products', 'both'
     let timeMin = 0;  // epoch ms — absolute min from data
     let timeMax = 0;  // epoch ms — absolute max from data
     let timeStartMs = 0; // current selected start
@@ -1335,6 +1325,37 @@
     };
 
     // Plugin: scroll wheel on x-axis to zoom in/out
+    /** Draw a dotted vertical "now" line when the chart extends into the future */
+    const nowLinePlugin = {
+      id: 'nowLine',
+      afterDraw(chart) {
+        const xScale = chart.scales.x;
+        if (!xScale) return;
+        const now = Date.now();
+        const xMax = xScale.max;
+        // Only draw if the chart x-axis extends past the current time
+        if (xMax <= now) return;
+        const xPixel = xScale.getPixelForValue(now);
+        if (xPixel < xScale.left || xPixel > xScale.right) return;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(xPixel, chart.chartArea.top);
+        ctx.lineTo(xPixel, chart.chartArea.bottom);
+        ctx.stroke();
+        // Label
+        ctx.setLineDash([]);
+        ctx.font = '10px -apple-system, sans-serif';
+        ctx.fillStyle = document.documentElement.getAttribute('data-theme') === 'light' ? '#86868b' : '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText('Now', xPixel, chart.chartArea.top - 4);
+        ctx.restore();
+      }
+    };
+
     const xZoomPlugin = {
       id: 'xAxisZoom',
       _xDragging: false,
@@ -1507,6 +1528,19 @@
         document.getElementById('lastUpdatedSite').textContent =
           `Site updated ${months[gen.getMonth()]} ${gen.getDate()} at ${h12}:${minStr} ${ampm}`;
       }
+
+      // Total stats in header
+      const totalSnapshots = DATA.snapshots ? DATA.snapshots.length : 0;
+      let totalDatapoints = 0;
+      if (DATA.snapshots) {
+        DATA.snapshots.forEach(s => {
+          s.products.forEach(p => {
+            totalDatapoints += Object.values(p.values).filter(v => v !== null && v !== undefined).length;
+          });
+        });
+      }
+      document.getElementById('headerStats').textContent =
+        `${totalSnapshots.toLocaleString()} snapshots · ${totalDatapoints.toLocaleString()} data points`;
 
       initControls();
       render();
@@ -1725,7 +1759,6 @@
         document.getElementById('leadTimeToggleLabel').style.display = 'flex';
       }
       document.getElementById('showLeadTimes').addEventListener('change', render);
-      document.getElementById('showSelectedAvg').addEventListener('change', render);
 
       // Reset axes button
       document.getElementById('resetGraphBtn').addEventListener('click', () => {
@@ -1773,27 +1806,15 @@
 
       document.getElementById('qvAllProducts').addEventListener('click', () => {
         _productDropdown.items.forEach(i => _productDropdown.selected.add(i.value));
-        _productDropdown.selected.add('__ALL__');
         _productDropdown._sync();
-        // Switch to "products" compare mode
-        _compareMode = 'products';
-        document.querySelectorAll('#compareBtns .period-btn').forEach(b => b.classList.remove('active'));
-        const prodBtn = document.querySelector('#compareBtns .period-btn[data-mode="products"]');
-        if (prodBtn) prodBtn.classList.add('active');
+        // Clear city selection so it shows per-product averages
+        _cityDropdown.selected.clear();
+        _cityDropdown.selected.add('__AVG__');
+        _cityDropdown._sync();
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
         render();
-      });
-
-      // Compare mode toggle
-      document.querySelectorAll('#compareBtns .period-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('#compareBtns .period-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          _compareMode = btn.dataset.mode;
-          render();
-        });
       });
 
       // Mover period buttons
@@ -1885,8 +1906,8 @@
       timeMin = Math.min(...timestamps);
       timeMax = Math.max(...timestamps);
       timeEndMs = timeMax;
-      // Default to 7d view
-      timeStartMs = Math.max(timeMin, timeMax - 168 * 3600000);
+      // Default to 2wk view
+      timeStartMs = Math.max(timeMin, timeMax - 336 * 3600000);
 
       const startInput = document.getElementById('timeStart');
       const endInput = document.getElementById('timeEnd');
@@ -2341,8 +2362,6 @@
       const PROD_DASHES = [[], [6,3], [2,2], [8,4,2,4], [4,4], [10,5], [1,4], [8,2], [12,4], [3,6], [6,3,2,3], [1,6], [4,2,4,6], [10,2,2,2], [5,5]];
 
       if (showAvailability) {
-        const mode = _compareMode;
-
         // --- Helper: build points for a single line (one product, one city) ---
         function buildLine(prod, city) {
           return snapshots.map((s, si) => {
@@ -2352,7 +2371,6 @@
         }
 
         // --- Helper: build points averaging products for a city ---
-        // Requires at least 2/3 of products to have data to avoid jumps from partial snapshots
         function buildCityLine(prods, city) {
           const minRequired = Math.max(1, Math.ceil(prods.length * 2 / 3));
           return snapshots.map((s, si) => {
@@ -2377,15 +2395,21 @@
           }).filter(pt => pt.y !== null).map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
         }
 
-        if (mode === 'cities') {
-          // One line per city, averaging across selected products
-          let title;
-          if (_prods.length === 1) title = `${_prods[0]} — Availability by City`;
-          else title = `${_prods.length} Products (Avg) — Availability by City`;
+        // Auto-detect mode based on selection:
+        //   1 product, N cities → one line per city (city colors)
+        //   N products, 0-1 cities or avg-only → one line per product (product colors)
+        //   N products, N cities → one line per city × product (city color + product dash)
+        const multiProds = _prods.length > 1;
+        const multiCities = selectedCities.length > 1;
+        const cityAvgOnly = selectedCities.length === 0 && isCityAverageOn();
+
+        if (!multiProds && !cityAvgOnly) {
+          // Single product, N cities → one line per city
+          const title = `${_prods[0]} — Availability by City`;
           document.getElementById('mainChartTitle').textContent = title;
 
           selectedCities.forEach(city => {
-            const points = buildCityLine(_prods, city);
+            const points = buildLine(_prods[0], city);
             if (points.length > 0) {
               const cityColor = CITY_COLORS[city] || '#888';
               datasets.push({
@@ -2397,13 +2421,12 @@
             }
           });
 
-        } else if (mode === 'products') {
-          // One line per product, store-weighted average across selected cities
+        } else if (multiProds && !multiCities) {
+          // Multiple products, 0-1 cities → one line per product
           const citiesToAvg = selectedCities.length > 0 ? selectedCities : DATA.all_cities;
           let title;
           if (citiesToAvg.length === DATA.all_cities.length) title = 'Availability by Product — All Cities';
-          else if (citiesToAvg.length === 1) title = `${citiesToAvg[0]} — Availability by Product`;
-          else title = `${citiesToAvg.length} Cities (Avg) — Availability by Product`;
+          else title = `${citiesToAvg[0]} — Availability by Product`;
           document.getElementById('mainChartTitle').textContent = title;
 
           _prods.forEach((prod, pi) => {
@@ -2419,8 +2442,8 @@
             }
           });
 
-        } else if (mode === 'both') {
-          // One line per city × product combination
+        } else {
+          // Multiple products × multiple cities → Cartesian product
           let title = `${selectedCities.length} ${selectedCities.length === 1 ? 'City' : 'Cities'} × ${_prods.length} ${_prods.length === 1 ? 'Product' : 'Products'}`;
           document.getElementById('mainChartTitle').textContent = title;
 
@@ -2429,7 +2452,6 @@
             _prods.forEach((prod, pi) => {
               const points = buildLine(prod, city);
               if (points.length > 0) {
-                // Short product label: take text before the price
                 const shortProd = prod.replace(/\s*\([^)]*\)$/, '');
                 datasets.push({
                   label: `${city} — ${shortProd}`, data: points,
@@ -2457,25 +2479,6 @@
               label: 'Average (All Cities)', data: avgPoints,
               borderColor: avgColor, backgroundColor: avgColor + '20',
               borderWidth: 3, borderDash: [6, 3], pointRadius: 0,
-              pointHoverRadius: 5, tension: 0.3, fill: false
-            });
-          }
-        }
-
-        // "Avg Selected Cities" line — enabled via checkbox toggle
-        if (document.getElementById('showSelectedAvg').checked && selectedCities.length > 1) {
-          const selAvgPoints = [];
-          snapshots.forEach((s, si) => {
-            const val = weightedAvg(s, si, _prods, selectedCities, filterZeros, blipSet);
-            if (val !== null) selAvgPoints.push({ x: new Date(s.timestamp), y: val });
-          });
-          if (selAvgPoints.length > 0) {
-            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-            const selAvgColor = isLight ? '#5856d6' : '#bf5af2';
-            datasets.push({
-              label: 'Avg Selected Cities', data: selAvgPoints,
-              borderColor: selAvgColor, backgroundColor: selAvgColor + '20',
-              borderWidth: 3, borderDash: [8, 4], pointRadius: 0,
               pointHoverRadius: 5, tension: 0.3, fill: false
             });
           }
@@ -2770,12 +2773,12 @@
             }
           },
           scales: {
-            x: _makeTimeAxisConfig({ max: showAvailability ? new Date() : undefined }),
+            x: _makeTimeAxisConfig({ max: new Date() }),
             y: yConfig,
             y2: y2Config
           }
         },
-        plugins: [highlightPlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin]
+        plugins: [highlightPlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin, nowLinePlugin]
       });
 
       // Auto-highlight the Average line on load
@@ -3253,6 +3256,45 @@
       const a = document.createElement('a');
       a.href = url;
       a.download = `availability_${safeName}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Chart CSV download — exports raw (product × city) time series for current view
+    document.getElementById('downloadChartCsv').addEventListener('click', () => {
+      if (!DATA) return;
+      const { snapshots, filterZeros } = getFilteredSnapshots();
+      const prods = getSelectedProducts();
+      const cities = getSelectedCities();
+      if (prods.length === 0) return;
+      // Use all cities if none selected but average is on
+      const effectiveCities = cities.length > 0 ? cities : DATA.all_cities;
+      const blipSet = filterZeros ? getBlipSet(snapshots) : null;
+
+      // Build header: Timestamp, then one column per product × city
+      const cols = [];
+      effectiveCities.forEach(city => {
+        prods.forEach(prod => {
+          cols.push({ city, prod, label: `${prod} — ${city}` });
+        });
+      });
+
+      let csv = 'Timestamp,' + cols.map(c => '"' + c.label.replace(/"/g, '""') + '"').join(',') + '\n';
+      snapshots.forEach((s, si) => {
+        const row = [s.timestamp];
+        cols.forEach(c => {
+          const val = getValidValue(s, c.prod, c.city, filterZeros, blipSet, si);
+          row.push(val !== null ? val : '');
+        });
+        csv += row.join(',') + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeName = (prods.length === 1 ? prods[0] : prods.length + '_products').replace(/[^a-zA-Z0-9]/g, '_');
+      a.download = `trends_${safeName}_${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
@@ -3941,7 +3983,8 @@
         if (isAllProd) th += `<td style="color:var(--text-muted);font-size:12px;">${c.product}</td>`;
         th += `<td style="white-space:nowrap;font-size:12px;">${c.restock.replace('T',' ').slice(0,16)}</td>`;
         th += `<td style="white-space:nowrap;font-size:12px;">${c.sellout.replace('T',' ').slice(0,16)}</td>`;
-        th += `<td style="color:${clr};font-weight:600;">${formatDuration(c.hours)}</td></tr>`;
+        const wallNote = c.wall_hours && c.wall_hours !== c.hours ? ` <span style="color:var(--text-dimmer);font-size:10px;">(${formatDuration(c.wall_hours)} wall)</span>` : '';
+        th += `<td style="color:${clr};font-weight:600;">${formatDuration(c.hours)}${wallNote}</td></tr>`;
       });
       th += '</tbody>';
       tbl.innerHTML = th;
@@ -4006,32 +4049,46 @@
         'Denver': '#a855f7', 'Atlanta': '#fb923c', 'Other': '#888',
       };
 
-      const datasets = Object.entries(regionCycles).sort((a,b) => a[0].localeCompare(b[0])).map(([region, pts]) => ({
-        label: region,
-        data: pts.sort((a,b) => a.x - b.x),
-        borderColor: regionColors[region] || '#888',
-        backgroundColor: (regionColors[region] || '#888') + '80',
-        pointRadius: 3,
-        pointHoverRadius: 5,
-        showLine: pts.length > 1,
-        borderWidth: 1.5,
-        tension: 0,
-      }));
+      // Compute 48h EMA per region
+      // EMA alpha: use ~48h half-life. For each region, process points in time order.
+      function computeEMA(pts, halfLifeMs) {
+        if (pts.length === 0) return [];
+        const alpha = 1 - Math.exp(-Math.LN2 / halfLifeMs); // time-weighted decay
+        const ema = [{ x: pts[0].x, y: pts[0].y }];
+        for (let i = 1; i < pts.length; i++) {
+          const dt = pts[i].x.getTime() - pts[i - 1].x.getTime();
+          const w = 1 - Math.exp(-Math.LN2 * dt / halfLifeMs);
+          const prev = ema[ema.length - 1].y;
+          ema.push({ x: pts[i].x, y: prev + w * (pts[i].y - prev) });
+        }
+        return ema;
+      }
+      const halfLife48h = 48 * 3600000;
 
-      // Add rolling average line across all regions
+      const datasets = Object.entries(regionCycles).sort((a,b) => a[0].localeCompare(b[0])).map(([region, pts]) => {
+        const sorted = pts.sort((a,b) => a.x - b.x);
+        const emaData = computeEMA(sorted, halfLife48h);
+        return {
+          label: region,
+          data: emaData,
+          borderColor: regionColors[region] || '#888',
+          backgroundColor: (regionColors[region] || '#888') + '20',
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          showLine: true,
+          borderWidth: 2,
+          tension: 0.3,
+          fill: false,
+        };
+      });
+
+      // Add overall EMA across all regions
       const allPts = cycles.map(c => ({ x: new Date(c.sellout), y: c.hours })).sort((a,b) => a.x - b.x);
       if (allPts.length >= 3) {
-        const windowSize = Math.max(3, Math.min(10, Math.floor(allPts.length / 8)));
-        const avgPts = [];
-        for (let i = 0; i < allPts.length; i++) {
-          const start = Math.max(0, i - Math.floor(windowSize / 2));
-          const end = Math.min(allPts.length, start + windowSize);
-          const slice = allPts.slice(start, end);
-          avgPts.push({ x: allPts[i].x, y: slice.reduce((s,p) => s + p.y, 0) / slice.length });
-        }
+        const allEma = computeEMA(allPts, halfLife48h);
         datasets.unshift({
-          label: 'Average',
-          data: avgPts,
+          label: 'All Regions (EMA)',
+          data: allEma,
           borderColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#1d1d1f' : '#ffffff',
           backgroundColor: 'transparent',
           pointRadius: 0,
