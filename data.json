@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-02-16T11:01:52.182326",
+  "generated_at": "2026-02-16T11:24:39.385974",
   "site_updated_at": "2026-02-16T10:41:32.299587",
-  "total_snapshots": 248,
+  "total_snapshots": 249,
   "all_models": [
     "Mac Mini M4 ($599)",
     "Mac Mini M4 16/512 ($799)",
@@ -11,6 +11,7 @@
     "MacBook Pro 14\" M5 ($1,599)",
     "iMac 24\" M4 10-core ($1,499)",
     "iMac 24\" M4 8-core ($1,299)",
+    "iPhone 16 128GB ($799)",
     "iPhone 16 256GB ($899)",
     "iPhone 16 Pro 256GB ($999)",
     "iPhone 17 256GB ($799)",
@@ -38085,6 +38086,216 @@
             "Miami": 100,
             "Denver": 50,
             "Atlanta": 60
+          }
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-02-16T11:23:08",
+      "file": "availability_matrix_20260216_112308.csv",
+      "file_type": "standard",
+      "cities": [
+        {
+          "name": "NYC",
+          "store_count": 22
+        },
+        {
+          "name": "LA",
+          "store_count": 19
+        },
+        {
+          "name": "SF",
+          "store_count": 16
+        },
+        {
+          "name": "Austin",
+          "store_count": 4
+        },
+        {
+          "name": "Boston",
+          "store_count": 12
+        },
+        {
+          "name": "Chicago",
+          "store_count": 9
+        },
+        {
+          "name": "Houston",
+          "store_count": 7
+        },
+        {
+          "name": "Phoenix",
+          "store_count": 5
+        },
+        {
+          "name": "Seattle",
+          "store_count": 5
+        },
+        {
+          "name": "Miami",
+          "store_count": 9
+        },
+        {
+          "name": "Denver",
+          "store_count": 6
+        },
+        {
+          "name": "Atlanta",
+          "store_count": 5
+        }
+      ],
+      "products": [
+        {
+          "model": "Mac Mini M4 ($599)",
+          "values": {
+            "NYC": 22,
+            "LA": 0,
+            "SF": 0,
+            "Austin": 0,
+            "Boston": 0,
+            "Chicago": 0,
+            "Houston": 0,
+            "Phoenix": 0,
+            "Seattle": 0,
+            "Miami": 11,
+            "Denver": 0,
+            "Atlanta": 0
+          }
+        },
+        {
+          "model": "Mac Mini M4 Pro ($1,399)",
+          "values": {
+            "NYC": 50,
+            "LA": 94,
+            "SF": 62,
+            "Austin": 100,
+            "Boston": 75,
+            "Chicago": 88,
+            "Houston": 85,
+            "Phoenix": 80,
+            "Seattle": 100,
+            "Miami": 77,
+            "Denver": 83,
+            "Atlanta": 80
+          }
+        },
+        {
+          "model": "Mac Mini M4 16/512 ($799)",
+          "values": {
+            "NYC": 50,
+            "LA": 68,
+            "SF": 43,
+            "Austin": 100,
+            "Boston": 66,
+            "Chicago": 88,
+            "Houston": 100,
+            "Phoenix": 60,
+            "Seattle": 80,
+            "Miami": 77,
+            "Denver": 100,
+            "Atlanta": 60
+          }
+        },
+        {
+          "model": "Mac Mini M4 24/512 ($999)",
+          "values": {
+            "NYC": 45,
+            "LA": 89,
+            "SF": 50,
+            "Austin": 100,
+            "Boston": 66,
+            "Chicago": 88,
+            "Houston": 42,
+            "Phoenix": 80,
+            "Seattle": 60,
+            "Miami": 66,
+            "Denver": 83,
+            "Atlanta": 100
+          }
+        },
+        {
+          "model": "iMac 24\" M4 8-core ($1,299)",
+          "values": {
+            "NYC": 90,
+            "LA": 84,
+            "SF": 75,
+            "Austin": 100,
+            "Boston": 100,
+            "Chicago": 100,
+            "Houston": 100,
+            "Phoenix": 100,
+            "Seattle": 80,
+            "Miami": 77,
+            "Denver": 66,
+            "Atlanta": 100
+          }
+        },
+        {
+          "model": "iMac 24\" M4 10-core ($1,499)",
+          "values": {
+            "NYC": 95,
+            "LA": 94,
+            "SF": 93,
+            "Austin": 75,
+            "Boston": 83,
+            "Chicago": 77,
+            "Houston": 100,
+            "Phoenix": 100,
+            "Seattle": 80,
+            "Miami": 88,
+            "Denver": 83,
+            "Atlanta": 60
+          }
+        },
+        {
+          "model": "MacBook Pro 14\" M5 ($1,599)",
+          "values": {
+            "NYC": 95,
+            "LA": 100,
+            "SF": 93,
+            "Austin": 100,
+            "Boston": 91,
+            "Chicago": 88,
+            "Houston": 85,
+            "Phoenix": 100,
+            "Seattle": 100,
+            "Miami": 100,
+            "Denver": 100,
+            "Atlanta": 100
+          }
+        },
+        {
+          "model": "MacBook Pro 14\" M4 Pro ($1,999)",
+          "values": {
+            "NYC": 50,
+            "LA": 63,
+            "SF": 50,
+            "Austin": 50,
+            "Boston": 58,
+            "Chicago": 33,
+            "Houston": 57,
+            "Phoenix": 40,
+            "Seattle": 80,
+            "Miami": 100,
+            "Denver": 50,
+            "Atlanta": 60
+          }
+        },
+        {
+          "model": "iPhone 16 128GB ($799)",
+          "values": {
+            "NYC": 100,
+            "LA": 94,
+            "SF": 100,
+            "Austin": 100,
+            "Boston": 100,
+            "Chicago": 88,
+            "Houston": 100,
+            "Phoenix": 100,
+            "Seattle": 80,
+            "Miami": 100,
+            "Denver": 100,
+            "Atlanta": 100
           }
         }
       ]
@@ -204790,6 +205001,1551 @@
             "MacBook Pro 14\" M4 Pro ($1,999)": 0
           }
         }
+      },
+      {
+        "t": "2026-02-16T11:24:28.124373",
+        "a": {
+          "R250": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R415": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R032": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R095": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R251": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R582": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R654": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R594": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R715": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R755": {
+            "Mac Mini M4 ($599)": 1,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R612": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R753": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R720": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R050": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R122": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R124": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 0
+          },
+          "R108": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R777": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R451": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R300": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R001": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R034": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R051": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R148": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R075": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R217": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R033": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R057": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R414": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R071": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R029": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R231": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R014": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R099": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R002": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R101": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R085": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R216": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R290": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R131": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R321": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R205": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R164": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R126": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R058": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R437": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R204": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R316": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R021": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R149": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R076": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R155": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R346": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R110": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R011": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R232": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R137": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R027": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R354": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R622": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R035": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R284": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R089": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R056": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R237": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R018": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R348": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R258": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R360": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 0
+          },
+          "R059": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R257": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R229": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R042": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R031": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R292": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R026": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R247": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R267": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R086": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R297": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R072": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R003": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R106": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R100": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R339": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 0
+          },
+          "R077": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R090": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R134": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R420": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R752": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R623": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R115": {
+            "Mac Mini M4 ($599)": 1,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R312": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R012": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R087": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R214": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R074": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R024": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R127": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R169": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R185": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R047": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R030": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R182": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R228": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R172": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R338": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R006": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R591": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R184": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R080": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R259": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R364": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R225": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R355": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R266": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R203": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 0
+          },
+          "R513": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 0,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R123": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R152": {
+            "Mac Mini M4 ($599)": 1,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R067": {
+            "Mac Mini M4 ($599)": 1,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R043": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R261": {
+            "Mac Mini M4 ($599)": 1,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R061": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R327": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R282": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R060": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R117": {
+            "Mac Mini M4 ($599)": 1,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R068": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R146": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R004": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R015": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R069": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R156": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R094": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R345": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 1,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R039": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 0,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R824": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 1,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R105": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 1,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 0,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          },
+          "R240": {
+            "Mac Mini M4 ($599)": 0,
+            "Mac Mini M4 Pro ($1,399)": 0,
+            "Mac Mini M4 16/512 ($799)": 0,
+            "Mac Mini M4 24/512 ($999)": 1,
+            "iMac 24\" M4 8-core ($1,299)": 1,
+            "iMac 24\" M4 10-core ($1,499)": 1,
+            "MacBook Pro 14\" M5 ($1,599)": 1,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0,
+            "iPhone 16 128GB ($799)": 1
+          }
+        }
       }
     ]
   },
@@ -205941,11 +207697,35 @@
         "city": "Austin",
         "state": "TX",
         "region": "Austin",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 48.45,
+        "wall_hours": 117.45
+      },
+      {
+        "store": "R216",
+        "store_name": "Domain NORTHSIDE",
+        "city": "Austin",
+        "state": "TX",
+        "region": "Austin",
         "product": "Mac Mini M4 24/512 ($999)",
         "restock": "2026-02-11T13:57:16.305747",
         "sellout": "2026-02-13T15:50:21.365287",
         "hours": 23.88,
         "wall_hours": 49.88
+      },
+      {
+        "store": "R290",
+        "store_name": "North Star",
+        "city": "San Antonio",
+        "state": "TX",
+        "region": "Austin",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 46.45,
+        "wall_hours": 117.45
       },
       {
         "store": "R290",
@@ -205965,11 +207745,35 @@
         "city": "San Antonio",
         "state": "TX",
         "region": "Austin",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 46.45,
+        "wall_hours": 117.45
+      },
+      {
+        "store": "R131",
+        "store_name": "La Cantera",
+        "city": "San Antonio",
+        "state": "TX",
+        "region": "Austin",
         "product": "Mac Mini M4 24/512 ($999)",
         "restock": "2026-02-11T13:57:16.305747",
         "sellout": "2026-02-13T15:50:21.365287",
         "hours": 21.88,
         "wall_hours": 49.88
+      },
+      {
+        "store": "R321",
+        "store_name": "Willowbrook Mall",
+        "city": "Houston",
+        "state": "TX",
+        "region": "Houston",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 46.45,
+        "wall_hours": 117.45
       },
       {
         "store": "R321",
@@ -205989,11 +207793,35 @@
         "city": "Sugar Land",
         "state": "TX",
         "region": "Houston",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 46.45,
+        "wall_hours": 117.45
+      },
+      {
+        "store": "R205",
+        "store_name": "First Colony Mall",
+        "city": "Sugar Land",
+        "state": "TX",
+        "region": "Houston",
         "product": "Mac Mini M4 24/512 ($999)",
         "restock": "2026-02-11T13:57:16.305747",
         "sellout": "2026-02-13T15:50:21.365287",
         "hours": 21.88,
         "wall_hours": 49.88
+      },
+      {
+        "store": "R164",
+        "store_name": "Memorial City",
+        "city": "Houston",
+        "state": "TX",
+        "region": "Houston",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 47.45,
+        "wall_hours": 117.45
       },
       {
         "store": "R164",
@@ -206013,11 +207841,35 @@
         "city": "The Woodlands",
         "state": "TX",
         "region": "Houston",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 46.45,
+        "wall_hours": 117.45
+      },
+      {
+        "store": "R126",
+        "store_name": "The Woodlands",
+        "city": "The Woodlands",
+        "state": "TX",
+        "region": "Houston",
         "product": "Mac Mini M4 24/512 ($999)",
         "restock": "2026-02-11T13:57:16.305747",
         "sellout": "2026-02-13T15:50:21.365287",
         "hours": 21.88,
         "wall_hours": 49.88
+      },
+      {
+        "store": "R058",
+        "store_name": "Houston Galleria",
+        "city": "Houston",
+        "state": "TX",
+        "region": "Houston",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 47.45,
+        "wall_hours": 117.45
       },
       {
         "store": "R058",
@@ -206037,11 +207889,35 @@
         "city": "Houston",
         "state": "TX",
         "region": "Houston",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 45.45,
+        "wall_hours": 117.45
+      },
+      {
+        "store": "R437",
+        "store_name": "Highland Village",
+        "city": "Houston",
+        "state": "TX",
+        "region": "Houston",
         "product": "Mac Mini M4 24/512 ($999)",
         "restock": "2026-02-11T13:57:16.305747",
         "sellout": "2026-02-13T15:50:21.365287",
         "hours": 21.88,
         "wall_hours": 49.88
+      },
+      {
+        "store": "R204",
+        "store_name": "Baybrook",
+        "city": "Friendswood",
+        "state": "TX",
+        "region": "Houston",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 46.45,
+        "wall_hours": 117.45
       },
       {
         "store": "R204",
@@ -206582,6 +208458,18 @@
         "sellout": "2026-02-14T11:02:04.251464",
         "hours": 33.08,
         "wall_hours": 69.08
+      },
+      {
+        "store": "R012",
+        "store_name": "The Falls",
+        "city": "Miami",
+        "state": "FL",
+        "region": "Miami",
+        "product": "Mac Mini M4 24/512 ($999)",
+        "restock": "2026-02-11T13:57:16.305747",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 47.45,
+        "wall_hours": 117.45
       },
       {
         "store": "R087",
@@ -211864,6 +213752,18 @@
         "wall_hours": 17.5
       },
       {
+        "store": "R058",
+        "store_name": "Houston Galleria",
+        "city": "Houston",
+        "state": "TX",
+        "region": "Houston",
+        "product": "MacBook Pro 14\" M5 ($1,599)",
+        "restock": "2026-02-15T17:31:20.335128",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 3.41,
+        "wall_hours": 17.89
+      },
+      {
         "store": "R240",
         "store_name": "Los Gatos",
         "city": "Los Gatos",
@@ -212584,6 +214484,18 @@
         "wall_hours": 1.5
       },
       {
+        "store": "R216",
+        "store_name": "Domain NORTHSIDE",
+        "city": "Austin",
+        "state": "TX",
+        "region": "Austin",
+        "product": "Mac Mini M4 Pro ($1,399)",
+        "restock": "2026-02-16T08:31:23.592260",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 2.88,
+        "wall_hours": 2.88
+      },
+      {
         "store": "R582",
         "store_name": "Upper East Side",
         "city": "New York",
@@ -212632,6 +214544,18 @@
         "wall_hours": 1.0
       },
       {
+        "store": "R251",
+        "store_name": "Upper West Side",
+        "city": "New York",
+        "state": "NY",
+        "region": "NYC",
+        "product": "Mac Mini M4 24/512 ($999)",
+        "restock": "2026-02-16T10:01:17.554319",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 1.39,
+        "wall_hours": 1.39
+      },
+      {
         "store": "R050",
         "store_name": "The Grove",
         "city": "Los Angeles",
@@ -212642,6 +214566,42 @@
         "sellout": "2026-02-16T10:31:18.696461",
         "hours": 0.42,
         "wall_hours": 0.42
+      },
+      {
+        "store": "R316",
+        "store_name": "University Park Village",
+        "city": "",
+        "state": "",
+        "region": "",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-16T10:06:18.091267",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 1.3,
+        "wall_hours": 1.3
+      },
+      {
+        "store": "R284",
+        "store_name": "Lincoln Park",
+        "city": "Chicago",
+        "state": "IL",
+        "region": "Chicago",
+        "product": "Mac Mini M4 ($599)",
+        "restock": "2026-02-16T10:06:18.091267",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 1.3,
+        "wall_hours": 1.3
+      },
+      {
+        "store": "R085",
+        "store_name": "Barton Creek",
+        "city": "Austin",
+        "state": "TX",
+        "region": "Austin",
+        "product": "Mac Mini M4 16/512 ($799)",
+        "restock": "2026-02-16T11:01:19.926855",
+        "sellout": "2026-02-16T11:24:28.124373",
+        "hours": 0.39,
+        "wall_hours": 0.39
       }
     ],
     "store_rankings": [
@@ -212822,6 +214782,17 @@
         "products": 2
       },
       {
+        "store": "R316",
+        "name": "University Park Village",
+        "region": "",
+        "city": "",
+        "state": "",
+        "cycles": 2,
+        "avg_hours": 10.93,
+        "fastest": 1.3,
+        "products": 1
+      },
+      {
         "store": "R225",
         "name": "The Summit",
         "region": "",
@@ -212866,17 +214837,6 @@
         "products": 3
       },
       {
-        "store": "R321",
-        "name": "Willowbrook Mall",
-        "region": "Houston",
-        "city": "Houston",
-        "state": "TX",
-        "cycles": 5,
-        "avg_hours": 11.95,
-        "fastest": 3.33,
-        "products": 3
-      },
-      {
         "store": "R513",
         "name": "CoolSprings Galleria",
         "region": "",
@@ -212910,17 +214870,6 @@
         "products": 2
       },
       {
-        "store": "R204",
-        "name": "Baybrook",
-        "region": "Houston",
-        "city": "Friendswood",
-        "state": "TX",
-        "cycles": 7,
-        "avg_hours": 13.6,
-        "fastest": 1.58,
-        "products": 4
-      },
-      {
         "store": "R123",
         "name": "Green Hills",
         "region": "",
@@ -212941,6 +214890,17 @@
         "avg_hours": 14.02,
         "fastest": 0.0,
         "products": 2
+      },
+      {
+        "store": "R284",
+        "name": "Lincoln Park",
+        "region": "Chicago",
+        "city": "Chicago",
+        "state": "IL",
+        "cycles": 14,
+        "avg_hours": 14.28,
+        "fastest": 0.22,
+        "products": 8
       },
       {
         "store": "R232",
@@ -212987,17 +214947,6 @@
         "products": 6
       },
       {
-        "store": "R131",
-        "name": "La Cantera",
-        "region": "Austin",
-        "city": "San Antonio",
-        "state": "TX",
-        "cycles": 4,
-        "avg_hours": 15.12,
-        "fastest": 0.53,
-        "products": 3
-      },
-      {
         "store": "R752",
         "name": "Miami Worldcenter",
         "region": "Miami",
@@ -213020,17 +214969,6 @@
         "products": 2
       },
       {
-        "store": "R284",
-        "name": "Lincoln Park",
-        "region": "Chicago",
-        "city": "Chicago",
-        "state": "IL",
-        "cycles": 13,
-        "avg_hours": 15.27,
-        "fastest": 0.22,
-        "products": 8
-      },
-      {
         "store": "R169",
         "name": "Waterside Shops",
         "region": "",
@@ -213051,17 +214989,6 @@
         "avg_hours": 15.8,
         "fastest": 1.51,
         "products": 4
-      },
-      {
-        "store": "R290",
-        "name": "North Star",
-        "region": "Austin",
-        "city": "San Antonio",
-        "state": "TX",
-        "cycles": 5,
-        "avg_hours": 16.09,
-        "fastest": 3.02,
-        "products": 3
       },
       {
         "store": "R257",
@@ -213141,6 +215068,17 @@
         "products": 6
       },
       {
+        "store": "R251",
+        "name": "Upper West Side",
+        "region": "NYC",
+        "city": "New York",
+        "state": "NY",
+        "cycles": 10,
+        "avg_hours": 17.0,
+        "fastest": 1.39,
+        "products": 6
+      },
+      {
         "store": "R612",
         "name": "Queens Center",
         "region": "NYC",
@@ -213174,17 +215112,6 @@
         "products": 2
       },
       {
-        "store": "R164",
-        "name": "Memorial City",
-        "region": "Houston",
-        "city": "Houston",
-        "state": "TX",
-        "cycles": 6,
-        "avg_hours": 17.44,
-        "fastest": 0.67,
-        "products": 3
-      },
-      {
         "store": "R240",
         "name": "Los Gatos",
         "region": "SF",
@@ -213205,6 +215132,28 @@
         "avg_hours": 17.7,
         "fastest": 0.2,
         "products": 3
+      },
+      {
+        "store": "R321",
+        "name": "Willowbrook Mall",
+        "region": "Houston",
+        "city": "Houston",
+        "state": "TX",
+        "cycles": 6,
+        "avg_hours": 17.7,
+        "fastest": 3.33,
+        "products": 4
+      },
+      {
+        "store": "R204",
+        "name": "Baybrook",
+        "region": "Houston",
+        "city": "Friendswood",
+        "state": "TX",
+        "cycles": 8,
+        "avg_hours": 17.7,
+        "fastest": 1.58,
+        "products": 5
       },
       {
         "store": "R059",
@@ -213240,17 +215189,6 @@
         "products": 3
       },
       {
-        "store": "R205",
-        "name": "First Colony Mall",
-        "region": "Houston",
-        "city": "Sugar Land",
-        "state": "TX",
-        "cycles": 5,
-        "avg_hours": 18.2,
-        "fastest": 13.51,
-        "products": 3
-      },
-      {
         "store": "R217",
         "name": "Chestnut Street",
         "region": "SF",
@@ -213262,17 +215200,6 @@
         "products": 4
       },
       {
-        "store": "R058",
-        "name": "Houston Galleria",
-        "region": "Houston",
-        "city": "Houston",
-        "state": "TX",
-        "cycles": 5,
-        "avg_hours": 18.4,
-        "fastest": 13.51,
-        "products": 3
-      },
-      {
         "store": "R594",
         "name": "Williamsburg",
         "region": "NYC",
@@ -213282,17 +215209,6 @@
         "avg_hours": 18.56,
         "fastest": 1.21,
         "products": 7
-      },
-      {
-        "store": "R251",
-        "name": "Upper West Side",
-        "region": "NYC",
-        "city": "New York",
-        "state": "NY",
-        "cycles": 9,
-        "avg_hours": 18.74,
-        "fastest": 3.02,
-        "products": 6
       },
       {
         "store": "R003",
@@ -213317,15 +215233,15 @@
         "products": 7
       },
       {
-        "store": "R437",
-        "name": "Highland Village",
-        "region": "Houston",
-        "city": "Houston",
+        "store": "R085",
+        "name": "Barton Creek",
+        "region": "Austin",
+        "city": "Austin",
         "state": "TX",
-        "cycles": 6,
-        "avg_hours": 19.15,
-        "fastest": 17.55,
-        "products": 3
+        "cycles": 8,
+        "avg_hours": 19.05,
+        "fastest": 0.39,
+        "products": 4
       },
       {
         "store": "R047",
@@ -213427,15 +215343,15 @@
         "products": 7
       },
       {
-        "store": "R126",
-        "name": "The Woodlands",
+        "store": "R058",
+        "name": "Houston Galleria",
         "region": "Houston",
-        "city": "The Woodlands",
+        "city": "Houston",
         "state": "TX",
-        "cycles": 6,
-        "avg_hours": 20.39,
-        "fastest": 5.3,
-        "products": 5
+        "cycles": 7,
+        "avg_hours": 20.41,
+        "fastest": 3.41,
+        "products": 4
       },
       {
         "store": "R824",
@@ -213447,17 +215363,6 @@
         "avg_hours": 20.46,
         "fastest": 7.38,
         "products": 3
-      },
-      {
-        "store": "R316",
-        "name": "University Park Village",
-        "region": "",
-        "city": "",
-        "state": "",
-        "cycles": 1,
-        "avg_hours": 20.55,
-        "fastest": 20.55,
-        "products": 1
       },
       {
         "store": "R035",
@@ -213504,6 +215409,17 @@
         "products": 6
       },
       {
+        "store": "R290",
+        "name": "North Star",
+        "region": "Austin",
+        "city": "San Antonio",
+        "state": "TX",
+        "cycles": 6,
+        "avg_hours": 21.15,
+        "fastest": 3.02,
+        "products": 4
+      },
+      {
         "store": "R237",
         "name": "Orland Square Mall",
         "region": "Chicago",
@@ -213513,6 +215429,17 @@
         "avg_hours": 21.32,
         "fastest": 17.55,
         "products": 7
+      },
+      {
+        "store": "R131",
+        "name": "La Cantera",
+        "region": "Austin",
+        "city": "San Antonio",
+        "state": "TX",
+        "cycles": 5,
+        "avg_hours": 21.38,
+        "fastest": 0.53,
+        "products": 4
       },
       {
         "store": "R060",
@@ -213526,14 +215453,14 @@
         "products": 6
       },
       {
-        "store": "R085",
-        "name": "Barton Creek",
-        "region": "Austin",
-        "city": "Austin",
+        "store": "R164",
+        "name": "Memorial City",
+        "region": "Houston",
+        "city": "Houston",
         "state": "TX",
         "cycles": 7,
-        "avg_hours": 21.71,
-        "fastest": 15.45,
+        "avg_hours": 21.73,
+        "fastest": 0.67,
         "products": 4
       },
       {
@@ -213546,17 +215473,6 @@
         "avg_hours": 22.1,
         "fastest": 0.77,
         "products": 3
-      },
-      {
-        "store": "R216",
-        "name": "Domain NORTHSIDE",
-        "region": "Austin",
-        "city": "Austin",
-        "state": "TX",
-        "cycles": 7,
-        "avg_hours": 22.37,
-        "fastest": 7.51,
-        "products": 5
       },
       {
         "store": "R043",
@@ -213603,6 +215519,39 @@
         "products": 2
       },
       {
+        "store": "R205",
+        "name": "First Colony Mall",
+        "region": "Houston",
+        "city": "Sugar Land",
+        "state": "TX",
+        "cycles": 6,
+        "avg_hours": 22.91,
+        "fastest": 13.51,
+        "products": 4
+      },
+      {
+        "store": "R437",
+        "name": "Highland Village",
+        "region": "Houston",
+        "city": "Houston",
+        "state": "TX",
+        "cycles": 7,
+        "avg_hours": 22.91,
+        "fastest": 17.55,
+        "products": 4
+      },
+      {
+        "store": "R216",
+        "name": "Domain NORTHSIDE",
+        "region": "Austin",
+        "city": "Austin",
+        "state": "TX",
+        "cycles": 9,
+        "avg_hours": 23.1,
+        "fastest": 2.88,
+        "products": 7
+      },
+      {
         "store": "R021",
         "name": "CambridgeSide",
         "region": "Boston",
@@ -213645,6 +215594,17 @@
         "avg_hours": 24.08,
         "fastest": 24.08,
         "products": 1
+      },
+      {
+        "store": "R126",
+        "name": "The Woodlands",
+        "region": "Houston",
+        "city": "The Woodlands",
+        "state": "TX",
+        "cycles": 7,
+        "avg_hours": 24.12,
+        "fastest": 5.3,
+        "products": 6
       },
       {
         "store": "R027",
@@ -214087,6 +216047,17 @@
         "products": 2
       },
       {
+        "store": "R012",
+        "name": "The Falls",
+        "region": "Miami",
+        "city": "Miami",
+        "state": "FL",
+        "cycles": 1,
+        "avg_hours": 47.45,
+        "fastest": 47.45,
+        "products": 1
+      },
+      {
         "store": "R146",
         "name": "Irvine Spectrum Center",
         "region": "LA",
@@ -214099,12 +216070,12 @@
       }
     ],
     "summary": {
-      "total_cycles": 654,
-      "avg_hours": 20.77,
+      "total_cycles": 671,
+      "avg_hours": 21.03,
       "fastest_hours": 0.0,
-      "same_day_count": 126,
-      "same_day_pct": 19.3,
-      "stores_with_cycles": 132,
+      "same_day_count": 131,
+      "same_day_pct": 19.5,
+      "stores_with_cycles": 133,
       "products_with_cycles": 10
     }
   },
@@ -227940,6 +229911,133 @@
             "iMac 24\" M4 8-core ($1,299)": 0.0,
             "MacBook Pro 14\" M5 ($1,599)": 0.0,
             "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0
+          }
+        }
+      },
+      {
+        "t": "2026-02-16T11:24:28.124373",
+        "data": {
+          "NYC": {
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "Mac Mini M4 ($599)": 0.0
+          },
+          "LA": {
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0
+          },
+          "SF": {
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0
+          },
+          "Austin": {
+            "Mac Mini M4 24/512 ($999)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0,
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0
+          },
+          "Houston": {
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0
+          },
+          "Boston": {
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0
+          },
+          "Chicago": {
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0
+          },
+          "Phoenix": {
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0
+          },
+          "Seattle": {
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0
+          },
+          "Miami": {
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0,
+            "Mac Mini M4 ($599)": 0.0
+          },
+          "Denver": {
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "iMac 24\" M4 10-core ($1,499)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0
+          },
+          "Atlanta": {
+            "Mac Mini M4 Pro ($1,399)": 0.0,
+            "Mac Mini M4 16/512 ($799)": 0.0,
+            "Mac Mini M4 24/512 ($999)": 0.0,
+            "iMac 24\" M4 8-core ($1,299)": 0.0,
+            "MacBook Pro 14\" M5 ($1,599)": 0.0,
+            "MacBook Pro 14\" M4 Pro ($1,999)": 0.0,
+            "iPhone 16 128GB ($799)": 0.0,
             "iMac 24\" M4 10-core ($1,499)": 0.0
           }
         }
