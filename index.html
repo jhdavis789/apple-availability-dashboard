@@ -1326,35 +1326,36 @@
 
     // Plugin: scroll wheel on x-axis to zoom in/out
     /**
-     * Interpolating crosshair tooltip plugin.
-     * Shows interpolated values for ALL visible datasets at the cursor's x position.
-     * Right-click toggles persistent data labels.
+     * Crosshair tooltip plugin.
+     * Shows nearest actual data point values for all visible datasets at cursor position.
+     * Only includes a dataset if the cursor time falls within its data range.
+     * Right-click hides the tooltip.
      */
-    let _crosshairPinned = false;
+    let _crosshairHidden = false;
     const crosshairTooltipPlugin = {
       id: 'crosshairTooltip',
       _tooltipEl: null,
       _lastX: null,
 
-      /** Binary-search interpolate: given sorted [{x:Date,y:number}], find y at targetMs */
-      _interpolate(data, targetMs) {
+      /** Find the nearest actual data point. Returns null if cursor is outside data range. */
+      _findNearest(data, targetMs) {
         if (!data || data.length === 0) return null;
-        const first = data[0].x instanceof Date ? data[0].x.getTime() : +data[0].x;
-        const last = data[data.length - 1].x instanceof Date ? data[data.length - 1].x.getTime() : +data[data.length - 1].x;
-        if (targetMs <= first) return data[0].y;
-        if (targetMs >= last) return data[data.length - 1].y;
+        const getMs = (pt) => pt.x instanceof Date ? pt.x.getTime() : +pt.x;
+        const first = getMs(data[0]), last = getMs(data[data.length - 1]);
+        // Cursor outside this dataset's range → skip
+        if (targetMs < first || targetMs > last) return null;
+        // Binary search for nearest point
         let lo = 0, hi = data.length - 1;
         while (lo < hi - 1) {
           const mid = (lo + hi) >> 1;
-          const mx = data[mid].x instanceof Date ? data[mid].x.getTime() : +data[mid].x;
-          if (mx <= targetMs) lo = mid;
+          if (getMs(data[mid]) <= targetMs) lo = mid;
           else hi = mid;
         }
-        const t0 = data[lo].x instanceof Date ? data[lo].x.getTime() : +data[lo].x;
-        const t1 = data[hi].x instanceof Date ? data[hi].x.getTime() : +data[hi].x;
-        if (t1 === t0) return data[lo].y;
-        const frac = (targetMs - t0) / (t1 - t0);
-        return data[lo].y + frac * (data[hi].y - data[lo].y);
+        // Return whichever bracket point is closer
+        const dLo = Math.abs(targetMs - getMs(data[lo]));
+        const dHi = Math.abs(targetMs - getMs(data[hi]));
+        return dLo <= dHi ? { y: data[lo].y, t: getMs(data[lo]), idx: lo }
+                          : { y: data[hi].y, t: getMs(data[hi]), idx: hi };
       },
 
       _getTooltipEl(chart) {
@@ -1372,12 +1373,10 @@
       },
 
       afterInit(chart) {
-        // Right-click toggles pin/unpin of the crosshair tooltip
         chart.canvas.addEventListener('contextmenu', (e) => {
           e.preventDefault();
-          _crosshairPinned = !_crosshairPinned;
-          if (!_crosshairPinned) {
-            // Unpin: hide tooltip and crosshair
+          _crosshairHidden = !_crosshairHidden;
+          if (_crosshairHidden) {
             this._lastX = null;
             const el = this._getTooltipEl(chart);
             el.style.display = 'none';
@@ -1387,7 +1386,7 @@
       },
 
       afterEvent(chart, args) {
-        if (_crosshairPinned) return; // Pinned — don't update
+        if (_crosshairHidden) return;
         const evt = args.event;
         if (evt.type === 'mouseout') {
           this._lastX = null;
@@ -1447,42 +1446,35 @@
         let lines = [];
         chart.data.datasets.forEach((ds, i) => {
           if (chart.getDatasetMeta(i).hidden) return;
-          // Skip sigma bands
           if (ds.label && ds.label.includes('\u03c3')) return;
 
-          const val = this._interpolate(ds.data, targetMs);
-          if (val === null) return;
+          const hit = this._findNearest(ds.data, targetMs);
+          if (!hit) return;
 
           const color = ds.borderColor || '#888';
           let formatted;
           if (ds.yAxisID === 'y2') {
             if (ds.label && ds.label.includes('Lead Time')) {
-              formatted = val.toFixed(2) + ' days';
+              formatted = hit.y.toFixed(2) + ' days';
             } else {
-              formatted = '$' + val.toFixed(2);
-              // Find nearest eBay data point for total_listings
-              if (ds._ebayData && ds._ebayData.length > 0) {
-                let nearest = ds._ebayData[0], bestDist = Infinity;
-                for (const d of ds._ebayData) {
-                  const dist = Math.abs(new Date(d.timestamp).getTime() - targetMs);
-                  if (dist < bestDist) { bestDist = dist; nearest = d; }
-                }
-                if (nearest.total_listings != null) formatted += ` (${nearest.total_listings} listings)`;
+              formatted = '$' + hit.y.toFixed(2);
+              if (ds._ebayData && hit.idx < ds._ebayData.length) {
+                const listings = ds._ebayData[hit.idx].total_listings;
+                if (listings != null) formatted += ` (${listings} listings)`;
               }
             }
           } else {
-            formatted = val.toFixed(1) + '%';
+            formatted = hit.y.toFixed(1) + '%';
           }
 
-          lines.push({ label: ds.label, color, formatted, y: val });
+          lines.push({ label: ds.label, color, formatted, y: hit.y });
         });
 
         if (lines.length === 0) { el.style.display = 'none'; return; }
 
-        // Sort: availability lines descending, then eBay/lead time
         lines.sort((a, b) => b.y - a.y);
 
-        let html = `<div style="color:${titleColor};font-weight:600;margin-bottom:4px;">${timeStr}${_crosshairPinned ? ' <span style="opacity:0.5;font-size:10px;">(pinned)</span>' : ''}</div>`;
+        let html = `<div style="color:${titleColor};font-weight:600;margin-bottom:4px;">${timeStr}</div>`;
         lines.forEach(l => {
           html += `<div style="color:${bodyColor};"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l.color};margin-right:6px;"></span>${l.label}: <strong>${l.formatted}</strong></div>`;
         });
@@ -1490,7 +1482,6 @@
         el.innerHTML = html;
         el.style.display = 'block';
 
-        // Position: prefer right of cursor, flip if near edge
         const tooltipW = el.offsetWidth;
         const tooltipH = el.offsetHeight;
         let left = mouseX + 16;
@@ -2511,7 +2502,7 @@
         mainChart.destroy();
         mainChart = null;
       }
-      _crosshairPinned = false;
+      _crosshairHidden = false;
 
       let datasets = [];
       const showAvailability = document.getElementById('showAvailability').checked;
