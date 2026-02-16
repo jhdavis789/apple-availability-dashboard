@@ -1517,63 +1517,58 @@
     /* ── MultiDropdown reusable component ────────────────────────── */
     class MultiDropdown {
       /**
-       * @param {HTMLElement} el  – container div (gets .multi-dropdown class)
+       * @param {HTMLElement} el  – container div
        * @param {Object} opts
        * @param {Array<{value:string,label:string}>} opts.items – regular options
-       * @param {{value:string,label:string,btnLabel:string,isSelectAll:boolean}} [opts.header]
-       *        Special top option.  isSelectAll=true → toggling it checks/unchecks all items.
+       * @param {Array<{value:string,label:string}>} [opts.headers] – independent toggle options at top
        * @param {Array<string>} [opts.initialSelected] – values to pre-select
-       * @param {Function} [opts.onChange] – called with getSelected() after every change
+       * @param {Function} [opts.onChange] – called after every change
        */
       constructor(el, opts) {
         this.el = el;
         this.items = opts.items || [];
-        this.header = opts.header || null;
+        this.headers = opts.headers || [];
         this.selected = new Set(opts.initialSelected != null
           ? opts.initialSelected
           : this.items.map(i => i.value));
-        if (this.header && this.header.isSelectAll && this.items.every(i => this.selected.has(i.value))) {
-          this.selected.add(this.header.value);
-        }
         this.onChange = opts.onChange || (() => {});
         this._build();
       }
 
-      /** Selected regular-item values (header value excluded when isSelectAll) */
+      /** Selected regular-item values (header values excluded) */
       getSelected() {
         return this.items.filter(i => this.selected.has(i.value)).map(i => i.value);
       }
 
-      /** Whether the header special option is checked */
-      isHeaderSelected() { return this.header ? this.selected.has(this.header.value) : false; }
+      /** Which header values are currently checked */
+      getSelectedHeaders() {
+        return this.headers.filter(h => this.selected.has(h.value)).map(h => h.value);
+      }
 
       _build() {
         this.el.innerHTML = '';
         this.triggerEl = document.createElement('div');
         this.triggerEl.className = 'md-trigger';
         this.el.appendChild(this.triggerEl);
-
         this.menuEl = document.createElement('div');
         this.menuEl.className = 'md-menu';
         this.el.appendChild(this.menuEl);
-
         this.triggerEl.addEventListener('click', e => { e.stopPropagation(); this.el.classList.toggle('open'); });
         document.addEventListener('click', e => { if (!this.el.contains(e.target)) this.el.classList.remove('open'); });
-
         this._renderOptions();
         this._updateTrigger();
       }
 
       _renderOptions() {
         this.menuEl.innerHTML = '';
-        if (this.header) {
-          this._addRow(this.header.value, this.header.label, this.header.btnLabel || 'all', true);
+        this.headers.forEach(h => this._addRow(h.value, h.label, true));
+        if (this.headers.length > 0) {
           const d = document.createElement('div'); d.className = 'md-divider'; this.menuEl.appendChild(d);
         }
-        this.items.forEach(item => this._addRow(item.value, item.label, 'only', false));
+        this.items.forEach(item => this._addRow(item.value, item.label, false));
       }
 
-      _addRow(value, label, btnLabel, isHeader) {
+      _addRow(value, label, isHeader) {
         const row = document.createElement('div');
         row.className = 'md-option';
         row.dataset.value = value;
@@ -1599,8 +1594,7 @@
           row.appendChild(btn);
         };
 
-        if (isHeader && this.header && !this.header.isSelectAll) {
-          // Non-selectAll header: show "only" (just this toggle) + "all" (select all items)
+        if (isHeader) {
           addBtn('only', () => {
             this.selected.clear();
             this.selected.add(value);
@@ -1608,39 +1602,26 @@
           addBtn('all', () => {
             this.items.forEach(i => this.selected.add(i.value));
           }, true);
-        } else if (btnLabel === 'all') {
-          addBtn('all', () => {
-            this.items.forEach(i => this.selected.add(i.value));
-          }, isHeader);
         } else {
           addBtn('only', () => {
-            const keepHeader = this.header && !this.header.isSelectAll && this.selected.has(this.header.value);
+            // Keep header selections when clicking "only" on a regular item
+            const keepHeaders = this.headers.filter(h => this.selected.has(h.value)).map(h => h.value);
             this.selected.clear();
             this.selected.add(value);
-            if (keepHeader) this.selected.add(this.header.value);
-          }, isHeader);
+            keepHeaders.forEach(v => this.selected.add(v));
+          }, false);
         }
 
         this.menuEl.appendChild(row);
       }
 
       _toggle(value) {
-        const opt = this.header && this.header.value === value ? this.header : null;
-        if (this.selected.has(value)) {
-          this.selected.delete(value);
-          if (opt && opt.isSelectAll) this.items.forEach(i => this.selected.delete(i.value));
-        } else {
-          this.selected.add(value);
-          if (opt && opt.isSelectAll) this.items.forEach(i => this.selected.add(i.value));
-        }
+        if (this.selected.has(value)) this.selected.delete(value);
+        else this.selected.add(value);
         this._sync();
       }
 
       _sync() {
-        if (this.header && this.header.isSelectAll) {
-          if (this.items.every(i => this.selected.has(i.value))) this.selected.add(this.header.value);
-          else this.selected.delete(this.header.value);
-        }
         this._updateCheckboxes();
         this._updateTrigger();
         this.onChange(this.getSelected());
@@ -1655,23 +1636,20 @@
 
       _updateTrigger() {
         const sel = this.getSelected();
+        const hdrs = this.getSelectedHeaders();
         const total = this.items.length;
-        const headerOn = this.header && this.selected.has(this.header.value);
-        if (sel.length === 0) {
-          this.triggerEl.textContent = headerOn ? this.header.label : 'None selected';
-        } else if (sel.length === 1 && !headerOn) {
-          const item = this.items.find(i => i.value === sel[0]);
-          this.triggerEl.textContent = item ? item.label : sel[0];
-        }
-        else if (sel.length === total) {
-          if (headerOn && !this.header.isSelectAll) this.triggerEl.textContent = 'All Cities + Avg';
-          else this.triggerEl.textContent = this.header ? this.header.label : 'All selected';
-        }
-        else {
-          let text = sel.length + ' selected';
-          if (headerOn && !this.header.isSelectAll) text += ' + Avg';
-          this.triggerEl.textContent = text;
-        }
+        const hdrLabels = hdrs.map(v => {
+          const h = this.headers.find(x => x.value === v);
+          return h ? h.label : v;
+        });
+
+        let parts = [];
+        if (sel.length === 0 && hdrs.length === 0) { this.triggerEl.textContent = 'None selected'; return; }
+        if (sel.length === 1) parts.push(sel[0]);
+        else if (sel.length === total) parts.push('All');
+        else if (sel.length > 1) parts.push(sel.length + ' selected');
+        hdrLabels.forEach(l => parts.push(l));
+        this.triggerEl.textContent = parts.join(' + ') || 'None selected';
       }
     }
 
