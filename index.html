@@ -2000,6 +2000,11 @@
         _productDropdown.selected.clear();
         _productDropdown.selected.add('Mac Mini M4 ($599)');
         _productDropdown._sync();
+        // Select all cities + average
+        _cityDropdown.selected.clear();
+        _cityDropdown.selected.add('__AVG__');
+        _cityDropdown.items.forEach(i => _cityDropdown.selected.add(i.value));
+        _cityDropdown._sync();
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
