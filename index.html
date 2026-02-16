@@ -1136,6 +1136,7 @@
               pointRadius: ds.pointRadius,
               pointBackgroundColor: ds.pointBackgroundColor || ds.borderColor,
               pointBorderColor: ds.pointBorderColor || ds.borderColor,
+              backgroundColor: ds.backgroundColor,
               borderDash: ds.borderDash || [],
             }));
           }
@@ -1147,22 +1148,21 @@
           }
           this._ensureOrigStyles(chart);
           chart.data.datasets.forEach((ds, i) => {
-            // Never dim eBay price datasets (y2 axis)
-            if (ds.yAxisID === 'y2') return;
             if (i === idx) {
               ds.borderColor = this._origStyles[i].borderColor;
               ds.pointBackgroundColor = this._origStyles[i].borderColor;
               ds.pointBorderColor = this._origStyles[i].pointBorderColor;
-              ds.borderWidth = 3;
-              ds.pointRadius = 2.5;
-              ds.borderDash = [];
+              ds.borderWidth = this._origStyles[i].borderWidth + 1;
+              ds.pointRadius = this._origStyles[i].pointRadius;
+              ds.borderDash = this._origStyles[i].borderDash;
             } else {
               ds.borderColor = this._dimColor(this._origStyles[i].borderColor);
               ds.pointBackgroundColor = this._dimColor(this._origStyles[i].borderColor);
               ds.pointBorderColor = this._dimColor(this._origStyles[i].pointBorderColor);
+              ds.backgroundColor = this._dimColor(this._origStyles[i].borderColor);
               ds.borderWidth = 1;
               ds.pointRadius = 0;
-              ds.borderDash = [];
+              ds.borderDash = this._origStyles[i].borderDash;
             }
           });
           this._highlighted = idx;
@@ -1177,6 +1177,7 @@
             ds.pointRadius = this._origStyles[i].pointRadius;
             ds.pointBackgroundColor = this._origStyles[i].pointBackgroundColor;
             ds.pointBorderColor = this._origStyles[i].pointBorderColor;
+            ds.backgroundColor = this._origStyles[i].backgroundColor;
             ds.borderDash = this._origStyles[i].borderDash;
           });
           this._origStyles = [];
@@ -1898,20 +1899,19 @@
         });
       });
 
-      // Product multi-dropdown
-      const defaultProduct = modelsWithData.find(m => m === 'Mac Mini M4 ($599)');
+      // Product multi-dropdown — default: all products selected
       _productDropdown = new MultiDropdown(document.getElementById('productDropdown'), {
         items: modelsWithData.map(m => ({ value: m, label: m })),
         header: { value: '__ALL__', label: 'All Products (Average)', btnLabel: 'all', isSelectAll: true },
-        initialSelected: defaultProduct ? [defaultProduct] : [modelsWithData[0]],
+        initialSelected: modelsWithData.slice(),
         onChange: () => render()
       });
 
-      // City multi-dropdown with "Average" special option
+      // City multi-dropdown — default: only Average (All Cities)
       _cityDropdown = new MultiDropdown(document.getElementById('cityDropdown'), {
         items: DATA.all_cities.map(c => ({ value: c, label: c })),
         header: { value: '__AVG__', label: 'Average (All Cities)', btnLabel: 'all', isSelectAll: false },
-        initialSelected: ['__AVG__', ...DATA.all_cities],
+        initialSelected: ['__AVG__'],
         onChange: () => render()
       });
 
@@ -2926,11 +2926,7 @@
         plugins: [highlightPlugin, crosshairTooltipPlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin, nowLinePlugin]
       });
 
-      // Auto-highlight the Average line on load
-      const avgIdx = datasets.findIndex(ds => ds.label === 'Average (All Cities)');
-      if (avgIdx >= 0) {
-        highlightPlugin._highlight(mainChart, avgIdx);
-      }
+      // No auto-highlight — show all lines at full opacity by default
     }
 
     function renderHeatmap(snapshots, selectedCities, filterZeros, blipSet) {
