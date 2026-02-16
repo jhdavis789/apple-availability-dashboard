@@ -1527,7 +1527,14 @@
       constructor(el, opts) {
         this.el = el;
         this.items = opts.items || [];
-        this.headers = opts.headers || [];
+        // Support both `headers` (array) and legacy `header` (single object)
+        if (opts.headers) {
+          this.headers = opts.headers;
+        } else if (opts.header) {
+          this.headers = [opts.header];
+        } else {
+          this.headers = [];
+        }
         this.selected = new Set(opts.initialSelected != null
           ? opts.initialSelected
           : this.items.map(i => i.value));
@@ -1543,6 +1550,11 @@
       /** Which header values are currently checked */
       getSelectedHeaders() {
         return this.headers.filter(h => this.selected.has(h.value)).map(h => h.value);
+      }
+
+      /** Legacy compat: check if the first header is selected */
+      isHeaderSelected() {
+        return this.headers.length > 0 && this.selected.has(this.headers[0].value);
       }
 
       _build() {
