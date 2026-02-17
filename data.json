@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-17T12:01:39.549233",
+  "generated_at": "2026-02-17T12:02:03.198018",
   "site_updated_at": "2026-02-16T16:22:09.543816",
   "total_snapshots": 308,
   "all_models": [
@@ -54468,6 +54468,14 @@
           "min_price": 479.0,
           "max_price": 1699.0,
           "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-17T20:01:34Z",
+          "avg_price": 1108.51,
+          "median_price": 1049.0,
+          "min_price": 479.0,
+          "max_price": 1699.0,
+          "total_listings": 25
         }
       ],
       "Mac Mini M4 ($599)": [
@@ -58097,6 +58105,14 @@
         },
         {
           "timestamp": "2026-02-17T19:57:12Z",
+          "avg_price": 533.26,
+          "median_price": 525.0,
+          "min_price": 367.99,
+          "max_price": 700.0,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-17T20:01:35Z",
           "avg_price": 533.26,
           "median_price": 525.0,
           "min_price": 367.99,
