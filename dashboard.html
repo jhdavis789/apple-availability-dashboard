@@ -2636,10 +2636,13 @@
 
       // City Averages now uses the same time-filtered snapshots as the main chart.
       // Movers still uses ALL snapshots so its period buttons are independent.
-      renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
+      // When only "Average (All Cities)" is selected with no individual cities,
+      // show all cities in the summary/movers sections.
+      const citiesForSummary = selectedCities.length === 0 && isCityAverageOn() ? DATA.all_cities.slice() : selectedCities;
+      renderCitySummary(snapshots, citiesForSummary, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
       const allSnaps = getAllSnapshots();
       const allBlipSet = allSnaps.filterZeros ? getBlipSet(allSnaps.snapshots) : null;
-      renderMovers(allSnaps.snapshots, selectedCities, allSnaps.filterZeros, isAllProducts, selectedProduct, allBlipSet, selectedProducts);
+      renderMovers(allSnaps.snapshots, citiesForSummary, allSnaps.filterZeros, isAllProducts, selectedProduct, allBlipSet, selectedProducts);
       renderProductChart(snapshots, selectedCities, filterZeros, blipSet);
       renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
     }
