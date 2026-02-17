@@ -140,6 +140,17 @@
     .theme-toggle:hover {
       border-color: var(--input-border-hover);
     }
+    .comp-toggle {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .comp-toggle input { margin: 0; }
     .share-btn {
       background: transparent;
       border: 1px solid var(--secondary-border);
@@ -746,12 +757,18 @@
 
     <div class="control-group map-keep">
       <label>Product</label>
-      <div id="productDropdown" class="multi-dropdown"></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div id="productDropdown" class="multi-dropdown"></div>
+        <label class="comp-toggle"><input type="checkbox" id="productShowComponents" checked> Components</label>
+      </div>
     </div>
 
     <div class="control-group">
       <label>Cities</label>
-      <div id="cityDropdown" class="multi-dropdown"></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div id="cityDropdown" class="multi-dropdown"></div>
+        <label class="comp-toggle"><input type="checkbox" id="cityShowComponents" checked> Components</label>
+      </div>
     </div>
 
     <div class="control-group" style="display:none;">
@@ -1962,6 +1979,8 @@
 
       document.getElementById('filterZeros').addEventListener('change', render);
       document.getElementById('showAvailability').addEventListener('change', render);
+      document.getElementById('cityShowComponents').addEventListener('change', render);
+      document.getElementById('productShowComponents').addEventListener('change', render);
       document.getElementById('showEbayPrices').addEventListener('change', () => {
         updateEbaySubToggles();
         render();
@@ -2315,6 +2334,8 @@
       params.set('te', String(Math.round(timeEndMs)));
 
       // Checkboxes (only include non-defaults)
+      if (!document.getElementById('cityShowComponents').checked) params.set('cc', '0');
+      if (!document.getElementById('productShowComponents').checked) params.set('pc', '0');
       if (!document.getElementById('filterZeros').checked) params.set('fz', '0');
       if (!document.getElementById('showAvailability').checked) params.set('sa', '0');
       if (document.getElementById('showEbayPrices').checked) params.set('ebay', '1');
@@ -2394,6 +2415,8 @@
       }
 
       // Checkboxes
+      if (params.has('cc')) document.getElementById('cityShowComponents').checked = params.get('cc') === '1';
+      if (params.has('pc')) document.getElementById('productShowComponents').checked = params.get('pc') === '1';
       if (params.has('fz')) document.getElementById('filterZeros').checked = params.get('fz') === '1';
       if (params.has('sa')) document.getElementById('showAvailability').checked = params.get('sa') === '1';
       if (params.has('ebay')) {
@@ -2771,21 +2794,42 @@
           }).filter(pt => pt.y !== null).map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
         }
 
-        // Auto-detect mode based on selection:
-        //   1 product, N cities → one line per city (city colors)
-        //   N products, 0-1 cities or avg-only → one line per product (product colors)
-        //   N products, N cities → one line per city × product (city color + product dash)
-        const multiProds = _prods.length > 1;
-        const multiCities = selectedCities.length > 1;
-        const cityAvgOnly = selectedCities.length === 0 && isCityAverageOn();
+        // Component toggles: control whether individual lines are shown per dimension
+        const cityComp = document.getElementById('cityShowComponents').checked;
+        const prodComp = document.getElementById('productShowComponents').checked;
+        // Cities used for averaging (all cities when none individually selected)
+        const avgCities = selectedCities.length > 0 ? selectedCities : DATA.all_cities;
+        // Whether each dimension has multiple items to show components for
+        const showCityLines = cityComp && selectedCities.length > 1;
+        const showProdLines = prodComp && _prods.length > 1;
 
-        if (!multiProds && !cityAvgOnly) {
-          // Single product, N cities → one line per city
-          const title = `${_prods[0]} — Availability by City`;
-          document.getElementById('mainChartTitle').textContent = title;
+        // --- Chart title ---
+        let chartTitle;
+        if (showCityLines && showProdLines) {
+          chartTitle = `${selectedCities.length} Cities × ${_prods.length} Products`;
+        } else if (showCityLines) {
+          chartTitle = _prods.length === 1 ? `${_prods[0]} — by City` : `${_prods.length} Products avg — by City`;
+        } else if (showProdLines) {
+          if (selectedCities.length === 1) chartTitle = `${selectedCities[0]} — by Product`;
+          else if (selectedCities.length > 1) chartTitle = `by Product — ${selectedCities.length} Cities avg`;
+          else chartTitle = 'by Product — All Cities avg';
+        } else if (_prods.length === 1 && selectedCities.length === 0) {
+          chartTitle = `${_prods[0]} — All Cities avg`;
+        } else if (_prods.length === 1 && selectedCities.length === 1) {
+          chartTitle = `${_prods[0]} — ${selectedCities[0]}`;
+        } else if (_prods.length === 1 && selectedCities.length > 1) {
+          chartTitle = `${_prods[0]} — ${selectedCities.length} Cities avg`;
+        } else if (_prods.length > 1 && selectedCities.length <= 1) {
+          chartTitle = selectedCities.length === 1 ? `${selectedCities[0]} — ${_prods.length} Products avg` : `${_prods.length} Products avg — All Cities`;
+        } else {
+          chartTitle = 'Average — Selected';
+        }
+        document.getElementById('mainChartTitle').textContent = chartTitle;
 
+        // --- Per-city component lines ---
+        if (showCityLines) {
           selectedCities.forEach(city => {
-            const points = buildLine(_prods[0], city);
+            const points = _prods.length === 1 ? buildLine(_prods[0], city) : buildCityLine(_prods, city);
             if (points.length > 0) {
               const cityColor = CITY_COLORS[city] || '#888';
               datasets.push({
@@ -2796,63 +2840,89 @@
               });
             }
           });
+        }
 
-        } else if (multiProds && !multiCities) {
-          // Multiple products, 0-1 cities → one line per product
-          const citiesToAvg = selectedCities.length > 0 ? selectedCities : DATA.all_cities;
-          let title;
-          if (citiesToAvg.length === DATA.all_cities.length) title = 'Availability by Product — All Cities';
-          else title = `${citiesToAvg[0]} — Availability by Product`;
-          document.getElementById('mainChartTitle').textContent = title;
-
+        // --- Per-product component lines ---
+        if (showProdLines) {
           _prods.forEach((prod, pi) => {
-            const points = buildProductLine(prod, citiesToAvg);
+            const points = buildProductLine(prod, avgCities);
             if (points.length > 0) {
               const color = PRODUCT_COLORS[pi % PRODUCT_COLORS.length];
               datasets.push({
                 label: prod, data: points,
                 borderColor: color, backgroundColor: color + '20',
                 pointBackgroundColor: color, borderWidth: 2,
+                borderDash: showCityLines ? [6, 3] : [],
                 pointRadius: 1, pointHoverRadius: 2.5, pointBorderWidth: 0, tension: 0.3, fill: false
               });
             }
           });
+        }
 
-        } else {
-          // Multiple products × multiple cities → Cartesian product
-          let title = `${selectedCities.length} ${selectedCities.length === 1 ? 'City' : 'Cities'} × ${_prods.length} ${_prods.length === 1 ? 'Product' : 'Products'}`;
-          document.getElementById('mainChartTitle').textContent = title;
-
-          selectedCities.forEach(city => {
+        // --- Single direct line when only 1 city × 1 product and no components ---
+        if (!showCityLines && !showProdLines && selectedCities.length === 1 && _prods.length === 1) {
+          const city = selectedCities[0];
+          const points = buildLine(_prods[0], city);
+          if (points.length > 0) {
             const cityColor = CITY_COLORS[city] || '#888';
-            _prods.forEach((prod, pi) => {
-              const points = buildLine(prod, city);
-              if (points.length > 0) {
-                const shortProd = prod.replace(/\s*\([^)]*\)$/, '');
-                datasets.push({
-                  label: `${city} — ${shortProd}`, data: points,
-                  borderColor: cityColor, backgroundColor: cityColor + '20',
-                  pointBackgroundColor: cityColor, borderWidth: 2,
-                  borderDash: PROD_DASHES[pi % PROD_DASHES.length],
-                  pointRadius: 1, pointHoverRadius: 2.5, pointBorderWidth: 0, tension: 0.3, fill: false
-                });
-              }
+            datasets.push({
+              label: `${city} — ${_prods[0]}`, data: points,
+              borderColor: cityColor, backgroundColor: cityColor + '20',
+              pointBackgroundColor: cityColor, borderWidth: 2,
+              pointRadius: 1, pointHoverRadius: 2.5, pointBorderWidth: 0, tension: 0.3, fill: false
             });
+          }
+        }
+
+        // --- "Avg of Selected" line ---
+        // Shown when multiple items exist in any dimension (as reference or main line)
+        if (selectedCities.length > 1 || _prods.length > 1 || selectedCities.length === 0) {
+          const avgSelPoints = [];
+          snapshots.forEach((s, si) => {
+            const val = weightedAvg(s, si, _prods, avgCities, filterZeros, blipSet);
+            if (val !== null) avgSelPoints.push({ x: new Date(s.timestamp), y: val });
           });
+          if (avgSelPoints.length > 0) {
+            // Label based on what's being averaged
+            let avgLabel;
+            if (selectedCities.length > 1 && _prods.length > 1)
+              avgLabel = `Avg of ${selectedCities.length} Cities × ${_prods.length} Products`;
+            else if (selectedCities.length > 1)
+              avgLabel = `Avg of ${selectedCities.length} Cities`;
+            else if (_prods.length > 1 && selectedCities.length === 0)
+              avgLabel = `Avg of ${_prods.length} Products — All Cities`;
+            else if (_prods.length > 1)
+              avgLabel = `Avg of ${_prods.length} Products`;
+            else
+              avgLabel = 'Avg (All Cities)';
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            datasets.push({
+              label: avgLabel,
+              data: avgSelPoints,
+              borderColor: '#ff9f0a',
+              backgroundColor: '#ff9f0a20',
+              borderWidth: 2.5,
+              pointRadius: 0,
+              pointHoverRadius: 4,
+              tension: 0.3,
+              fill: false
+            });
+          }
         }
 
         // "Average (All Cities)" line — enabled via city dropdown toggle
-        if (isCityAverageOn()) {
-          const avgPoints = [];
+        // Only show when it differs from "Avg of Selected" (i.e., when specific cities are selected)
+        if (isCityAverageOn() && selectedCities.length > 0) {
+          const avgAllPoints = [];
           snapshots.forEach((s, si) => {
             const val = weightedAvg(s, si, _prods, DATA.all_cities, filterZeros, blipSet);
-            if (val !== null) avgPoints.push({ x: new Date(s.timestamp), y: val });
+            if (val !== null) avgAllPoints.push({ x: new Date(s.timestamp), y: val });
           });
-          if (avgPoints.length > 0) {
+          if (avgAllPoints.length > 0) {
             const isLight = document.documentElement.getAttribute('data-theme') === 'light';
             const avgColor = isLight ? '#1d1d1f' : '#ffffff';
             datasets.push({
-              label: 'Average (All Cities)', data: avgPoints,
+              label: 'Average (All Cities)', data: avgAllPoints,
               borderColor: avgColor, backgroundColor: avgColor + '20',
               borderWidth: 3, borderDash: [6, 3], pointRadius: 0,
               pointHoverRadius: 5, tension: 0.3, fill: false
