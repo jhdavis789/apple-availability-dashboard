@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-17T10:01:36.786183",
+  "generated_at": "2026-02-17T10:01:59.418790",
   "site_updated_at": "2026-02-16T16:22:09.543816",
   "total_snapshots": 304,
   "all_models": [
@@ -51856,6 +51856,14 @@
           "min_price": 234.96,
           "max_price": 2149.83,
           "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-17T18:01:31Z",
+          "avg_price": 728.94,
+          "median_price": 584.95,
+          "min_price": 234.96,
+          "max_price": 2149.83,
+          "total_listings": 25
         }
       ],
       "M4 Mac Mini Pro (keyword)": [
@@ -52637,6 +52645,14 @@
         },
         {
           "timestamp": "2026-02-17T17:31:37Z",
+          "avg_price": 1707.82,
+          "median_price": 1669.27,
+          "min_price": 234.96,
+          "max_price": 4299.99,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-17T18:01:32Z",
           "avg_price": 1707.82,
           "median_price": 1669.27,
           "min_price": 234.96,
@@ -53426,6 +53442,14 @@
           "avg_price": 1078.31,
           "median_price": 1049.0,
           "min_price": 350.0,
+          "max_price": 1699.0,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-17T18:01:34Z",
+          "avg_price": 1100.31,
+          "median_price": 1049.0,
+          "min_price": 479.0,
           "max_price": 1699.0,
           "total_listings": 25
         }
@@ -56979,6 +57003,14 @@
           "timestamp": "2026-02-17T17:31:40Z",
           "avg_price": 533.26,
           "median_price": 525.0,
+          "min_price": 367.99,
+          "max_price": 700.0,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-17T18:01:36Z",
+          "avg_price": 535.82,
+          "median_price": 534.99,
           "min_price": 367.99,
           "max_price": 700.0,
           "total_listings": 25
