@@ -2020,12 +2020,14 @@
       document.getElementById('qvMacMini').addEventListener('click', () => {
         _productDropdown.selected.clear();
         _productDropdown.selected.add('Mac Mini M4 ($599)');
-        _productDropdown._sync();
+        _productDropdown._updateCheckboxes();
+        _productDropdown._updateTrigger();
         // Select all cities + average
         _cityDropdown.selected.clear();
         _cityDropdown.selected.add('__AVG__');
         _cityDropdown.items.forEach(i => _cityDropdown.selected.add(i.value));
-        _cityDropdown._sync();
+        _cityDropdown._updateCheckboxes();
+        _cityDropdown._updateTrigger();
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
@@ -2034,11 +2036,13 @@
 
       document.getElementById('qvAllProducts').addEventListener('click', () => {
         _productDropdown.items.forEach(i => _productDropdown.selected.add(i.value));
-        _productDropdown._sync();
+        _productDropdown._updateCheckboxes();
+        _productDropdown._updateTrigger();
         // Clear city selection so it shows per-product averages
         _cityDropdown.selected.clear();
         _cityDropdown.selected.add('__AVG__');
-        _cityDropdown._sync();
+        _cityDropdown._updateCheckboxes();
+        _cityDropdown._updateTrigger();
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
