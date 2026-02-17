@@ -3011,7 +3011,10 @@
       const showLeadTimes = document.getElementById('showLeadTimes').checked && DATA.lead_times;
       if (showLeadTimes) {
         const ltSnapshots = DATA.lead_times.snapshots;
-        const ltCities = getSelectedCities();
+        const ltCities = selectedCities.length > 0 ? selectedCities : DATA.all_cities;
+        const ltShowAvg = isCityAverageOn() || selectedCities.length === 0;
+
+        // Per-city lead time lines
         ltCities.forEach(city => {
           const points = [];
           ltSnapshots.forEach(snap => {
@@ -3043,6 +3046,38 @@
             });
           }
         });
+
+        // Average lead time line across all cities
+        if (ltShowAvg) {
+          const avgPoints = [];
+          ltSnapshots.forEach(snap => {
+            let allVals = [];
+            DATA.all_cities.forEach(city => {
+              const cityData = snap.data[city];
+              if (!cityData) return;
+              const vals = _prods.map(p => cityData[p]).filter(v => v !== undefined && v !== null);
+              allVals = allVals.concat(vals);
+            });
+            if (allVals.length > 0) {
+              avgPoints.push({ x: new Date(snap.t), y: allVals.reduce((a,b) => a+b, 0) / allVals.length });
+            }
+          });
+          if (avgPoints.length > 0) {
+            datasets.push({
+              label: 'Avg Lead Time (All Cities)',
+              data: avgPoints,
+              borderColor: '#64d2ff',
+              backgroundColor: 'transparent',
+              borderWidth: 2.5,
+              borderDash: [6, 3],
+              pointRadius: 0,
+              pointHoverRadius: 3,
+              stepped: 'before',
+              fill: false,
+              yAxisID: 'y2',
+            });
+          }
+        }
       }
 
       // Compute y2 axis max from eBay/lead time data
