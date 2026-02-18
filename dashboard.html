@@ -996,6 +996,10 @@
             <button id="cycleGroupRegion" class="period-btn active">Region</button>
           </div>
         </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Min Cycles</span>
+          <input type="number" id="cycleMinCycles" min="1" value="5" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:6px 8px;border-radius:6px;font-size:12px;width:60px;">
+        </div>
       </div>
 
       <div class="cycles-stats-row" id="cyclesStats"></div>
@@ -2404,6 +2408,8 @@
       // Cycles
       if (_cycleGroupBy !== 'region') params.set('cg', _cycleGroupBy);
       if (_cycleRegionFilter !== '__ALL__') params.set('cr', _cycleRegionFilter);
+      const _mc = parseInt(document.getElementById('cycleMinCycles').value) || 5;
+      if (_mc !== 5) params.set('mc', String(_mc));
 
       // Theme
       if (document.documentElement.getAttribute('data-theme') === 'light') params.set('theme', 'light');
@@ -2508,6 +2514,7 @@
         if (cg === 'store' || cg === 'region') _cycleGroupBy = cg;
       }
       if (params.has('cr')) _cycleRegionFilter = params.get('cr');
+      if (params.has('mc')) document.getElementById('cycleMinCycles').value = params.get('mc');
 
       // Theme (overrides localStorage)
       if (params.has('theme')) {
@@ -4320,6 +4327,8 @@
         document.getElementById('cycleTimeStart').value = fmt(_cycleTimeStart);
         document.getElementById('cycleTimeEnd').value = fmt(_cycleTimeEnd);
       }
+      // Min cycles filter
+      document.getElementById('cycleMinCycles').addEventListener('change', () => renderCycles());
       // Group-by toggle
       document.getElementById('cycleGroupStore').addEventListener('click', () => {
         _cycleGroupBy = 'store';
@@ -4463,7 +4472,11 @@
         return _cycleSortDir === 'asc' ? cmp : -cmp;
       });
 
-      const maxH = Math.max(...rankings.map(r => r.avg_hours));
+      // Apply min cycles filter to ranking
+      const minCycles = parseInt(document.getElementById('cycleMinCycles').value) || 1;
+      const filteredRankings = rankings.filter(r => r.cycles >= minCycles);
+
+      const maxH = filteredRankings.length > 0 ? Math.max(...filteredRankings.map(r => r.avg_hours)) : 1;
       const rankTable = document.getElementById('rankingTable');
       const sa = (key) => `style="cursor:pointer;user-select:none;" onclick="cycleSortBy('${key}')"`;
       const arrow = (key) => _cycleSortKey === key ? (_cycleSortDir === 'asc' ? ' \u25B2' : ' \u25BC') : '';
@@ -4474,7 +4487,7 @@
       rh += `<th ${sa('cycles')}>Cycles${arrow('cycles')}</th>`;
       if (isAllProd) rh += `<th ${sa('products')}>Products${arrow('products')}</th>`;
       rh += `<th ${sa('avg_hours')}>Avg Time to Sellout${arrow('avg_hours')}</th><th ${sa('fastest')}>Fastest${arrow('fastest')}</th></tr></thead><tbody>`;
-      rankings.forEach((r, i) => {
+      filteredRankings.forEach((r, i) => {
         const barW = Math.max(4, Math.round(200 * r.avg_hours / maxH));
         const clr = r.avg_hours < 6 ? '#ff453a' : r.avg_hours < 24 ? '#ffd60a' : '#30d158';
         rh += `<tr><td>${i+1}</td>`;
