@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-18T11:01:59.484315",
+  "generated_at": "2026-02-18T11:02:34.593577",
   "site_updated_at": "2026-02-18T05:39:05.778943",
   "total_snapshots": 363,
   "all_models": [
@@ -66436,6 +66436,14 @@
           "min_price": 234.96,
           "max_price": 1534.99,
           "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T19:01:52Z",
+          "avg_price": 705.4,
+          "median_price": 577.87,
+          "min_price": 234.96,
+          "max_price": 1534.99,
+          "total_listings": 25
         }
       ],
       "M4 Mac Mini Pro (keyword)": [
@@ -67401,6 +67409,14 @@
         },
         {
           "timestamp": "2026-02-18T18:31:50Z",
+          "avg_price": 1467.51,
+          "median_price": 1329.0,
+          "min_price": 208.99,
+          "max_price": 4299.0,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T19:01:54Z",
           "avg_price": 1467.51,
           "median_price": 1329.0,
           "min_price": 208.99,
@@ -68372,6 +68388,14 @@
         {
           "timestamp": "2026-02-18T18:31:52Z",
           "avg_price": 1085.47,
+          "median_price": 1049.0,
+          "min_price": 479.0,
+          "max_price": 1499.99,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T19:01:55Z",
+          "avg_price": 1093.47,
           "median_price": 1049.0,
           "min_price": 479.0,
           "max_price": 1499.99,
@@ -71382,6 +71406,14 @@
           "min_price": 479.0,
           "max_price": 1799.95,
           "total_listings": 9
+        },
+        {
+          "timestamp": "2026-02-18T19:01:50Z",
+          "avg_price": 1159.56,
+          "median_price": 1099.0,
+          "min_price": 479.0,
+          "max_price": 1799.95,
+          "total_listings": 9
         }
       ],
       "iMac 24\" M4 8-core ($1,299)": [
@@ -72837,6 +72869,14 @@
         },
         {
           "timestamp": "2026-02-18T18:31:54Z",
+          "avg_price": 533.26,
+          "median_price": 525.0,
+          "min_price": 367.99,
+          "max_price": 700.0,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T19:01:57Z",
           "avg_price": 533.26,
           "median_price": 525.0,
           "min_price": 367.99,
