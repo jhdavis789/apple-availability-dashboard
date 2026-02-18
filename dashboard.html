@@ -155,6 +155,15 @@
     }
     .md-comp-toggle:hover { color: var(--text-muted); }
     .md-comp-toggle input { margin: 0; width: 12px; height: 12px; }
+    .settings-wrap { position: relative; display: inline-block; }
+    .settings-menu {
+      display: none; position: absolute; bottom: 100%; right: 0; margin-bottom: 6px;
+      background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px;
+      padding: 8px 12px; min-width: 160px; z-index: 90; box-shadow: 0 4px 12px rgba(0,0,0,.4);
+    }
+    .settings-menu.open { display: block; }
+    .settings-menu label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); cursor: pointer; padding: 4px 0; white-space: nowrap; }
+    .settings-menu label input { margin: 0; }
     .share-btn {
       background: transparent;
       border: 1px solid var(--secondary-border);
@@ -827,8 +836,14 @@
 
     <div class="control-group">
       <label>&nbsp;</label>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;align-items:center;">
         <button id="resetCities" class="secondary">Reset</button>
+        <div class="settings-wrap">
+          <button id="settingsBtn" class="secondary" style="font-size:14px;padding:6px 10px;">&#9881;</button>
+          <div class="settings-menu" id="settingsMenu">
+            <label><input type="checkbox" id="showPoints"> Show Points</label>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2048,6 +2063,18 @@
         _cityDropdown._sync();
       });
 
+      // Settings dropdown
+      const settingsBtn = document.getElementById('settingsBtn');
+      const settingsMenu = document.getElementById('settingsMenu');
+      settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsMenu.classList.toggle('open');
+      });
+      document.addEventListener('click', (e) => {
+        if (!settingsMenu.contains(e.target) && e.target !== settingsBtn) settingsMenu.classList.remove('open');
+      });
+      document.getElementById('showPoints').addEventListener('change', render);
+
       document.querySelectorAll('.view-tab').forEach(tab => {
         tab.addEventListener('click', () => {
           document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
@@ -2375,6 +2402,7 @@
       if (!document.getElementById('showEbayMean').checked) params.set('emean', '0');
       if (document.getElementById('showEbayMedian').checked) params.set('emed', '1');
       if (document.getElementById('showLeadTimes').checked) params.set('lt', '1');
+      if (document.getElementById('showPoints').checked) params.set('pts', '1');
 
       // Cycles
       if (_cycleGroupBy !== 'region') params.set('cg', _cycleGroupBy);
@@ -2475,6 +2503,7 @@
       if (params.has('emean')) document.getElementById('showEbayMean').checked = params.get('emean') === '1';
       if (params.has('emed')) document.getElementById('showEbayMedian').checked = params.get('emed') === '1';
       if (params.has('lt')) document.getElementById('showLeadTimes').checked = params.get('lt') === '1';
+      if (params.has('pts')) document.getElementById('showPoints').checked = params.get('pts') === '1';
 
       // Cycles
       if (params.has('cg')) {
@@ -2775,6 +2804,7 @@
 
       let datasets = [];
       const showAvailability = document.getElementById('showAvailability').checked;
+      const showPoints = document.getElementById('showPoints').checked;
 
       /** Helper: get store count for a city in a snapshot */
       function getStoreCount(snapshot, cityName) {
@@ -2949,8 +2979,8 @@
               label: lineLabel, data: points,
               borderColor: color, backgroundColor: color + '20',
               pointBackgroundColor: color, borderWidth: width, borderDash: dash,
-              pointRadius: isAvgProd || isAvgCity ? 0 : 1,
-              pointHoverRadius: 2.5, pointBorderWidth: 0, tension: 0.3, fill: false
+              pointRadius: showPoints ? (isAvgProd || isAvgCity ? 1.5 : 2.5) : (isAvgProd || isAvgCity ? 0 : 1),
+              pointHoverRadius: showPoints ? 4 : 2.5, pointBorderWidth: 0, tension: 0.3, fill: false
             });
           });
         });
