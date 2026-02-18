@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-17T16:01:42.384319",
+  "generated_at": "2026-02-17T16:02:09.531137",
   "site_updated_at": "2026-02-17T15:22:48.085198",
   "total_snapshots": 328,
   "all_models": [
@@ -57784,6 +57784,14 @@
           "min_price": 477.5,
           "max_price": 1534.99,
           "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T00:01:37Z",
+          "avg_price": 687.96,
+          "median_price": 564.99,
+          "min_price": 477.5,
+          "max_price": 1534.99,
+          "total_listings": 25
         }
       ],
       "M4 Mac Mini Pro (keyword)": [
@@ -58642,6 +58650,14 @@
           "min_price": 234.96,
           "max_price": 4299.99,
           "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T00:01:39Z",
+          "avg_price": 1547.84,
+          "median_price": 1534.99,
+          "min_price": 234.96,
+          "max_price": 4299.0,
+          "total_listings": 25
         }
       ],
       "M4 iMac 24 (keyword)": [
@@ -59495,6 +59511,14 @@
         },
         {
           "timestamp": "2026-02-17T23:31:39Z",
+          "avg_price": 1064.51,
+          "median_price": 1000.0,
+          "min_price": 400.0,
+          "max_price": 1699.0,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T00:01:41Z",
           "avg_price": 1064.51,
           "median_price": 1000.0,
           "min_price": 400.0,
@@ -62170,6 +62194,14 @@
           "min_price": 479.0,
           "max_price": 1799.95,
           "total_listings": 9
+        },
+        {
+          "timestamp": "2026-02-18T00:01:35Z",
+          "avg_price": 1159.56,
+          "median_price": 1099.0,
+          "min_price": 479.0,
+          "max_price": 1799.95,
+          "total_listings": 9
         }
       ],
       "iMac 24\" M4 8-core ($1,299)": [
@@ -63044,6 +63076,14 @@
           "min_price": 489.0,
           "max_price": 1544.95,
           "total_listings": 15
+        },
+        {
+          "timestamp": "2026-02-18T00:01:34Z",
+          "avg_price": 1094.12,
+          "median_price": 1032.0,
+          "min_price": 489.0,
+          "max_price": 1544.95,
+          "total_listings": 15
         }
       ],
       "iPhone 16 128GB ($799)": [
@@ -63393,6 +63433,14 @@
         },
         {
           "timestamp": "2026-02-17T23:31:40Z",
+          "avg_price": 533.26,
+          "median_price": 525.0,
+          "min_price": 367.99,
+          "max_price": 700.0,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T00:01:43Z",
           "avg_price": 533.26,
           "median_price": 525.0,
           "min_price": 367.99,
