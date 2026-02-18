@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-18T09:01:45.808792",
+  "generated_at": "2026-02-18T09:02:16.570378",
   "site_updated_at": "2026-02-18T05:39:05.778943",
   "total_snapshots": 352,
   "all_models": [
@@ -64666,6 +64666,14 @@
           "min_price": 208.99,
           "max_price": 4299.0,
           "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T17:01:37Z",
+          "avg_price": 1467.51,
+          "median_price": 1329.0,
+          "min_price": 208.99,
+          "max_price": 4299.0,
+          "total_listings": 25
         }
       ],
       "M4 iMac 24 (keyword)": [
@@ -65603,6 +65611,14 @@
           "median_price": 1049.0,
           "min_price": 479.0,
           "max_price": 1699.0,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T17:01:39Z",
+          "avg_price": 1101.47,
+          "median_price": 1049.0,
+          "min_price": 479.0,
+          "max_price": 1499.99,
           "total_listings": 25
         }
       ],
@@ -69913,6 +69929,14 @@
         },
         {
           "timestamp": "2026-02-18T16:31:37Z",
+          "avg_price": 533.26,
+          "median_price": 525.0,
+          "min_price": 367.99,
+          "max_price": 700.0,
+          "total_listings": 25
+        },
+        {
+          "timestamp": "2026-02-18T17:01:40Z",
           "avg_price": 533.26,
           "median_price": 525.0,
           "min_price": 367.99,
