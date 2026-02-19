@@ -787,10 +787,6 @@
       <label>Data Filters</label>
       <div class="filter-toggles">
         <label class="toggle-label">
-          <input type="checkbox" id="filterZeros" checked>
-          Filter likely errors?
-        </label>
-        <label class="toggle-label">
           <input type="checkbox" id="showAvailability" checked>
           Show Availability
         </label>
@@ -837,7 +833,9 @@
         <div class="settings-wrap">
           <button id="settingsBtn" class="secondary" style="font-size:14px;padding:6px 10px;">&#9881;</button>
           <div class="settings-menu" id="settingsMenu">
+            <label><input type="checkbox" id="showCrosshair" checked> Show Crosshair</label>
             <label><input type="checkbox" id="showPoints"> Show Points</label>
+            <label><input type="checkbox" id="filterZeros" checked> Filter likely errors</label>
             <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Show Lead Times</label>
             <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Show Delivery Times</label>
           </div>
