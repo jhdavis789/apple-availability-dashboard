@@ -804,8 +804,8 @@
       <div class="period-btns" id="timeRangePeriodBtns" style="margin-bottom:8px;">
         <button class="period-btn" data-hours="24">24h</button>
         <button class="period-btn" data-hours="168">7d</button>
-        <button class="period-btn active" data-hours="336">2wk</button>
-        <button class="period-btn" data-hours="0">Max</button>
+        <button class="period-btn" data-hours="336">2wk</button>
+        <button class="period-btn active" data-hours="0">Max</button>
       </div>
       <div class="time-range-inputs">
         <input type="datetime-local" id="timeStart" step="1">
@@ -2122,14 +2122,15 @@
         });
       });
 
-      // Product multi-dropdown — default: all products selected
+      // Product multi-dropdown — default: Mac Mini + Mac Studio only
+      const defaultProducts = modelsWithData.filter(m => m.startsWith('Mac Mini') || m.startsWith('Mac Studio'));
       _productDropdown = new MultiDropdown(document.getElementById('productDropdown'), {
         items: modelsWithData.map(m => ({ value: m, label: m })),
         headers: [
           { value: '__ALL__', label: 'All Products (Average)', btnLabel: 'all', isSelectAll: true },
           { value: '__AVG_SEL__', label: 'Avg of Selected', noButtons: true }
         ],
-        initialSelected: modelsWithData.slice(),
+        initialSelected: defaultProducts.length > 0 ? defaultProducts : modelsWithData.slice(),
         onChange: () => render()
       });
       _addCompToggle(_productDropdown, '__AVG_SEL__',
@@ -2359,8 +2360,8 @@
       timeMin = Math.min(...timestamps);
       timeMax = Math.max(...timestamps);
       timeEndMs = timeMax;
-      // Default to 2wk view
-      timeStartMs = Math.max(timeMin, timeMax - 336 * 3600000);
+      // Default to Max view
+      timeStartMs = timeMin;
 
       const startInput = document.getElementById('timeStart');
       const endInput = document.getElementById('timeEnd');
