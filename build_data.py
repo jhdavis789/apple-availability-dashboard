@@ -18,10 +18,15 @@ from collections import defaultdict
 from datetime import datetime
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-CSV_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, ".."))
+CSV_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "csvs"))
 OUTPUT_FILE = os.path.join(SCRIPT_DIR, "data.json")
 EBAY_DB_PATH = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "Ebay Scrape", "ebay_data.db"))
 RAW_API_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "raw_api_responses"))
+
+# Models to exclude from dashboard output (easy to add more later)
+EXCLUDED_MODELS = {
+    'MacBook Pro 14" M4 Max ($3,499)',
+}
 
 
 def parse_timestamp(filename):
@@ -218,7 +223,7 @@ def _parse_one_raw_file(filepath):
                 avail = 1 if pickup == "available" else 0
                 # Resolve product name: try resp-level parts, then top-level, then use raw product field
                 name = resp_part_to_name.get(pn) or part_to_name.get(pn) or product
-                if name and name != "batch":
+                if name and name != "batch" and name not in EXCLUDED_MODELS:
                     store_avail[sn][name] = avail
 
     return timestamp, store_meta, store_avail
@@ -292,6 +297,157 @@ def load_store_map():
     }
 
 
+def _parse_lead_days(quote):
+    """Map pickupSearchQuote to numeric lead days."""
+    if not quote:
+        return None
+    q = quote.lower()
+    if "today" in q:
+        return 0
+    if "tomorrow" in q:
+        return 1
+    return None
+
+
+def load_lead_times():
+    """Extract pickup lead time data from raw API response files.
+
+    Parses pickupSearchQuote ("Available Today" = 0 days, "Available Tomorrow" = 1 day)
+    for each store+product, then aggregates to per-city averages.
+    """
+    if not os.path.isdir(RAW_API_DIR):
+        print("Raw API directory not found, skipping lead times")
+        return None
+
+    # Load store-to-region mapping for city aggregation
+    sa_path = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "store_assignments.json"))
+    store_region = {}
+    if os.path.exists(sa_path):
+        with open(sa_path) as f:
+            sa = json.load(f)
+        for region, store_nums in sa.get("city_assignments", {}).items():
+            for sn in store_nums:
+                store_region[sn] = region
+
+    files = sorted(glob.glob(os.path.join(RAW_API_DIR, "raw_responses_*.json")))
+    candidates = [f for f in files if "wave2" not in os.path.basename(f)]
+    if not candidates:
+        print("No raw API response files found, skipping lead times")
+        return None
+
+    print(f"Extracting lead times from {len(candidates)} raw API files...")
+
+    snapshots = []
+    for filepath in candidates:
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+        except Exception:
+            continue
+
+        timestamp = raw.get("timestamp", "")
+        if not timestamp:
+            continue
+
+        products_map = raw.get("products", {})
+        part_to_name = {v: k for k, v in products_map.items()}
+
+        # {city: {product: [lead_days, ...]}} for this snapshot
+        city_product_leads = defaultdict(lambda: defaultdict(list))
+
+        for resp in raw.get("responses", []):
+            resp_parts = resp.get("parts", {})
+            resp_part_to_name = {v: k for k, v in resp_parts.items()}
+            product = resp.get("product", "")
+
+            stores = resp.get("response", {}).get("body", {}).get("stores", [])
+            for store in stores:
+                sn = store.get("storeNumber", "")
+                if not sn:
+                    continue
+                region = store_region.get(sn)
+                if not region:
+                    continue
+
+                for pn, pv in store.get("partsAvailability", {}).items():
+                    name = resp_part_to_name.get(pn) or part_to_name.get(pn) or product
+                    if not name or name == "batch":
+                        continue
+                    if name in EXCLUDED_MODELS:
+                        continue
+
+                    quote = pv.get("pickupSearchQuote", "")
+                    lead = _parse_lead_days(quote)
+                    if lead is not None:
+                        city_product_leads[region][name].append(lead)
+
+        # Compute averages for this snapshot
+        if city_product_leads:
+            data = {}
+            for city, products in city_product_leads.items():
+                data[city] = {}
+                for prod, leads in products.items():
+                    if leads:
+                        data[city][prod] = round(sum(leads) / len(leads), 2)
+            snapshots.append({"t": timestamp, "data": data})
+
+    print(f"  Extracted lead times from {len(snapshots)} snapshots")
+    return {"snapshots": snapshots} if snapshots else None
+
+
+def load_delivery_times():
+    """Extract delivery time data from raw API response files.
+
+    Reads the delivery_times key directly (already per-city, per-product).
+    Returns {"snapshots": [{"t": timestamp, "data": {city: {product: days}}}]}.
+    """
+    if not os.path.isdir(RAW_API_DIR):
+        print("Raw API directory not found, skipping delivery times")
+        return None
+
+    files = sorted(glob.glob(os.path.join(RAW_API_DIR, "raw_responses_*.json")))
+    candidates = [f for f in files if "wave2" not in os.path.basename(f)]
+    if not candidates:
+        print("No raw API response files found, skipping delivery times")
+        return None
+
+    print(f"Extracting delivery times from {len(candidates)} raw API files...")
+
+    snapshots = []
+    for filepath in candidates:
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+        except Exception:
+            continue
+
+        timestamp = raw.get("timestamp", "")
+        if not timestamp:
+            continue
+
+        dt = raw.get("delivery_times")
+        if not dt:
+            continue
+
+        # Reshape from {product: {city: {days, ...}}} to {city: {product: days}}
+        data = {}
+        for product, cities in dt.items():
+            if product in EXCLUDED_MODELS:
+                continue
+            for city, info in cities.items():
+                days = info.get("days") if isinstance(info, dict) else None
+                if days is not None:
+                    if city not in data:
+                        data[city] = {}
+                    data[city][product] = days
+
+        if data:
+            snapshots.append({"t": timestamp, "data": data})
+
+    print(f"  Extracted delivery times from {len(snapshots)} snapshots")
+    return {"snapshots": snapshots} if snapshots else None
+
+
 STORE_ASSIGNMENTS_PATH = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "store_assignments.json"))
 GLITCH_INELIGIBLE_THRESHOLD = 0.80
 
@@ -310,6 +466,154 @@ def _is_glitch_snapshot(raw_data):
     if total == 0:
         return True
     return (ineligible / total) >= GLITCH_INELIGIBLE_THRESHOLD
+
+
+def _extract_store_hours(raw_api_dir):
+    """Extract store hours and timezone from the latest raw API file.
+
+    Returns dict: storeNumber -> {
+        'timezone': str,
+        'schedule': {0: (open_h, close_h), 1: ..., 6: ...}  # 0=Mon, 6=Sun
+    }
+    where open_h/close_h are fractional hours (e.g. 9.0 for 9 AM, 21.0 for 9 PM).
+    """
+    import re as _re
+
+    files = sorted(glob.glob(os.path.join(raw_api_dir, "raw_responses_*.json")))
+    candidates = [f for f in files if "wave2" not in os.path.basename(f)]
+    if not candidates:
+        return {}
+
+    # Use latest file for store hours
+    with open(candidates[-1], "r", encoding="utf-8") as f:
+        raw = json.load(f)
+
+    def parse_time(t_str):
+        """Parse '9:00 AM' -> 9.0, '9:30 PM' -> 21.5"""
+        m = _re.match(r'(\d+):(\d+)\s*(AM|PM)', t_str.strip(), _re.IGNORECASE)
+        if not m:
+            return None
+        h, mn, ap = int(m.group(1)), int(m.group(2)), m.group(3).upper()
+        if ap == 'PM' and h != 12:
+            h += 12
+        elif ap == 'AM' and h == 12:
+            h = 0
+        return h + mn / 60.0
+
+    DAY_MAP = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5, 'sun': 6}
+
+    def expand_days(days_str):
+        """Expand 'Mon-Sat:' -> [0,1,2,3,4,5], 'Sun:' -> [6]"""
+        days_str = days_str.strip().rstrip(':').strip()
+        result = []
+        for part in days_str.split(','):
+            part = part.strip()
+            if '-' in part:
+                start_s, end_s = part.split('-', 1)
+                start_d = DAY_MAP.get(start_s.strip()[:3].lower())
+                end_d = DAY_MAP.get(end_s.strip()[:3].lower())
+                if start_d is not None and end_d is not None:
+                    if start_d <= end_d:
+                        result.extend(range(start_d, end_d + 1))
+                    else:
+                        result.extend(range(start_d, 7))
+                        result.extend(range(0, end_d + 1))
+            else:
+                d = DAY_MAP.get(part[:3].lower())
+                if d is not None:
+                    result.append(d)
+        return result
+
+    store_hours = {}
+    for resp in raw.get("responses", []):
+        stores = resp.get("response", {}).get("body", {}).get("stores", [])
+        for store in stores:
+            sn = store.get("storeNumber", "")
+            if not sn or sn in store_hours:
+                continue
+            tz = store.get("retailStore", {}).get("timezone", "")
+            sh = store.get("storeHours", {})
+            hours_list = sh.get("hours", [])
+            schedule = {}
+            for entry in hours_list:
+                timings = entry.get("storeTimings", "")
+                days_str = entry.get("storeDays", "")
+                if '-' not in timings:
+                    continue
+                open_s, close_s = timings.split('-', 1)
+                open_h = parse_time(open_s)
+                close_h = parse_time(close_s)
+                if open_h is None or close_h is None:
+                    continue
+                for d in expand_days(days_str):
+                    schedule[d] = (open_h, close_h)
+            if schedule and tz:
+                store_hours[sn] = {"timezone": tz, "schedule": schedule}
+
+    return store_hours
+
+
+def _compute_open_hours(restock_str, sellout_str, schedule, tz_name):
+    """Compute total open hours between restock and sellout times.
+
+    Walks day by day, summing only the hours the store is open.
+    Falls back to wall-clock hours if timezone handling fails.
+    """
+    try:
+        from zoneinfo import ZoneInfo
+    except ImportError:
+        # Python < 3.9 fallback
+        return None
+
+    try:
+        tz = ZoneInfo(tz_name)
+    except Exception:
+        return None
+
+    t0 = datetime.fromisoformat(restock_str.replace("Z", "+00:00").replace("+00:00", ""))
+    t1 = datetime.fromisoformat(sellout_str.replace("Z", "+00:00").replace("+00:00", ""))
+
+    # Timestamps are in the machine's local timezone (America/Los_Angeles)
+    machine_tz = ZoneInfo("America/Los_Angeles")
+    t0_aware = t0.replace(tzinfo=machine_tz) if t0.tzinfo is None else t0
+    t1_aware = t1.replace(tzinfo=machine_tz) if t1.tzinfo is None else t1
+
+    # Convert to store local time
+    t0_local = t0_aware.astimezone(tz)
+    t1_local = t1_aware.astimezone(tz)
+
+    total_open = 0.0
+    current = t0_local
+
+    while current < t1_local:
+        dow = current.weekday()  # 0=Mon, 6=Sun
+        open_h, close_h = schedule.get(dow, (0, 24))
+
+        current_h = current.hour + current.minute / 60.0
+        # End of this day's window
+        end_of_day = current.replace(hour=0, minute=0, second=0, microsecond=0)
+        from datetime import timedelta
+        end_of_day = end_of_day + timedelta(hours=close_h)
+
+        if current_h < open_h:
+            # Before store opens — skip to open time
+            current = current.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(hours=open_h)
+            if current >= t1_local:
+                break
+            current_h = open_h
+
+        if current_h >= close_h:
+            # Past closing — skip to next day's opening
+            current = current.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+            continue
+
+        # We're within open hours
+        effective_end = min(t1_local, end_of_day)
+        if effective_end > current:
+            total_open += (effective_end - current).total_seconds() / 3600.0
+        current = end_of_day
+
+    return round(total_open, 2)
 
 
 def load_cycles():
@@ -344,6 +648,11 @@ def load_cycles():
         for sn, meta in sa.get("stores", {}).items():
             store_extra[sn] = {"city": meta.get("city", ""), "state": meta.get("state", "")}
         print(f"  Loaded region mapping for {len(store_region)} stores")
+
+    # Load store hours for open-hours cycle calculation
+    store_hours = _extract_store_hours(RAW_API_DIR)
+    if store_hours:
+        print(f"  Loaded store hours for {len(store_hours)} stores")
 
     # Build per-(store, product) timelines: [(timestamp_str, is_available)]
     timeline_raw = defaultdict(lambda: defaultdict(list))
@@ -388,7 +697,7 @@ def load_cycles():
                 for pn, pv in store.get("partsAvailability", {}).items():
                     display = pv.get("pickupDisplay", "")
                     name = resp_part_to_name.get(pn) or part_to_name.get(pn) or product
-                    if name and name != "batch":
+                    if name and name != "batch" and name not in EXCLUDED_MODELS:
                         timeline_raw[sn][name].append((ts_str, display))
 
     if skipped:
@@ -407,6 +716,13 @@ def load_cycles():
                     prev = display
             timelines[(sn, prod)] = deduped
 
+    # Find the earliest snapshot timestamp (first observation — not a real restock)
+    all_timestamps = set()
+    for (sn, prod), entries in timelines.items():
+        if entries:
+            all_timestamps.add(entries[0][0])
+    first_snapshot_ts = min(all_timestamps) if all_timestamps else None
+
     # Detect cycles
     cycles = []
     for (sn, prod), entries in timelines.items():
@@ -414,6 +730,9 @@ def load_cycles():
         for i, (ts_str, display) in enumerate(entries):
             if display == "available":
                 if i == 0 or entries[i - 1][1] in ("ineligible", "unavailable"):
+                    # Skip if this is the very first observation (left-censored)
+                    if i == 0 and ts_str == first_snapshot_ts:
+                        continue
                     restock_ts = ts_str
             elif display in ("ineligible", "unavailable"):
                 if restock_ts is not None:
@@ -429,6 +748,13 @@ def load_cycles():
                         restock_ts = None
                         continue
                     extra = store_extra.get(sn, {})
+                    # Compute open hours (subtracting closed hours)
+                    open_h = duration_h
+                    sh = store_hours.get(sn)
+                    if sh and sh.get("schedule"):
+                        oh = _compute_open_hours(restock_ts, ts_str, sh["schedule"], sh["timezone"])
+                        if oh is not None:
+                            open_h = oh
                     cycles.append({
                         "store": sn,
                         "store_name": store_info.get(sn, {}).get("name", sn),
@@ -438,7 +764,8 @@ def load_cycles():
                         "product": prod,
                         "restock": restock_ts,
                         "sellout": ts_str,
-                        "hours": round(duration_h, 2),
+                        "hours": round(open_h, 2),
+                        "wall_hours": round(duration_h, 2),
                     })
                     restock_ts = None
 
@@ -509,6 +836,11 @@ def main():
 
     snapshots.sort(key=lambda x: x["timestamp"])
 
+    # Filter excluded models from snapshots and all_models
+    all_models -= EXCLUDED_MODELS
+    for snap in snapshots:
+        snap["products"] = [p for p in snap["products"] if p["model"] not in EXCLUDED_MODELS]
+
     # Load eBay price data
     ebay_prices = load_ebay_prices()
 
@@ -518,8 +850,22 @@ def main():
     # Load restock/sellout cycle data
     cycle_data = load_cycles()
 
+    # Load lead time data from raw API responses
+    lead_times = load_lead_times()
+
+    # Load delivery time data from raw API responses
+    delivery_times = load_delivery_times()
+
+    # Site updated timestamp (file modification time of dashboard.html)
+    dashboard_html_path = os.path.join(SCRIPT_DIR, "dashboard.html")
+    site_updated_at = None
+    if os.path.exists(dashboard_html_path):
+        mtime = os.path.getmtime(dashboard_html_path)
+        site_updated_at = datetime.fromtimestamp(mtime).isoformat()
+
     output = {
         "generated_at": datetime.now().isoformat(),
+        "site_updated_at": site_updated_at,
         "total_snapshots": len(snapshots),
         "all_models": sorted(all_models),
         "all_cities": sorted(all_cities),
@@ -531,6 +877,10 @@ def main():
         output["store_map"] = store_map
     if cycle_data:
         output["cycles"] = cycle_data
+    if lead_times:
+        output["lead_times"] = lead_times
+    if delivery_times:
+        output["delivery_times"] = delivery_times
 
     with open(OUTPUT_FILE, "w") as f:
         json.dump(output, f, indent=2)
@@ -538,6 +888,8 @@ def main():
     print(f"Written {len(snapshots)} snapshots to {OUTPUT_FILE}")
     print(f"Models: {sorted(all_models)}")
     print(f"Cities: {sorted(all_cities)}")
+    if EXCLUDED_MODELS:
+        print(f"Excluded: {sorted(EXCLUDED_MODELS)}")
 
 
 if __name__ == "__main__":

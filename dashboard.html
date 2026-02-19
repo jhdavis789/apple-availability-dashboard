@@ -839,6 +839,7 @@
           <div class="settings-menu" id="settingsMenu">
             <label><input type="checkbox" id="showPoints"> Show Points</label>
             <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Show Lead Times</label>
+            <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Show Delivery Times</label>
           </div>
         </div>
       </div>
@@ -2046,6 +2047,12 @@
       }
       document.getElementById('showLeadTimes').addEventListener('change', render);
 
+      // Show delivery time toggle if data is available
+      if (DATA.delivery_times && DATA.delivery_times.snapshots.length > 0) {
+        document.getElementById('deliveryTimeToggleLabel').style.display = 'flex';
+      }
+      document.getElementById('showDeliveryTimes').addEventListener('change', render);
+
       // Reset axes button
       document.getElementById('resetGraphBtn').addEventListener('click', () => {
         if (mainChart) {
@@ -2403,6 +2410,7 @@
       if (!document.getElementById('showEbayMean').checked) params.set('emean', '0');
       if (document.getElementById('showEbayMedian').checked) params.set('emed', '1');
       if (document.getElementById('showLeadTimes').checked) params.set('lt', '1');
+      if (document.getElementById('showDeliveryTimes').checked) params.set('dt', '1');
       if (document.getElementById('showPoints').checked) params.set('pts', '1');
 
       // Cycles
@@ -2506,6 +2514,7 @@
       if (params.has('emean')) document.getElementById('showEbayMean').checked = params.get('emean') === '1';
       if (params.has('emed')) document.getElementById('showEbayMedian').checked = params.get('emed') === '1';
       if (params.has('lt')) document.getElementById('showLeadTimes').checked = params.get('lt') === '1';
+      if (params.has('dt')) document.getElementById('showDeliveryTimes').checked = params.get('dt') === '1';
       if (params.has('pts')) document.getElementById('showPoints').checked = params.get('pts') === '1';
 
       // Cycles
@@ -3213,6 +3222,78 @@
         }
       }
 
+      // --- Delivery time overlay ---
+      const showDeliveryTimes = document.getElementById('showDeliveryTimes').checked && DATA.delivery_times;
+      if (showDeliveryTimes) {
+        const dtSnapshots = DATA.delivery_times.snapshots;
+        const dtCities = selectedCities.length > 0 ? selectedCities : DATA.all_cities;
+        const dtShowAvg = isCityAverageOn() || selectedCities.length === 0;
+
+        // Per-city delivery time lines
+        dtCities.forEach(city => {
+          const points = [];
+          dtSnapshots.forEach(snap => {
+            const cityData = snap.data[city];
+            if (!cityData) return;
+            const vals = _prods.map(p => cityData[p]).filter(v => v !== undefined && v !== null);
+            if (vals.length > 0) {
+              points.push({ x: new Date(snap.t), y: vals.reduce((a,b) => a+b, 0) / vals.length });
+            }
+          });
+          if (points.length > 0) {
+            const cityColor = CITY_COLORS[city] || '#888';
+            datasets.push({
+              label: `${city} Delivery`,
+              data: points,
+              borderColor: cityColor,
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              borderDash: [3, 3],
+              pointRadius: 1.5,
+              pointHoverRadius: 3,
+              pointBorderWidth: 0,
+              pointStyle: 'circle',
+              pointBackgroundColor: cityColor,
+              stepped: 'before',
+              fill: false,
+              yAxisID: 'y2',
+            });
+          }
+        });
+
+        // Average delivery time line across all cities
+        if (dtShowAvg) {
+          const avgPoints = [];
+          dtSnapshots.forEach(snap => {
+            let allVals = [];
+            DATA.all_cities.forEach(city => {
+              const cityData = snap.data[city];
+              if (!cityData) return;
+              const vals = _prods.map(p => cityData[p]).filter(v => v !== undefined && v !== null);
+              allVals = allVals.concat(vals);
+            });
+            if (allVals.length > 0) {
+              avgPoints.push({ x: new Date(snap.t), y: allVals.reduce((a,b) => a+b, 0) / allVals.length });
+            }
+          });
+          if (avgPoints.length > 0) {
+            datasets.push({
+              label: 'Avg Delivery (All Cities)',
+              data: avgPoints,
+              borderColor: '#ff9f0a',
+              backgroundColor: 'transparent',
+              borderWidth: 2.5,
+              borderDash: [3, 3],
+              pointRadius: 0,
+              pointHoverRadius: 3,
+              stepped: 'before',
+              fill: false,
+              yAxisID: 'y2',
+            });
+          }
+        }
+      }
+
       // Compute y2 axis max from eBay/lead time data
       let y2Max = 100;
       let y2Config;
@@ -3234,16 +3315,18 @@
           ticks: { color: '#30d158', callback: v => '$' + Math.round(v).toLocaleString() },
           title: { display: true, text: 'eBay Price ($)', color: '#30d158', font: { size: 12 } }
         };
-      } else if (showLeadTimes) {
-        const ltYValues = datasets.filter(ds => ds.yAxisID === 'y2').flatMap(ds => ds.data.map(pt => pt.y)).filter(v => v != null);
-        y2Max = ltYValues.length > 0 ? Math.max(2, Math.ceil(Math.max(...ltYValues) + 0.5)) : 2;
+      } else if (showLeadTimes || showDeliveryTimes) {
+        const daysYValues = datasets.filter(ds => ds.yAxisID === 'y2').flatMap(ds => ds.data.map(pt => pt.y)).filter(v => v != null);
+        y2Max = daysYValues.length > 0 ? Math.max(2, Math.ceil(Math.max(...daysYValues) + 0.5)) : 2;
+        const axisColor = showLeadTimes && showDeliveryTimes ? '#aaa' : showDeliveryTimes ? '#ff9f0a' : '#64d2ff';
+        const axisLabel = showLeadTimes && showDeliveryTimes ? 'Lead / Delivery (days)' : showDeliveryTimes ? 'Delivery Time (days)' : 'Avg Lead Time (days)';
         y2Config = {
           position: 'right',
           min: -0.08,
           max: y2Max,
           grid: { drawOnChartArea: !showAvailability, color: getThemeColors().grid },
-          ticks: { color: '#64d2ff', callback: v => v < 0 ? '' : v.toFixed(1) + 'd' },
-          title: { display: true, text: 'Avg Lead Time (days)', color: '#64d2ff', font: { size: 12 } }
+          ticks: { color: axisColor, callback: v => v < 0 ? '' : v.toFixed(1) + 'd' },
+          title: { display: true, text: axisLabel, color: axisColor, font: { size: 12 } }
         };
       } else {
         y2Config = {

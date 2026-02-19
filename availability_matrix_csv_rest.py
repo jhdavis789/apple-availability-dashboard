@@ -29,7 +29,17 @@ PRODUCTS = {
     "MacBook Pro 14\" M5 ($1,599)": "MDE04LL/A",
     "MacBook Pro 14\" M4 Pro ($1,999)": "MX2H3LL/A",
     "MacBook Pro 14\" M4 Max ($3,499)": "MX2K3LL/A",
+    "iPhone 16 128GB ($799)": "MYAP3LL/A",
+    "Mac Studio M4 Max ($1,999)": "MU963LL/A",
+    "Mac Studio M3 Ultra ($3,999)": "MU973LL/A",
 }
+
+# SKUs to exclude from tracking (easy to add more later)
+EXCLUDED_SKUS = {
+    "MX2K3LL/A",  # MacBook Pro 14" M4 Max ($3,499) — winding down
+}
+
+TRACKED_PRODUCTS = {k: v for k, v in PRODUCTS.items() if v not in EXCLUDED_SKUS}
 
 CITIES = {
     "NYC": "10001", "LA": "90001", "SF": "94102", "Austin": "78701",
@@ -65,8 +75,9 @@ OVERFLOW_ZIPS = {
 MAX_ASSIGNMENT_DISTANCE = 75  # miles
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
-OUT_DIR = Path("/Users/Jackson/.openclaw/workspace/research/apple-availability")
-ASSIGNMENTS_CACHE = OUT_DIR / "store_assignments.json"
+BASE_DIR = Path("/Users/Jackson/.openclaw/workspace/research/apple-availability")
+OUT_DIR = BASE_DIR / "csvs"
+ASSIGNMENTS_CACHE = BASE_DIR / "store_assignments.json"
 MAX_WORKERS = 1  # Serialized to respect rate limits (~15 req burst, 541 after)
 
 def check_batch(parts: list, zip_code: str) -> dict:
@@ -360,6 +371,8 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
     # {product_name: {storeNumber: bool}}
     product_store_avail = {name: {} for name in products}
 
+    completed_count = 0
+
     def _check_zip(z):
         time.sleep(3)
         result = check_batch(parts_list, z)
@@ -369,6 +382,8 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
         futures = [executor.submit(_check_zip, z) for z in all_zips]
         for future in as_completed(futures):
             z, result = future.result()
+            completed_count += 1
+            print(f"  [{completed_count}/{len(all_zips)}] Zip {z} ({_zip_to_label(z)}) done")
             if result["raw_response"]:
                 raw_responses.append({
                     "product": "batch",
@@ -407,6 +422,92 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
     return rows, counts, raw_responses
 
 
+def fetch_delivery_times(products: dict) -> dict:
+    """Fetch online delivery estimates from /shop/delivery-message for all products × cities.
+    Returns {product_name: {city: {"days": int, "date": "YYYYMMDD", "display": str}}}."""
+    url = "https://www.apple.com/shop/delivery-message"
+    today = datetime.now().date()
+    results = {}
+
+    # Batch up to 3 parts per request (Apple's maxParamsPerURL)
+    parts_list = list(products.items())  # [(name, sku), ...]
+
+    for city, zipcode in CITIES.items():
+        for batch_start in range(0, len(parts_list), 3):
+            batch = parts_list[batch_start:batch_start + 3]
+            params = {"mt": "regular", "postalCode": zipcode}
+            for i, (name, sku) in enumerate(batch):
+                params[f"parts.{i}"] = sku
+
+            for attempt in range(3):
+                try:
+                    resp = requests.get(url, params=params, headers=HEADERS, timeout=15)
+                    if resp.status_code == 541:
+                        wait = 10 * (attempt + 1)
+                        print(f"    Delivery API rate limited ({city}), waiting {wait}s...")
+                        time.sleep(wait)
+                        continue
+                    if resp.status_code != 200 or not resp.text.startswith('{'):
+                        break
+                    dm = resp.json().get("body", {}).get("content", {}).get("deliveryMessage", {})
+                    for name, sku in batch:
+                        info = dm.get(sku, {}).get("regular", {})
+                        encoded = info.get("deliveryOptionMessages", [])
+                        # Get the last encoded date (standard/express shipping, not same-day courier)
+                        enc_dates = [e.get("encodedUpperDateString", "") for e in encoded if e.get("encodedUpperDateString")]
+                        if enc_dates:
+                            date_str = enc_dates[-1]
+                            try:
+                                d = datetime.strptime(date_str, "%Y%m%d").date()
+                                days = (d - today).days
+                            except ValueError:
+                                days = None
+                            opts = info.get("deliveryOptions", [])
+                            display = opts[-1]["date"] if opts else date_str
+                            results.setdefault(name, {})[city] = {
+                                "days": days, "date": date_str, "display": display,
+                            }
+                        else:
+                            results.setdefault(name, {})[city] = {
+                                "days": None, "date": None, "display": "N/A",
+                            }
+                    break
+                except Exception as e:
+                    if attempt < 2:
+                        time.sleep(2)
+                    else:
+                        print(f"    Delivery ERR: {city} ({e})")
+
+    return results
+
+
+def print_delivery_matrix(delivery: dict):
+    """Print delivery time matrix."""
+    if not delivery:
+        print("\n  No delivery data collected.")
+        return
+    print(f"\n{'='*100}")
+    print(f"ONLINE DELIVERY TIMES (days)")
+    print(f"{'='*100}")
+
+    print(f"{'Model':<40}", end="")
+    for city in CITIES:
+        print(f"{city:>8}", end="")
+    print()
+    print("-" * 100)
+
+    for name in delivery:
+        print(f"{name:<40}", end="")
+        for city in CITIES:
+            info = delivery[name].get(city, {})
+            days = info.get("days")
+            if days is not None:
+                print(f"{days:>7}d", end="")
+            else:
+                print(f"{'--':>8}", end="")
+        print()
+
+
 def main():
     prev_csv = get_previous_csv()
     ts = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -418,8 +519,8 @@ def main():
         print(f"\n{'='*100}")
         print(f"STORE DISCOVERY (no cache found, running discovery...)")
         print(f"{'='*100}")
-        first_part = list(PRODUCTS.values())[0]
-        first_name = list(PRODUCTS.keys())[0]
+        first_part = list(TRACKED_PRODUCTS.values())[0]
+        first_name = list(TRACKED_PRODUCTS.keys())[0]
         all_stores, discovery_raw = discover_stores(first_part, first_name)
         city_assignments = assign_stores(all_stores)
         save_assignments(all_stores, city_assignments)
@@ -428,8 +529,8 @@ def main():
     # print(f"\n{'='*100}")
     # print(f"STORE DISCOVERY")
     # print(f"{'='*100}")
-    # first_part = list(PRODUCTS.values())[0]
-    # first_name = list(PRODUCTS.keys())[0]
+    # first_part = list(TRACKED_PRODUCTS.values())[0]
+    # first_name = list(TRACKED_PRODUCTS.keys())[0]
     # all_stores, discovery_raw = discover_stores(first_part, first_name)
     # city_assignments = assign_stores(all_stores)
     # save_assignments(all_stores, city_assignments)
@@ -438,10 +539,20 @@ def main():
 
     # === Batch all products in one pass ===
     print(f"\n{'='*100}")
-    print(f"PRODUCTS ({len(PRODUCTS)}): {', '.join(PRODUCTS.keys())}")
+    print(f"PRODUCTS ({len(TRACKED_PRODUCTS)}): {', '.join(TRACKED_PRODUCTS.keys())}")
+    if EXCLUDED_SKUS:
+        excluded_names = [k for k, v in PRODUCTS.items() if v in EXCLUDED_SKUS]
+        print(f"EXCLUDED: {', '.join(excluded_names)}")
     print(f"{'='*100}")
-    all_rows, _, raw1 = collect_availability(PRODUCTS, city_assignments)
+    all_rows, _, raw1 = collect_availability(TRACKED_PRODUCTS, city_assignments)
     all_raw = discovery_raw + raw1
+
+    # === Fetch delivery times ===
+    print(f"\n{'='*100}")
+    print(f"DELIVERY TIMES")
+    print(f"{'='*100}")
+    delivery_times = fetch_delivery_times(TRACKED_PRODUCTS)
+    print_delivery_matrix(delivery_times)
 
     # Write CSV
     new_csv = OUT_DIR / f"availability_matrix_{ts}.csv"
@@ -454,17 +565,18 @@ def main():
     print(f"\n✅ Saved: {new_csv.name}")
 
     # Write raw JSON with assignment metadata
-    raw_dir = OUT_DIR / "raw_api_responses"
+    raw_dir = BASE_DIR / "raw_api_responses"
     raw_dir.mkdir(exist_ok=True)
     raw_file = raw_dir / f"raw_responses_{ts}.json"
     with open(raw_file, 'w') as f:
         json.dump({
             "timestamp": datetime.now().isoformat(),
-            "products": dict(PRODUCTS),
+            "products": dict(TRACKED_PRODUCTS),
             "cities": dict(CITIES),
             "overflow_zips": dict(OVERFLOW_ZIPS),
             "city_assignments": {city: list(stores) for city, stores in city_assignments.items()},
             "store_metadata": {sn: meta for sn, meta in all_stores.items() if meta.get("assigned_city")},
+            "delivery_times": delivery_times,
             "responses": all_raw
         }, f, indent=2)
 
