@@ -356,6 +356,12 @@
     .period-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
     .period-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
 
+    .axis-toggle { display:inline-flex; gap:1px; margin-left:auto; font-size:10px; }
+    .axis-toggle button { padding:1px 5px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--text); cursor:pointer; border-radius:0; line-height:1.4; }
+    .axis-toggle button:first-child { border-radius:3px 0 0 3px; }
+    .axis-toggle button:last-child { border-radius:0 3px 3px 0; }
+    .axis-toggle button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
     .movers-row {
       display: flex; gap: 10px; flex-wrap: wrap;
       margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--card-border);
@@ -789,12 +795,12 @@
       <div class="settings-wrap">
         <button id="dataSourcesBtn" class="secondary" style="font-size:13px;padding:6px 12px;">Sources &#9662;</button>
         <div class="settings-menu dropdown-down" id="dataSourcesMenu">
-          <label><input type="checkbox" id="showAvailability" checked> Availability</label>
-          <label id="ebayToggleLabel" style="display:none;"><input type="checkbox" id="showEbayPrices"> eBay Prices</label>
+          <label><input type="checkbox" id="showAvailability" checked> Availability <span class="axis-toggle" data-source="availability"><button class="active" data-side="left">L</button><button data-side="right">R</button></span></label>
+          <label id="ebayToggleLabel" style="display:none;"><input type="checkbox" id="showEbayPrices"> eBay Prices <span class="axis-toggle" data-source="ebay"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
           <label class="ebay-sub-toggle" id="ebayMeanLabel" style="display:none;margin-left:20px;opacity:0.4;pointer-events:none;"><input type="checkbox" id="showEbayMean" checked> Mean</label>
           <label class="ebay-sub-toggle" id="ebayMedianLabel" style="display:none;margin-left:20px;opacity:0.4;pointer-events:none;"><input type="checkbox" id="showEbayMedian"> Median</label>
-          <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Lead Times</label>
-          <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Delivery Times</label>
+          <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Lead Times <span class="axis-toggle" data-source="leadTimes"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
+          <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Delivery Times <span class="axis-toggle" data-source="deliveryTimes"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
         </div>
       </div>
     </div>
@@ -1054,6 +1060,12 @@
     let _cycleSortKey = 'avg_hours';
     let _cycleSortDir = 'asc';
     let currentView = 'trends';
+    let _axisSide = { availability: 'left', ebay: 'right', leadTimes: 'right', deliveryTimes: 'right' };
+    const _axisSideDefaults = { availability: 'left', ebay: 'right', leadTimes: 'right', deliveryTimes: 'right' };
+    const _sourceUnit = { availability: 'pct', ebay: 'dollars', leadTimes: 'days', deliveryTimes: 'days' };
+    function _getAxisId(source) {
+      return 'y_' + _axisSide[source] + '_' + _sourceUnit[source];
+    }
     let timeMin = 0;  // epoch ms — absolute min from data
     let timeMax = 0;  // epoch ms — absolute max from data
     let timeStartMs = 0; // current selected start
@@ -1639,16 +1651,15 @@
 
           const color = ds.borderColor || '#888';
           let formatted;
-          if (ds.yAxisID === 'y2') {
-            if (ds.label && ds.label.includes('Lead Time')) {
-              formatted = hit.y.toFixed(2) + ' days';
-            } else {
-              formatted = '$' + hit.y.toFixed(2);
-              if (ds._ebayData && hit.idx < ds._ebayData.length) {
-                const listings = ds._ebayData[hit.idx].total_listings;
-                if (listings != null) formatted += ` (${listings} listings)`;
-              }
+          const axisId = ds.yAxisID || '';
+          if (axisId.includes('_dollars')) {
+            formatted = '$' + hit.y.toFixed(2);
+            if (ds._ebayData && hit.idx < ds._ebayData.length) {
+              const listings = ds._ebayData[hit.idx].total_listings;
+              if (listings != null) formatted += ` (${listings} listings)`;
             }
+          } else if (axisId.includes('_days')) {
+            formatted = hit.y.toFixed(2) + ' days';
           } else {
             formatted = hit.y.toFixed(1) + '%';
           }
@@ -2177,6 +2188,21 @@
         document.getElementById('deliveryTimeToggleLabel').style.display = 'flex';
       }
       document.getElementById('showDeliveryTimes').addEventListener('change', render);
+
+      // Axis side toggles (L/R buttons)
+      document.querySelectorAll('.axis-toggle').forEach(toggle => {
+        const source = toggle.dataset.source;
+        toggle.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const side = btn.dataset.side;
+            _axisSide[source] = side;
+            toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.side === side));
+            render();
+          });
+        });
+      });
 
       // Reset axes button
       document.getElementById('resetGraphBtn').addEventListener('click', () => {
@@ -3139,7 +3165,8 @@
               borderColor: color, backgroundColor: color + '20',
               pointBackgroundColor: color, borderWidth: width, borderDash: dash,
               pointRadius: showPoints ? (isAvgProd || isAvgCity ? 1.5 : 2.5) : (isAvgProd || isAvgCity ? 0 : 1),
-              pointHoverRadius: showPoints ? 4 : 2.5, pointBorderWidth: 0, tension: 0.3, fill: false
+              pointHoverRadius: showPoints ? 4 : 2.5, pointBorderWidth: 0, tension: 0.3, fill: false,
+              yAxisID: _getAxisId('availability'),
             });
           });
         });
@@ -3157,7 +3184,8 @@
               label: 'Custom Avg (' + customCities.join(', ') + ')', data: customPoints,
               borderColor: '#ffd60a', backgroundColor: '#ffd60a20',
               borderWidth: 3, borderDash: [3, 3], pointRadius: 0,
-              pointHoverRadius: 5, tension: 0.3, fill: false
+              pointHoverRadius: 5, tension: 0.3, fill: false,
+              yAxisID: _getAxisId('availability'),
             });
           }
         }
@@ -3194,7 +3222,7 @@
                 pointStyle: 'rectRot',
                 tension: 0.3,
                 fill: false,
-                yAxisID: 'y2',
+                yAxisID: _getAxisId('ebay'),
               });
             }
             if (showMedian) {
@@ -3213,39 +3241,35 @@
                 pointStyle: 'triangle',
                 tension: 0.3,
                 fill: false,
-                yAxisID: 'y2',
+                yAxisID: _getAxisId('ebay'),
               });
             }
-            // 2-sigma band around the mean price (always shown when eBay is on)
+            // Rolling 2-sigma band around the mean price (always shown when eBay is on)
             {
-              const validPrices = ebayHistory.filter(d => d.avg_price !== null).map(d => d.avg_price);
-              if (validPrices.length >= 2) {
-                const mean = validPrices.reduce((a,b) => a+b, 0) / validPrices.length;
-                const variance = validPrices.reduce((a,b) => a + (b - mean) ** 2, 0) / validPrices.length;
-                const sigma2 = Math.sqrt(variance) * 2;
-                const upperData = ebayHistory.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price + sigma2 }));
-                const lowerData = ebayHistory.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price - sigma2 }));
+              const meanPoints = ebayHistory.filter(d => d.avg_price !== null);
+              if (meanPoints.length >= 2) {
+                const bands = _rollingBands(meanPoints.map(d => ({ t: new Date(d.timestamp).getTime(), v: d.avg_price })));
                 datasets.push({
                   label: 'eBay +2\u03c3',
-                  data: upperData,
+                  data: bands.map(b => ({ x: new Date(b.t), y: b.upper })),
                   borderColor: 'transparent',
                   backgroundColor: 'rgba(48,209,88,0.08)',
                   pointRadius: 0,
                   pointHoverRadius: 0,
                   tension: 0.3,
                   fill: '+1',
-                  yAxisID: 'y2',
+                  yAxisID: _getAxisId('ebay'),
                 });
                 datasets.push({
                   label: 'eBay -2\u03c3',
-                  data: lowerData,
+                  data: bands.map(b => ({ x: new Date(b.t), y: b.lower })),
                   borderColor: 'transparent',
                   backgroundColor: 'rgba(48,209,88,0.08)',
                   pointRadius: 0,
                   pointHoverRadius: 0,
                   tension: 0.3,
                   fill: '-1',
-                  yAxisID: 'y2',
+                  yAxisID: _getAxisId('ebay'),
                 });
               }
             }
@@ -3271,7 +3295,7 @@
                 pointStyle: 'rectRot',
                 tension: 0.3,
                 fill: false,
-                yAxisID: 'y2',
+                yAxisID: _getAxisId('ebay'),
               });
             }
             if (showMedian) {
@@ -3288,39 +3312,35 @@
                 pointStyle: 'triangle',
                 tension: 0.3,
                 fill: false,
-                yAxisID: 'y2',
+                yAxisID: _getAxisId('ebay'),
               });
             }
-            // 2-sigma band per product (always shown when eBay is on)
+            // Rolling 2-sigma band per product (always shown when eBay is on)
             {
-              const validPrices = history.filter(d => d.avg_price !== null).map(d => d.avg_price);
-              if (validPrices.length >= 2) {
-                const mean = validPrices.reduce((a,b) => a+b, 0) / validPrices.length;
-                const variance = validPrices.reduce((a,b) => a + (b - mean) ** 2, 0) / validPrices.length;
-                const sigma2 = Math.sqrt(variance) * 2;
-                const upperData = history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price + sigma2 }));
-                const lowerData = history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price - sigma2 }));
+              const meanPoints = history.filter(d => d.avg_price !== null);
+              if (meanPoints.length >= 2) {
+                const bands = _rollingBands(meanPoints.map(d => ({ t: new Date(d.timestamp).getTime(), v: d.avg_price })));
                 datasets.push({
                   label: `${productName} +2\u03c3`,
-                  data: upperData,
+                  data: bands.map(b => ({ x: new Date(b.t), y: b.upper })),
                   borderColor: 'transparent',
                   backgroundColor: color + '10',
                   pointRadius: 0,
                   pointHoverRadius: 0,
                   tension: 0.3,
                   fill: '+1',
-                  yAxisID: 'y2',
+                  yAxisID: _getAxisId('ebay'),
                 });
                 datasets.push({
                   label: `${productName} -2\u03c3`,
-                  data: lowerData,
+                  data: bands.map(b => ({ x: new Date(b.t), y: b.lower })),
                   borderColor: 'transparent',
                   backgroundColor: color + '10',
                   pointRadius: 0,
                   pointHoverRadius: 0,
                   tension: 0.3,
                   fill: '-1',
-                  yAxisID: 'y2',
+                  yAxisID: _getAxisId('ebay'),
                 });
               }
             }
@@ -3363,7 +3383,7 @@
               pointBackgroundColor: cityColor,
               stepped: 'before',
               fill: false,
-              yAxisID: 'y2',
+              yAxisID: _getAxisId('leadTimes'),
             });
           }
         });
@@ -3395,7 +3415,7 @@
               pointHoverRadius: 3,
               stepped: 'before',
               fill: false,
-              yAxisID: 'y2',
+              yAxisID: _getAxisId('leadTimes'),
             });
           }
         }
@@ -3435,7 +3455,7 @@
               pointBackgroundColor: cityColor,
               stepped: 'before',
               fill: false,
-              yAxisID: 'y2',
+              yAxisID: _getAxisId('deliveryTimes'),
             });
           }
         });
@@ -3467,7 +3487,7 @@
               pointHoverRadius: 3,
               stepped: 'before',
               fill: false,
-              yAxisID: 'y2',
+              yAxisID: _getAxisId('deliveryTimes'),
             });
           }
         }
