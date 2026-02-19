@@ -1267,66 +1267,79 @@
       };
     }
 
-    // Plugin: drag y2 axis to shift eBay prices, scroll to zoom
+    // Plugin: drag right-side axes to shift, scroll to zoom
+    // Helper: find right-position axis under cursor
+    function _findRightAxis(chart, e) {
+      const rect = chart.canvas.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      const ids = Object.keys(chart.scales).filter(id => id !== 'x');
+      for (const id of ids) {
+        const s = chart.scales[id];
+        if (!s || s.position !== 'right' || !s.options.display) continue;
+        if (cx >= s.left - 10 && cx <= s.right + 10 && cy >= s.top && cy <= s.bottom) return id;
+      }
+      return null;
+    }
     const y2DragPlugin = {
       id: 'y2DragZoom',
       _dragging: false,
+      _dragAxisId: null,
       _startY: 0,
       _startMin: 0,
       _startMax: 0,
-      _isOverY2(chart, e) {
-        const y2 = chart.scales.y2;
-        if (!y2 || !y2.options.display) return false;
-        const rect = chart.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        return x >= y2.left - 10 && x <= y2.right + 10 && y >= y2.top && y <= y2.bottom;
+      _isOverRightAxis(chart, e) {
+        return _findRightAxis(chart, e) !== null;
       },
       afterInit(chart) {
         const canvas = chart.canvas;
         canvas.addEventListener('mousedown', (e) => {
-          if (!this._isOverY2(chart, e)) return;
+          const axisId = _findRightAxis(chart, e);
+          if (!axisId) return;
           this._dragging = true;
+          this._dragAxisId = axisId;
           this._startY = e.clientY;
-          const y2 = chart.options.scales.y2;
-          this._startMin = y2.min;
-          this._startMax = y2.max;
+          const ax = chart.options.scales[axisId];
+          this._startMin = ax.min;
+          this._startMax = ax.max;
           canvas.style.cursor = 'ns-resize';
           e.preventDefault();
         });
         canvas.addEventListener('mousemove', (e) => {
           if (!this._dragging) {
-            canvas.style.cursor = this._isOverY2(chart, e) ? 'ns-resize' : '';
+            canvas.style.cursor = this._isOverRightAxis(chart, e) ? 'ns-resize' : '';
           }
         });
         window.addEventListener('mousemove', (e) => {
-          if (!this._dragging) return;
+          if (!this._dragging || !this._dragAxisId) return;
           const dy = e.clientY - this._startY;
-          const y2Scale = chart.scales.y2;
-          if (!y2Scale) return;
-          const pxRange = y2Scale.bottom - y2Scale.top;
+          const scale = chart.scales[this._dragAxisId];
+          if (!scale) return;
+          const pxRange = scale.bottom - scale.top;
           const valRange = this._startMax - this._startMin;
           const shift = (dy / pxRange) * valRange;
-          chart.options.scales.y2.min = this._startMin + shift;
-          chart.options.scales.y2.max = this._startMax + shift;
+          chart.options.scales[this._dragAxisId].min = this._startMin + shift;
+          chart.options.scales[this._dragAxisId].max = this._startMax + shift;
           chart.update('none');
         });
         window.addEventListener('mouseup', () => {
           if (this._dragging) {
             this._dragging = false;
+            this._dragAxisId = null;
             canvas.style.cursor = '';
           }
         });
         canvas.addEventListener('wheel', (e) => {
-          if (!this._isOverY2(chart, e)) return;
+          const axisId = _findRightAxis(chart, e);
+          if (!axisId) return;
           e.preventDefault();
-          const y2 = chart.options.scales.y2;
-          const range = y2.max - y2.min;
+          const ax = chart.options.scales[axisId];
+          const range = ax.max - ax.min;
           const factor = e.deltaY > 0 ? 1.15 : 0.87;
-          const mid = (y2.min + y2.max) / 2;
+          const mid = (ax.min + ax.max) / 2;
           const newRange = range * factor;
-          y2.min = mid - newRange / 2;
-          y2.max = mid + newRange / 2;
+          ax.min = mid - newRange / 2;
+          ax.max = mid + newRange / 2;
           chart.update('none');
         }, { passive: false });
       }
@@ -1445,10 +1458,14 @@
           const cx = e.clientX - rect.left;
           const cy = e.clientY - rect.top;
           if (cx < area.left || cx > area.right || cy < area.top || cy > area.bottom) return;
-          const y2 = chart.scales.y2;
-          if (y2 && y2.options.display && cx >= y2.left - 10) return;
-          const yScale = chart.scales.y;
-          if (yScale && cx <= yScale.right + 10) return;
+          // Skip if over any right-side axis
+          if (_findRightAxis(chart, e)) return;
+          // Skip if over any left-side axis
+          const leftAxes = Object.keys(chart.scales).filter(id => id !== 'x' && chart.scales[id].position === 'left');
+          for (const id of leftAxes) {
+            const s = chart.scales[id];
+            if (s && cx <= s.right + 10) return;
+          }
           const xScale = chart.scales.x;
           if (!xScale) return;
 
@@ -1761,9 +1778,17 @@
         const area = chart.chartArea;
         return area && cx >= area.left && cx <= area.right && cy >= area.bottom - 5;
       },
+      _findLeftAxis(chart, cx, cy) {
+        const ids = Object.keys(chart.scales).filter(id => id !== 'x');
+        for (const id of ids) {
+          const s = chart.scales[id];
+          if (!s || s.position !== 'left' || !s.options.display) continue;
+          if (cx >= s.left - 10 && cx <= s.right + 10 && cy >= s.top && cy <= s.bottom) return id;
+        }
+        return null;
+      },
       _isOverYAxis(chart, cx, cy) {
-        const y = chart.scales.y;
-        return y && cx >= y.left - 10 && cx <= y.right + 10 && cy >= y.top && cy <= y.bottom;
+        return this._findLeftAxis(chart, cx, cy) !== null;
       },
       _showResetBtn() {
         const btn = document.getElementById('resetGraphBtn');
@@ -1774,13 +1799,8 @@
         const canvas = chart.canvas;
         // Scroll-to-zoom on axes only
         canvas.addEventListener('wheel', (e) => {
-          // Skip if over y2 axis (handled by y2DragPlugin)
-          const y2 = chart.scales.y2;
-          if (y2) {
-            const rect = canvas.getBoundingClientRect();
-            const cx = e.clientX - rect.left;
-            if (cx >= y2.left - 10 && cx <= y2.right + 10) return;
-          }
+          // Skip if over any right-side axis (handled by y2DragPlugin)
+          if (_findRightAxis(chart, e)) return;
           const rect = canvas.getBoundingClientRect();
           const cx = e.clientX - rect.left;
           const cy = e.clientY - rect.top;
@@ -1804,17 +1824,18 @@
             return;
           }
 
-          // Y-axis zoom: only when mouse is on or near the y-axis
-          if (this._isOverYAxis(chart, cx, cy)) {
-            const yScale = chart.scales.y;
+          // Y-axis zoom: only when mouse is on or near a left-side y-axis
+          const leftAxisId = this._findLeftAxis(chart, cx, cy);
+          if (leftAxisId) {
+            const yScale = chart.scales[leftAxisId];
             if (!yScale) return;
             e.preventDefault();
             const range = yScale.max - yScale.min;
             const factor = e.deltaY > 0 ? 1.15 : 0.87;
             const mid = (yScale.min + yScale.max) / 2;
             const newRange = range * factor;
-            chart.options.scales.y.min = mid - newRange / 2;
-            chart.options.scales.y.max = mid + newRange / 2;
+            chart.options.scales[leftAxisId].min = mid - newRange / 2;
+            chart.options.scales[leftAxisId].max = mid + newRange / 2;
             chart.update('none');
             this._showResetBtn();
             return;
@@ -1835,13 +1856,17 @@
             this._dragStartXMax = chart.scales.x.max;
             canvas.style.cursor = 'ew-resize';
             e.preventDefault();
-          } else if (this._isOverYAxis(chart, cx, cy)) {
-            this._yDragging = true;
-            this._dragStartY = e.clientY;
-            this._dragStartYMin = chart.options.scales.y.min;
-            this._dragStartYMax = chart.options.scales.y.max;
-            canvas.style.cursor = 'ns-resize';
-            e.preventDefault();
+          } else {
+            const yLeftId = this._findLeftAxis(chart, cx, cy);
+            if (yLeftId) {
+              this._yDragging = true;
+              this._dragYAxisId = yLeftId;
+              this._dragStartY = e.clientY;
+              this._dragStartYMin = chart.options.scales[yLeftId].min;
+              this._dragStartYMax = chart.options.scales[yLeftId].max;
+              canvas.style.cursor = 'ns-resize';
+              e.preventDefault();
+            }
           }
         });
         window.addEventListener('mousemove', (e) => {
@@ -1854,13 +1879,13 @@
             chart.options.scales.x.max = this._dragStartXMax + shift;
             chart.update('none');
             this._showResetBtn();
-          } else if (this._yDragging) {
-            const yScale = chart.scales.y;
+          } else if (this._yDragging && this._dragYAxisId) {
+            const yScale = chart.scales[this._dragYAxisId];
             const pxRange = yScale.bottom - yScale.top;
             const valRange = this._dragStartYMax - this._dragStartYMin;
             const shift = (e.clientY - this._dragStartY) / pxRange * valRange;
-            chart.options.scales.y.min = this._dragStartYMin + shift;
-            chart.options.scales.y.max = this._dragStartYMax + shift;
+            chart.options.scales[this._dragYAxisId].min = this._dragStartYMin + shift;
+            chart.options.scales[this._dragYAxisId].max = this._dragStartYMax + shift;
             chart.update('none');
             this._showResetBtn();
           }
@@ -1869,6 +1894,7 @@
           if (this._xDragging || this._yDragging) {
             this._xDragging = false;
             this._yDragging = false;
+            this._dragYAxisId = null;
             canvas.style.cursor = '';
           }
         });
@@ -2206,15 +2232,9 @@
 
       // Reset axes button
       document.getElementById('resetGraphBtn').addEventListener('click', () => {
-        if (mainChart) {
-          delete mainChart.options.scales.x.min;
-          delete mainChart.options.scales.x.max;
-          mainChart.options.scales.y.min = 0;
-          mainChart.options.scales.y.max = 100;
-          mainChart.update('none');
-        }
-        document.getElementById('resetGraphBtn').style.display = 'none';
         xZoomPlugin._axesModified = false;
+        document.getElementById('resetGraphBtn').style.display = 'none';
+        render(); // full re-render resets all axes
       });
 
       document.getElementById('resetCities').addEventListener('click', () => {
@@ -2580,6 +2600,16 @@
       if (document.getElementById('showPoints').checked) params.set('pts', '1');
       if (!document.getElementById('showCrosshair').checked) params.set('ch', '0');
 
+      // Axis sides (only non-defaults)
+      const asKeys = { availability: 'a', ebay: 'e', leadTimes: 'l', deliveryTimes: 'd' };
+      const asParts = [];
+      for (const [src, abbr] of Object.entries(asKeys)) {
+        if (_axisSide[src] !== _axisSideDefaults[src]) {
+          asParts.push(abbr + ':' + (_axisSide[src] === 'left' ? 'l' : 'r'));
+        }
+      }
+      if (asParts.length > 0) params.set('as', asParts.join(','));
+
       // Cycles
       if (_cycleGroupBy !== 'region') params.set('cg', _cycleGroupBy);
       if (_cycleRegionFilter !== '__ALL__') params.set('cr', _cycleRegionFilter);
@@ -2687,6 +2717,23 @@
         const chOn = params.get('ch') !== '0';
         document.getElementById('showCrosshair').checked = chOn;
         _crosshairHidden = !chOn;
+      }
+
+      // Axis sides
+      if (params.has('as')) {
+        const abbrMap = { a: 'availability', e: 'ebay', l: 'leadTimes', d: 'deliveryTimes' };
+        params.get('as').split(',').forEach(part => {
+          const [abbr, side] = part.split(':');
+          const src = abbrMap[abbr];
+          if (src && (side === 'l' || side === 'r')) {
+            _axisSide[src] = side === 'l' ? 'left' : 'right';
+            // Update toggle button UI
+            const toggle = document.querySelector(`.axis-toggle[data-source="${src}"]`);
+            if (toggle) {
+              toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.side === _axisSide[src]));
+            }
+          }
+        });
       }
 
       // Cycles
@@ -2976,6 +3023,35 @@
       `;
 
       excludedInfo.textContent = '';
+    }
+
+    /** Rolling 2-sigma bands: 3-day trailing window.
+     *  Input: array of {t: epochMs, v: number}
+     *  Returns: array of {t, upper, lower} */
+    function _rollingBands(points) {
+      const WINDOW_MS = 3 * 24 * 3600000; // 3 days
+      const MIN_PTS = 3;
+      const result = [];
+      for (let i = 0; i < points.length; i++) {
+        const cur = points[i];
+        // Gather points in trailing window [t - WINDOW_MS, t]
+        let windowPts = [];
+        for (let j = i; j >= 0; j--) {
+          if (cur.t - points[j].t <= WINDOW_MS) windowPts.push(points[j].v);
+          else break;
+        }
+        // Fall back to expanding window from start if too few points
+        if (windowPts.length < MIN_PTS) {
+          windowPts = [];
+          for (let j = 0; j <= i; j++) windowPts.push(points[j].v);
+        }
+        const n = windowPts.length;
+        const mean = windowPts.reduce((a, b) => a + b, 0) / n;
+        const variance = windowPts.reduce((a, b) => a + (b - mean) ** 2, 0) / n;
+        const sigma2 = Math.sqrt(variance) * 2;
+        result.push({ t: cur.t, upper: cur.v + sigma2, lower: cur.v - sigma2 });
+      }
+      return result;
     }
 
     function renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
@@ -3493,57 +3569,77 @@
         }
       }
 
-      // Compute y2 axis max from eBay/lead time data
-      let y2Max = 100;
-      let y2Config;
-      if (showEbay) {
-        const ebayYValues = datasets
-          .filter(ds => ds.yAxisID === 'y2')
+      // --- Dynamic multi-axis scale builder ---
+      const tc = getThemeColors();
+      const _scalesConfig = { x: _makeTimeAxisConfig({ max: new Date() }) };
+
+      // Collect which (side, unit) combos are actually used by active datasets
+      const _usedAxes = new Set();
+      datasets.forEach(ds => { if (ds.yAxisID) _usedAxes.add(ds.yAxisID); });
+
+      // Count how many axes per side (for grid drawing decisions)
+      let leftCount = 0, rightCount = 0;
+      _usedAxes.forEach(id => { if (id.startsWith('y_left_')) leftCount++; else rightCount++; });
+
+      // Track how many axes stacked per side (for weight/offset)
+      let leftIdx = 0, rightIdx = 0;
+
+      _usedAxes.forEach(axisId => {
+        const isLeft = axisId.startsWith('y_left_');
+        const unit = axisId.split('_').pop(); // pct, dollars, days
+        const position = isLeft ? 'left' : 'right';
+        const sameCount = isLeft ? leftCount : rightCount;
+        const stackIdx = isLeft ? leftIdx++ : rightIdx++;
+
+        // Gather values for auto-ranging
+        const yVals = datasets.filter(ds => ds.yAxisID === axisId)
           .flatMap(ds => ds.data.map(pt => pt.y))
           .filter(v => v !== null && v !== undefined);
-        if (ebayYValues.length > 0) {
-          const rawMax = Math.max(...ebayYValues);
-          y2Max = Math.ceil(rawMax / 100) * 100;
-          if (y2Max < rawMax * 1.1) y2Max = Math.ceil(rawMax * 1.1 / 50) * 50;
-        }
-        y2Config = {
-          position: 'right',
-          min: 0,
-          max: y2Max,
-          grid: { drawOnChartArea: !showAvailability, color: getThemeColors().grid },
-          ticks: { color: '#30d158', callback: v => '$' + Math.round(v).toLocaleString() },
-          title: { display: true, text: 'eBay Price ($)', color: '#30d158', font: { size: 12 } }
-        };
-      } else if (showLeadTimes || showDeliveryTimes) {
-        const daysYValues = datasets.filter(ds => ds.yAxisID === 'y2').flatMap(ds => ds.data.map(pt => pt.y)).filter(v => v != null);
-        y2Max = daysYValues.length > 0 ? Math.max(2, Math.ceil(Math.max(...daysYValues) + 0.5)) : 2;
-        const axisColor = showLeadTimes && showDeliveryTimes ? '#aaa' : showDeliveryTimes ? '#ff9f0a' : '#64d2ff';
-        const axisLabel = showLeadTimes && showDeliveryTimes ? 'Lead / Delivery (days)' : showDeliveryTimes ? 'Delivery Time (days)' : 'Avg Lead Time (days)';
-        y2Config = {
-          position: 'right',
-          min: -0.08,
-          max: y2Max,
-          grid: { drawOnChartArea: !showAvailability, color: getThemeColors().grid },
-          ticks: { color: axisColor, callback: v => v < 0 ? '' : v.toFixed(1) + 'd' },
-          title: { display: true, text: axisLabel, color: axisColor, font: { size: 12 } }
-        };
-      } else {
-        y2Config = {
-          position: 'right',
-          min: 0, max: 100,
-          grid: { drawOnChartArea: false },
-          ticks: { color: getThemeColors().tick, callback: v => Math.round(v) + '%' }
-        };
-      }
 
-      // Hide left y-axis when availability is off
-      const yConfig = {
-        position: 'left',
-        min: 0, max: 100,
-        display: showAvailability,
-        grid: { color: getThemeColors().grid },
-        ticks: { color: getThemeColors().tick, callback: v => Math.round(v) + '%' }
-      };
+        let min, max, tickCb, titleText, titleColor, tickColor;
+        if (unit === 'pct') {
+          min = 0; max = 100;
+          tickCb = v => Math.round(v) + '%';
+          titleText = 'Availability (%)';
+          titleColor = tc.tick;
+          tickColor = tc.tick;
+        } else if (unit === 'dollars') {
+          min = 0;
+          if (yVals.length > 0) {
+            const rawMax = Math.max(...yVals);
+            max = Math.ceil(rawMax / 100) * 100;
+            if (max < rawMax * 1.1) max = Math.ceil(rawMax * 1.1 / 50) * 50;
+          } else {
+            max = 100;
+          }
+          tickCb = v => '$' + Math.round(v).toLocaleString();
+          titleText = 'eBay Price ($)';
+          titleColor = '#30d158';
+          tickColor = '#30d158';
+        } else { // days
+          min = -0.08;
+          max = yVals.length > 0 ? Math.max(2, Math.ceil(Math.max(...yVals) + 0.5)) : 2;
+          tickCb = v => v < 0 ? '' : v.toFixed(1) + 'd';
+          // Determine color from which day sources are active
+          const ltOn = showLeadTimes, dtOn = showDeliveryTimes;
+          titleColor = ltOn && dtOn ? '#aaa' : dtOn ? '#ff9f0a' : '#64d2ff';
+          tickColor = titleColor;
+          titleText = ltOn && dtOn ? 'Lead / Delivery (days)' : dtOn ? 'Delivery Time (days)' : 'Avg Lead Time (days)';
+        }
+
+        // First axis on each side draws grid, others don't
+        const drawGrid = stackIdx === 0;
+
+        _scalesConfig[axisId] = {
+          position,
+          min, max,
+          display: true,
+          grid: { drawOnChartArea: drawGrid, color: tc.grid },
+          ticks: { color: tickColor, callback: tickCb },
+          title: { display: true, text: titleText, color: titleColor, font: { size: 12 } },
+          ...(sameCount > 1 && stackIdx > 0 ? { weight: stackIdx } : {})
+        };
+      });
 
       const highlightPlugin = makeHighlightPlugin('mainChart');
       mainChart = new Chart(ctx, {
@@ -3558,7 +3654,7 @@
           plugins: {
             legend: {
               position: 'top',
-              labels: { color: getThemeColors().tickLabel, usePointStyle: true, pointStyle: 'circle', padding: 16 },
+              labels: { color: tc.tickLabel, usePointStyle: true, pointStyle: 'circle', padding: 16 },
               onClick: (e, legendItem, legend) => {
                 // Clicking a legend item highlights that dataset
                 highlightPlugin._highlight(legend.chart, legendItem.datasetIndex);
@@ -3566,11 +3662,7 @@
             },
             tooltip: { enabled: false }
           },
-          scales: {
-            x: _makeTimeAxisConfig({ max: new Date() }),
-            y: yConfig,
-            y2: y2Config
-          }
+          scales: _scalesConfig
         },
         plugins: [highlightPlugin, crosshairTooltipPlugin, dragMeasurePlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin, nowLinePlugin]
       });
