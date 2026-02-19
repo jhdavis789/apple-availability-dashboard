@@ -162,6 +162,7 @@
       padding: 8px 12px; min-width: 160px; z-index: 90; box-shadow: 0 4px 12px rgba(0,0,0,.4);
     }
     .settings-menu.open { display: block; }
+    .settings-menu.dropdown-down { bottom: auto; top: 100%; margin-bottom: 0; margin-top: 6px; right: auto; left: 0; }
     .settings-menu label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); cursor: pointer; padding: 4px 0; white-space: nowrap; }
     .settings-menu label input { margin: 0; }
     .share-btn {
@@ -784,24 +785,17 @@
     </div>
 
     <div class="control-group">
-      <label>Data Filters</label>
-      <div class="filter-toggles">
-        <label class="toggle-label">
-          <input type="checkbox" id="showAvailability" checked>
-          Show Availability
-        </label>
-        <label class="toggle-label" id="ebayToggleLabel" style="display:none;">
-          <input type="checkbox" id="showEbayPrices">
-          Show eBay Prices
-        </label>
-        <label class="toggle-label ebay-sub-toggle" id="ebayMeanLabel" style="display:none;margin-left:24px;opacity:0.4;pointer-events:none;">
-          <input type="checkbox" id="showEbayMean" checked>
-          Mean
-        </label>
-        <label class="toggle-label ebay-sub-toggle" id="ebayMedianLabel" style="display:none;margin-left:24px;opacity:0.4;pointer-events:none;">
-          <input type="checkbox" id="showEbayMedian">
-          Median
-        </label>
+      <label>Data Sources</label>
+      <div class="settings-wrap">
+        <button id="dataSourcesBtn" class="secondary" style="font-size:13px;padding:6px 12px;">Sources &#9662;</button>
+        <div class="settings-menu dropdown-down" id="dataSourcesMenu">
+          <label><input type="checkbox" id="showAvailability" checked> Availability</label>
+          <label id="ebayToggleLabel" style="display:none;"><input type="checkbox" id="showEbayPrices"> eBay Prices</label>
+          <label class="ebay-sub-toggle" id="ebayMeanLabel" style="display:none;margin-left:20px;opacity:0.4;pointer-events:none;"><input type="checkbox" id="showEbayMean" checked> Mean</label>
+          <label class="ebay-sub-toggle" id="ebayMedianLabel" style="display:none;margin-left:20px;opacity:0.4;pointer-events:none;"><input type="checkbox" id="showEbayMedian"> Median</label>
+          <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Lead Times</label>
+          <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Delivery Times</label>
+        </div>
       </div>
     </div>
 
@@ -836,8 +830,6 @@
             <label><input type="checkbox" id="showCrosshair" checked> Show Crosshair</label>
             <label><input type="checkbox" id="showPoints"> Show Points</label>
             <label><input type="checkbox" id="filterZeros" checked> Filter likely errors</label>
-            <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Show Lead Times</label>
-            <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Show Delivery Times</label>
           </div>
         </div>
       </div>
@@ -2203,14 +2195,25 @@
         _cityDropdown._sync();
       });
 
+      // Data Sources dropdown
+      const dataSourcesBtn = document.getElementById('dataSourcesBtn');
+      const dataSourcesMenu = document.getElementById('dataSourcesMenu');
+      dataSourcesBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsMenu.classList.remove('open');
+        dataSourcesMenu.classList.toggle('open');
+      });
+
       // Settings dropdown
       const settingsBtn = document.getElementById('settingsBtn');
       const settingsMenu = document.getElementById('settingsMenu');
       settingsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        dataSourcesMenu.classList.remove('open');
         settingsMenu.classList.toggle('open');
       });
       document.addEventListener('click', (e) => {
+        if (!dataSourcesMenu.contains(e.target) && e.target !== dataSourcesBtn) dataSourcesMenu.classList.remove('open');
         if (!settingsMenu.contains(e.target) && e.target !== settingsBtn) settingsMenu.classList.remove('open');
       });
       document.getElementById('showPoints').addEventListener('change', render);
