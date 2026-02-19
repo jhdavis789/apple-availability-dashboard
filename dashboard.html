@@ -787,10 +787,6 @@
       <label>Data Filters</label>
       <div class="filter-toggles">
         <label class="toggle-label">
-          <input type="checkbox" id="filterZeros" checked>
-          Filter likely errors?
-        </label>
-        <label class="toggle-label">
           <input type="checkbox" id="showAvailability" checked>
           Show Availability
         </label>
@@ -837,7 +833,9 @@
         <div class="settings-wrap">
           <button id="settingsBtn" class="secondary" style="font-size:14px;padding:6px 10px;">&#9881;</button>
           <div class="settings-menu" id="settingsMenu">
+            <label><input type="checkbox" id="showCrosshair" checked> Show Crosshair</label>
             <label><input type="checkbox" id="showPoints"> Show Points</label>
+            <label><input type="checkbox" id="filterZeros" checked> Filter likely errors</label>
             <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Show Lead Times</label>
             <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Show Delivery Times</label>
           </div>
@@ -1401,12 +1399,115 @@
       }
     };
 
-    // Plugin: scroll wheel on x-axis to zoom in/out
+    // === Drag-to-measure state ===
+    let _dragMeasure = {
+      active: false,
+      startX: 0,
+      startMs: 0,
+      currentX: 0,
+      currentMs: 0,
+      anchorValues: [],
+    };
+
+    /**
+     * Drag-to-measure plugin.
+     * Click+drag on chart to see % change between two time points.
+     * Always calculates % from left to right regardless of drag direction.
+     * Shades the selected horizontal region across full chart height.
+     */
+    const dragMeasurePlugin = {
+      id: 'dragMeasure',
+
+      _getAnchorValues(chart, targetMs) {
+        const values = [];
+        chart.data.datasets.forEach((ds, i) => {
+          if (chart.getDatasetMeta(i).hidden) return;
+          if (ds.label && ds.label.includes('\u03c3')) return;
+          const hit = crosshairTooltipPlugin._findNearest(ds.data, targetMs);
+          if (!hit) return;
+          values.push({ datasetIndex: i, y: hit.y, label: ds.label, color: ds.borderColor, yAxisID: ds.yAxisID });
+        });
+        return values;
+      },
+
+      afterInit(chart) {
+        const canvas = chart.canvas;
+
+        canvas.addEventListener('mousedown', (e) => {
+          if (e.button !== 0) return;
+          const area = chart.chartArea;
+          if (!area) return;
+          const rect = canvas.getBoundingClientRect();
+          const cx = e.clientX - rect.left;
+          const cy = e.clientY - rect.top;
+          if (cx < area.left || cx > area.right || cy < area.top || cy > area.bottom) return;
+          const y2 = chart.scales.y2;
+          if (y2 && y2.options.display && cx >= y2.left - 10) return;
+          const yScale = chart.scales.y;
+          if (yScale && cx <= yScale.right + 10) return;
+          const xScale = chart.scales.x;
+          if (!xScale) return;
+
+          const ms = xScale.getValueForPixel(cx);
+          _dragMeasure.active = true;
+          _dragMeasure.startX = cx;
+          _dragMeasure.startMs = ms;
+          _dragMeasure.currentX = cx;
+          _dragMeasure.currentMs = ms;
+          _dragMeasure.anchorValues = this._getAnchorValues(chart, ms);
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (!_dragMeasure.active) return;
+          const rect = canvas.getBoundingClientRect();
+          const cx = e.clientX - rect.left;
+          const xScale = chart.scales.x;
+          if (!xScale) return;
+          _dragMeasure.currentX = cx;
+          _dragMeasure.currentMs = xScale.getValueForPixel(cx);
+          chart.draw();
+        });
+
+        window.addEventListener('mouseup', () => {
+          if (_dragMeasure.active) {
+            _dragMeasure.active = false;
+            _dragMeasure.anchorValues = [];
+            chart.draw();
+          }
+        });
+      },
+
+      afterDraw(chart) {
+        if (!_dragMeasure.active) return;
+        const ctx = chart.ctx;
+        const area = chart.chartArea;
+        if (!area) return;
+
+        const leftX = Math.max(area.left, Math.min(_dragMeasure.startX, _dragMeasure.currentX));
+        const rightX = Math.min(area.right, Math.max(_dragMeasure.startX, _dragMeasure.currentX));
+
+        ctx.save();
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        ctx.fillStyle = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
+        ctx.fillRect(leftX, area.top, rightX - leftX, area.bottom - area.top);
+
+        ctx.beginPath();
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = isLight ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(leftX, area.top);
+        ctx.lineTo(leftX, area.bottom);
+        ctx.moveTo(rightX, area.top);
+        ctx.lineTo(rightX, area.bottom);
+        ctx.stroke();
+        ctx.restore();
+      }
+    };
+
     /**
      * Crosshair tooltip plugin.
      * Shows nearest actual data point values for all visible datasets at cursor position.
      * Only includes a dataset if the cursor time falls within its data range.
-     * Right-click hides the tooltip.
      */
     let _crosshairHidden = false;
     const crosshairTooltipPlugin = {
@@ -1452,13 +1553,6 @@
       afterInit(chart) {
         chart.canvas.addEventListener('contextmenu', (e) => {
           e.preventDefault();
-          _crosshairHidden = !_crosshairHidden;
-          if (_crosshairHidden) {
-            this._lastX = null;
-            const el = this._getTooltipEl(chart);
-            el.style.display = 'none';
-            chart.draw();
-          }
         });
       },
 
@@ -1520,12 +1614,35 @@
         const titleColor = isLight ? '#1d1d1f' : '#fff';
         const bodyColor = isLight ? '#1d1d1f' : '#ccc';
 
+        // Build anchor map for % change during drag-to-measure
+        const anchorMap = new Map();
+        if (_dragMeasure.active && _dragMeasure.anchorValues.length > 0) {
+          const leftMs = Math.min(_dragMeasure.startMs, _dragMeasure.currentMs);
+          const isDraggingRight = _dragMeasure.currentMs >= _dragMeasure.startMs;
+          if (isDraggingRight) {
+            _dragMeasure.anchorValues.forEach(av => anchorMap.set(av.datasetIndex, av));
+          } else {
+            // Need values at the left (current) position as anchor
+            chart.data.datasets.forEach((ds, i) => {
+              if (chart.getDatasetMeta(i).hidden) return;
+              if (ds.label && ds.label.includes('\u03c3')) return;
+              const hit = this._findNearest(ds.data, leftMs);
+              if (hit) anchorMap.set(i, { datasetIndex: i, y: hit.y, yAxisID: ds.yAxisID });
+            });
+          }
+        }
+
+        // When dragging, show values at the right (later) time point
+        const displayMs = _dragMeasure.active
+          ? Math.max(_dragMeasure.startMs, _dragMeasure.currentMs)
+          : targetMs;
+
         let lines = [];
         chart.data.datasets.forEach((ds, i) => {
           if (chart.getDatasetMeta(i).hidden) return;
           if (ds.label && ds.label.includes('\u03c3')) return;
 
-          const hit = this._findNearest(ds.data, targetMs);
+          const hit = this._findNearest(ds.data, displayMs);
           if (!hit) return;
 
           const color = ds.borderColor || '#888';
@@ -1544,7 +1661,16 @@
             formatted = hit.y.toFixed(1) + '%';
           }
 
-          lines.push({ label: ds.label, color, formatted, y: hit.y });
+          // Compute % change if dragging
+          let pctChange = null;
+          if (_dragMeasure.active && anchorMap.has(i)) {
+            const anchor = anchorMap.get(i);
+            if (anchor.y !== 0) {
+              pctChange = ((hit.y - anchor.y) / Math.abs(anchor.y)) * 100;
+            }
+          }
+
+          lines.push({ label: ds.label, color, formatted, y: hit.y, datasetIndex: i, pctChange });
         });
 
         if (lines.length === 0) { el.style.display = 'none'; return; }
@@ -1553,7 +1679,13 @@
 
         let html = `<div style="color:${titleColor};font-weight:600;margin-bottom:4px;">${timeStr}</div>`;
         lines.forEach(l => {
-          html += `<div style="color:${bodyColor};"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l.color};margin-right:6px;"></span>${l.label}: <strong>${l.formatted}</strong></div>`;
+          let pctHtml = '';
+          if (l.pctChange !== null) {
+            const sign = l.pctChange >= 0 ? '+' : '';
+            const pctColor = l.pctChange >= 0 ? '#30d158' : '#ff453a';
+            pctHtml = `<span style="color:${pctColor};font-weight:600;font-size:11px;margin-right:4px;">${sign}${l.pctChange.toFixed(1)}%</span>`;
+          }
+          html += `<div style="color:${bodyColor};">${pctHtml}<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l.color};margin-right:6px;"></span>${l.label}: <strong>${l.formatted}</strong></div>`;
         });
 
         el.innerHTML = html;
@@ -2082,6 +2214,10 @@
         if (!settingsMenu.contains(e.target) && e.target !== settingsBtn) settingsMenu.classList.remove('open');
       });
       document.getElementById('showPoints').addEventListener('change', render);
+      document.getElementById('showCrosshair').addEventListener('change', (e) => {
+        _crosshairHidden = !e.target.checked;
+        if (mainChart) mainChart.draw();
+      });
 
       document.querySelectorAll('.view-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -2412,6 +2548,7 @@
       if (document.getElementById('showLeadTimes').checked) params.set('lt', '1');
       if (document.getElementById('showDeliveryTimes').checked) params.set('dt', '1');
       if (document.getElementById('showPoints').checked) params.set('pts', '1');
+      if (!document.getElementById('showCrosshair').checked) params.set('ch', '0');
 
       // Cycles
       if (_cycleGroupBy !== 'region') params.set('cg', _cycleGroupBy);
@@ -2516,6 +2653,11 @@
       if (params.has('lt')) document.getElementById('showLeadTimes').checked = params.get('lt') === '1';
       if (params.has('dt')) document.getElementById('showDeliveryTimes').checked = params.get('dt') === '1';
       if (params.has('pts')) document.getElementById('showPoints').checked = params.get('pts') === '1';
+      if (params.has('ch')) {
+        const chOn = params.get('ch') !== '0';
+        document.getElementById('showCrosshair').checked = chOn;
+        _crosshairHidden = !chOn;
+      }
 
       // Cycles
       if (params.has('cg')) {
@@ -2813,7 +2955,7 @@
         mainChart.destroy();
         mainChart = null;
       }
-      _crosshairHidden = false;
+      _crosshairHidden = !document.getElementById('showCrosshair').checked;
 
       let datasets = [];
       const showAvailability = document.getElementById('showAvailability').checked;
@@ -3070,8 +3212,8 @@
                 yAxisID: 'y2',
               });
             }
-            // 2-sigma band around the mean price
-            if (showMean) {
+            // 2-sigma band around the mean price (always shown when eBay is on)
+            {
               const validPrices = ebayHistory.filter(d => d.avg_price !== null).map(d => d.avg_price);
               if (validPrices.length >= 2) {
                 const mean = validPrices.reduce((a,b) => a+b, 0) / validPrices.length;
@@ -3144,6 +3286,39 @@
                 fill: false,
                 yAxisID: 'y2',
               });
+            }
+            // 2-sigma band per product (always shown when eBay is on)
+            {
+              const validPrices = history.filter(d => d.avg_price !== null).map(d => d.avg_price);
+              if (validPrices.length >= 2) {
+                const mean = validPrices.reduce((a,b) => a+b, 0) / validPrices.length;
+                const variance = validPrices.reduce((a,b) => a + (b - mean) ** 2, 0) / validPrices.length;
+                const sigma2 = Math.sqrt(variance) * 2;
+                const upperData = history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price + sigma2 }));
+                const lowerData = history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price - sigma2 }));
+                datasets.push({
+                  label: `${productName} +2\u03c3`,
+                  data: upperData,
+                  borderColor: 'transparent',
+                  backgroundColor: color + '10',
+                  pointRadius: 0,
+                  pointHoverRadius: 0,
+                  tension: 0.3,
+                  fill: '+1',
+                  yAxisID: 'y2',
+                });
+                datasets.push({
+                  label: `${productName} -2\u03c3`,
+                  data: lowerData,
+                  borderColor: 'transparent',
+                  backgroundColor: color + '10',
+                  pointRadius: 0,
+                  pointHoverRadius: 0,
+                  tension: 0.3,
+                  fill: '-1',
+                  yAxisID: 'y2',
+                });
+              }
             }
           });
         }
@@ -3373,7 +3548,7 @@
             y2: y2Config
           }
         },
-        plugins: [highlightPlugin, crosshairTooltipPlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin, nowLinePlugin]
+        plugins: [highlightPlugin, crosshairTooltipPlugin, dragMeasurePlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin, nowLinePlugin]
       });
 
       // No auto-highlight — show all lines at full opacity by default
