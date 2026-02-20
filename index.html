@@ -229,7 +229,7 @@
       border-radius: 6px; font-size: 13px; cursor: pointer;
       user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .multi-dropdown .md-trigger:hover { border-color: var(--input-border-hover); }
+    .multi-dropdown .md-trigger:hover, #dataSourcesBtn:hover { border-color: var(--input-border-hover) !important; }
     .multi-dropdown.open .md-trigger { border-color: var(--accent); }
     .multi-dropdown .md-trigger::after { content: '\25BE'; margin-left: 8px; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
     .multi-dropdown .md-menu {
@@ -792,8 +792,8 @@
 
     <div class="control-group">
       <label>Data Sources</label>
-      <div class="settings-wrap">
-        <button id="dataSourcesBtn" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:8px 12px;border-radius:6px;font-size:13px;cursor:pointer;">Sources &#9662;</button>
+      <div class="settings-wrap" style="position:relative;">
+        <div id="dataSourcesBtn" class="md-trigger" style="display:flex;align-items:center;justify-content:space-between;background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:8px 12px;border-radius:6px;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;">Sources<span style="margin-left:8px;font-size:10px;color:var(--text-muted);">&#9662;</span></div>
         <div class="settings-menu dropdown-down" id="dataSourcesMenu">
           <label><input type="checkbox" id="showAvailability" checked> Availability <span class="axis-toggle" data-source="availability"><button class="active" data-side="left">L</button><button data-side="right">R</button></span></label>
           <label id="ebayToggleLabel" style="display:none;"><input type="checkbox" id="showEbayPrices"> eBay Prices <span class="axis-toggle" data-source="ebay"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
