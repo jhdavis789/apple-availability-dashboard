@@ -4084,9 +4084,10 @@
       let csv = 'Timestamp,' + selectedCities.map(c => `${c} (${getCityStoreCount(c)})`).join(',') + ',Weighted Avg\n';
 
       snapshots.forEach((s, si) => {
-        const ts = s.timestamp.replace('T', ' ').slice(0, 19);
-        html += `<tr><td style="white-space:nowrap;color:var(--text-label);">${ts}</td>`;
-        let csvRow = ts;
+        const tsDisplay = formatMapTimestamp(s.timestamp);
+        const tsCsv = toLocalDatetimeStr(new Date(s.timestamp).getTime());
+        html += `<tr><td style="white-space:nowrap;color:var(--text-label);">${tsDisplay}</td>`;
+        let csvRow = tsCsv;
 
         const _isLight = document.documentElement.getAttribute('data-theme') === 'light';
         let wSum = 0, wTotal = 0;
@@ -4792,7 +4793,7 @@
 
       // Stats
       const hrs = cycles.map(c => c.hours);
-      const sameDayN = cycles.filter(c => c.restock.slice(0, 10) === c.sellout.slice(0, 10)).length;
+      const sameDayN = cycles.filter(c => new Date(c.restock).toLocaleDateString() === new Date(c.sellout).toLocaleDateString()).length;
       const statsEl = document.getElementById('cyclesStats');
       statsEl.innerHTML = `
         <div class="cycle-stat"><div class="stat-val">${cycles.length}</div><div class="stat-lbl">Total Cycles</div></div>
