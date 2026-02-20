@@ -793,7 +793,7 @@
     <div class="control-group">
       <label>Data Sources</label>
       <div class="settings-wrap">
-        <button id="dataSourcesBtn" class="secondary" style="font-size:13px;padding:6px 12px;">Sources &#9662;</button>
+        <button id="dataSourcesBtn" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:8px 12px;border-radius:6px;font-size:13px;cursor:pointer;">Sources &#9662;</button>
         <div class="settings-menu dropdown-down" id="dataSourcesMenu">
           <label><input type="checkbox" id="showAvailability" checked> Availability <span class="axis-toggle" data-source="availability"><button class="active" data-side="left">L</button><button data-side="right">R</button></span></label>
           <label id="ebayToggleLabel" style="display:none;"><input type="checkbox" id="showEbayPrices"> eBay Prices <span class="axis-toggle" data-source="ebay"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
@@ -1928,8 +1928,9 @@
         const ampm = h >= 12 ? 'PM' : 'AM';
         const h12 = h % 12 || 12;
         const minStr = m < 10 ? '0' + m : m;
+        const tzAbbr = new Intl.DateTimeFormat('en-US', {timeZoneName:'short'}).formatToParts(last).find(p => p.type === 'timeZoneName')?.value || '';
         document.getElementById('lastUpdated').textContent =
-          `Data updated ${days[last.getDay()]} ${months[last.getMonth()]} ${last.getDate()} at ${h12}:${minStr} ${ampm}`;
+          `Data updated ${days[last.getDay()]} ${months[last.getMonth()]} ${last.getDate()} at ${h12}:${minStr} ${ampm} ${tzAbbr}`;
       }
 
       // Show website file modification time in header top-right
@@ -1941,8 +1942,9 @@
         const ampm = h >= 12 ? 'PM' : 'AM';
         const h12 = h % 12 || 12;
         const minStr = m < 10 ? '0' + m : m;
+        const tzAbbr2 = new Intl.DateTimeFormat('en-US', {timeZoneName:'short'}).formatToParts(gen).find(p => p.type === 'timeZoneName')?.value || '';
         document.getElementById('lastUpdatedSite').textContent =
-          `Site updated ${months[gen.getMonth()]} ${gen.getDate()} at ${h12}:${minStr} ${ampm}`;
+          `Site updated ${months[gen.getMonth()]} ${gen.getDate()} at ${h12}:${minStr} ${ampm} ${tzAbbr2}`;
       }
 
       // Total stats in header
@@ -4688,18 +4690,16 @@
             const now = Date.now();
             _cycleTimeStart = now - hours * 3600000;
             _cycleTimeEnd = now;
-            const fmt = d => new Date(d).toISOString().slice(0, 16);
-            document.getElementById('cycleTimeStart').value = fmt(_cycleTimeStart);
-            document.getElementById('cycleTimeEnd').value = fmt(_cycleTimeEnd);
+            document.getElementById('cycleTimeStart').value = toLocalDatetimeStr(_cycleTimeStart);
+            document.getElementById('cycleTimeEnd').value = toLocalDatetimeStr(_cycleTimeEnd);
           }
           renderCycles();
         });
       });
       // Populate datetime inputs with 2w default
       if (_cycleTimeStart && _cycleTimeEnd) {
-        const fmt = d => new Date(d).toISOString().slice(0, 16);
-        document.getElementById('cycleTimeStart').value = fmt(_cycleTimeStart);
-        document.getElementById('cycleTimeEnd').value = fmt(_cycleTimeEnd);
+        document.getElementById('cycleTimeStart').value = toLocalDatetimeStr(_cycleTimeStart);
+        document.getElementById('cycleTimeEnd').value = toLocalDatetimeStr(_cycleTimeEnd);
       }
       // Min cycles filter
       document.getElementById('cycleMinCycles').addEventListener('change', () => renderCycles());
@@ -4896,8 +4896,8 @@
         th += `<tr><td>${c.store_name} <span style="color:var(--text-dim);font-size:11px;">${c.city ? c.city + ', ' + c.state : ''}</span></td>`;
         th += `<td style="font-size:12px;">${c.region || '—'}</td>`;
         if (isAllProd) th += `<td style="color:var(--text-muted);font-size:12px;">${c.product}</td>`;
-        th += `<td style="white-space:nowrap;font-size:12px;">${c.restock.replace('T',' ').slice(0,16)}</td>`;
-        th += `<td style="white-space:nowrap;font-size:12px;">${c.sellout.replace('T',' ').slice(0,16)}</td>`;
+        th += `<td style="white-space:nowrap;font-size:12px;">${formatMapTimestamp(c.restock)}</td>`;
+        th += `<td style="white-space:nowrap;font-size:12px;">${formatMapTimestamp(c.sellout)}</td>`;
         const wallNote = c.wall_hours && c.wall_hours !== c.hours ? ` <span style="color:var(--text-dimmer);font-size:10px;">(${formatDuration(c.wall_hours)} wall)</span>` : '';
         th += `<td style="color:${clr};font-weight:600;">${formatDuration(c.hours)}${wallNote}</td></tr>`;
       });
