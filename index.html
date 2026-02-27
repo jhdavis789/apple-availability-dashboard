@@ -1919,6 +1919,70 @@
       const resp = await fetch(`data.json?t=${Date.now()}`);
       DATA = await resp.json();
 
+      // Expand delta-encoded store_map snapshots into full state
+      if (DATA.store_map && DATA.store_map.snapshots && DATA.store_map.products) {
+        const smProducts = DATA.store_map.products;
+        const snaps = DATA.store_map.snapshots;
+        let prevState = null;
+        for (let i = 0; i < snaps.length; i++) {
+          if (snaps[i].a) {
+            // Full snapshot: convert numeric keys back to product names
+            const expanded = {};
+            for (const [storeId, prods] of Object.entries(snaps[i].a)) {
+              expanded[storeId] = {};
+              for (const [pidx, val] of Object.entries(prods))
+                expanded[storeId][smProducts[+pidx]] = val;
+            }
+            snaps[i].a = expanded;
+            prevState = {};
+            for (const [sid, p] of Object.entries(expanded))
+              prevState[sid] = Object.assign({}, p);
+          } else if (snaps[i].d !== undefined) {
+            // Delta snapshot: apply changes to previous state
+            for (const [storeId, changes] of Object.entries(snaps[i].d)) {
+              if (!prevState[storeId]) prevState[storeId] = {};
+              for (const [pidx, val] of Object.entries(changes))
+                prevState[storeId][smProducts[+pidx]] = val;
+            }
+            const full = {};
+            for (const [sid, p] of Object.entries(prevState))
+              full[sid] = Object.assign({}, p);
+            snaps[i].a = full;
+            delete snaps[i].d;
+          }
+        }
+      }
+
+      // Expand numeric product IDs in lead_times
+      if (DATA.lead_times && DATA.all_models) {
+        for (const snap of DATA.lead_times.snapshots) {
+          const newData = {};
+          for (const [city, prods] of Object.entries(snap.data)) {
+            newData[city] = {};
+            for (const [pidx, val] of Object.entries(prods)) {
+              const name = DATA.all_models[+pidx];
+              if (name) newData[city][name] = val;
+            }
+          }
+          snap.data = newData;
+        }
+      }
+
+      // Expand numeric product IDs in delivery_times
+      if (DATA.delivery_times && DATA.all_models) {
+        for (const snap of DATA.delivery_times.snapshots) {
+          const newData = {};
+          for (const [city, prods] of Object.entries(snap.data)) {
+            newData[city] = {};
+            for (const [pidx, val] of Object.entries(prods)) {
+              const name = DATA.all_models[+pidx];
+              if (name) newData[city][name] = val;
+            }
+          }
+          snap.data = newData;
+        }
+      }
+
       // Show last-updated time from most recent snapshot
       if (DATA.snapshots && DATA.snapshots.length > 0) {
         const last = new Date(DATA.snapshots[DATA.snapshots.length - 1].timestamp);
