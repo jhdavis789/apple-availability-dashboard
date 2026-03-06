@@ -799,6 +799,7 @@
           <label id="ebayToggleLabel" style="display:none;"><input type="checkbox" id="showEbayPrices"> eBay Prices <span class="axis-toggle" data-source="ebay"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
           <label class="ebay-sub-toggle" id="ebayMeanLabel" style="display:none;margin-left:20px;opacity:0.4;pointer-events:none;"><input type="checkbox" id="showEbayMean" checked> Mean</label>
           <label class="ebay-sub-toggle" id="ebayMedianLabel" style="display:none;margin-left:20px;opacity:0.4;pointer-events:none;"><input type="checkbox" id="showEbayMedian"> Median</label>
+          <label id="ebaySalesToggleLabel" style="display:none;"><input type="checkbox" id="showEbaySales"> eBay Sales <span class="axis-toggle" data-source="ebaySales"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
           <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Lead Times <span class="axis-toggle" data-source="leadTimes"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
           <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Delivery Times <span class="axis-toggle" data-source="deliveryTimes"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
         </div>
@@ -1060,9 +1061,9 @@
     let _cycleSortKey = 'avg_hours';
     let _cycleSortDir = 'asc';
     let currentView = 'trends';
-    let _axisSide = { availability: 'left', ebay: 'right', leadTimes: 'right', deliveryTimes: 'right' };
-    const _axisSideDefaults = { availability: 'left', ebay: 'right', leadTimes: 'right', deliveryTimes: 'right' };
-    const _sourceUnit = { availability: 'pct', ebay: 'dollars', leadTimes: 'days', deliveryTimes: 'days' };
+    let _axisSide = { availability: 'left', ebay: 'right', ebaySales: 'right', leadTimes: 'right', deliveryTimes: 'right' };
+    const _axisSideDefaults = { availability: 'left', ebay: 'right', ebaySales: 'right', leadTimes: 'right', deliveryTimes: 'right' };
+    const _sourceUnit = { availability: 'pct', ebay: 'dollars', ebaySales: 'count', leadTimes: 'days', deliveryTimes: 'days' };
     function _getAxisId(source) {
       return 'y_' + _axisSide[source] + '_' + _sourceUnit[source];
     }
@@ -1916,8 +1917,72 @@
     };
 
     async function loadData() {
-      const resp = await fetch('data.json');
+      const resp = await fetch(`data.json?t=${Date.now()}`);
       DATA = await resp.json();
+
+      // Expand delta-encoded store_map snapshots into full state
+      if (DATA.store_map && DATA.store_map.snapshots && DATA.store_map.products) {
+        const smProducts = DATA.store_map.products;
+        const snaps = DATA.store_map.snapshots;
+        let prevState = null;
+        for (let i = 0; i < snaps.length; i++) {
+          if (snaps[i].a) {
+            // Full snapshot: convert numeric keys back to product names
+            const expanded = {};
+            for (const [storeId, prods] of Object.entries(snaps[i].a)) {
+              expanded[storeId] = {};
+              for (const [pidx, val] of Object.entries(prods))
+                expanded[storeId][smProducts[+pidx]] = val;
+            }
+            snaps[i].a = expanded;
+            prevState = {};
+            for (const [sid, p] of Object.entries(expanded))
+              prevState[sid] = Object.assign({}, p);
+          } else if (snaps[i].d !== undefined) {
+            // Delta snapshot: apply changes to previous state
+            for (const [storeId, changes] of Object.entries(snaps[i].d)) {
+              if (!prevState[storeId]) prevState[storeId] = {};
+              for (const [pidx, val] of Object.entries(changes))
+                prevState[storeId][smProducts[+pidx]] = val;
+            }
+            const full = {};
+            for (const [sid, p] of Object.entries(prevState))
+              full[sid] = Object.assign({}, p);
+            snaps[i].a = full;
+            delete snaps[i].d;
+          }
+        }
+      }
+
+      // Expand numeric product IDs in lead_times
+      if (DATA.lead_times && DATA.all_models) {
+        for (const snap of DATA.lead_times.snapshots) {
+          const newData = {};
+          for (const [city, prods] of Object.entries(snap.data)) {
+            newData[city] = {};
+            for (const [pidx, val] of Object.entries(prods)) {
+              const name = DATA.all_models[+pidx];
+              if (name) newData[city][name] = val;
+            }
+          }
+          snap.data = newData;
+        }
+      }
+
+      // Expand numeric product IDs in delivery_times
+      if (DATA.delivery_times && DATA.all_models) {
+        for (const snap of DATA.delivery_times.snapshots) {
+          const newData = {};
+          for (const [city, prods] of Object.entries(snap.data)) {
+            newData[city] = {};
+            for (const [pidx, val] of Object.entries(prods)) {
+              const name = DATA.all_models[+pidx];
+              if (name) newData[city][name] = val;
+            }
+          }
+          snap.data = newData;
+        }
+      }
 
       // Show last-updated time from most recent snapshot
       if (DATA.snapshots && DATA.snapshots.length > 0) {
@@ -2204,6 +2269,12 @@
         document.getElementById('ebayMeanLabel').style.display = 'flex';
         document.getElementById('ebayMedianLabel').style.display = 'flex';
       }
+
+      // Show eBay sales toggle if data is available
+      if (DATA.ebay_sales && Object.keys(DATA.ebay_sales.data).length > 0) {
+        document.getElementById('ebaySalesToggleLabel').style.display = 'flex';
+      }
+      document.getElementById('showEbaySales').addEventListener('change', render);
 
       // Show lead time toggle if data is available
       if (DATA.lead_times && DATA.lead_times.snapshots.length > 0) {
@@ -2597,13 +2668,14 @@
       if (document.getElementById('showEbayPrices').checked) params.set('ebay', '1');
       if (!document.getElementById('showEbayMean').checked) params.set('emean', '0');
       if (document.getElementById('showEbayMedian').checked) params.set('emed', '1');
+      if (document.getElementById('showEbaySales').checked) params.set('esales', '1');
       if (document.getElementById('showLeadTimes').checked) params.set('lt', '1');
       if (document.getElementById('showDeliveryTimes').checked) params.set('dt', '1');
       if (document.getElementById('showPoints').checked) params.set('pts', '1');
       if (!document.getElementById('showCrosshair').checked) params.set('ch', '0');
 
       // Axis sides (only non-defaults)
-      const asKeys = { availability: 'a', ebay: 'e', leadTimes: 'l', deliveryTimes: 'd' };
+      const asKeys = { availability: 'a', ebay: 'e', ebaySales: 's', leadTimes: 'l', deliveryTimes: 'd' };
       const asParts = [];
       for (const [src, abbr] of Object.entries(asKeys)) {
         if (_axisSide[src] !== _axisSideDefaults[src]) {
@@ -2712,6 +2784,7 @@
       }
       if (params.has('emean')) document.getElementById('showEbayMean').checked = params.get('emean') === '1';
       if (params.has('emed')) document.getElementById('showEbayMedian').checked = params.get('emed') === '1';
+      if (params.has('esales')) document.getElementById('showEbaySales').checked = params.get('esales') === '1';
       if (params.has('lt')) document.getElementById('showLeadTimes').checked = params.get('lt') === '1';
       if (params.has('dt')) document.getElementById('showDeliveryTimes').checked = params.get('dt') === '1';
       if (params.has('pts')) document.getElementById('showPoints').checked = params.get('pts') === '1';
@@ -2723,7 +2796,7 @@
 
       // Axis sides
       if (params.has('as')) {
-        const abbrMap = { a: 'availability', e: 'ebay', l: 'leadTimes', d: 'deliveryTimes' };
+        const abbrMap = { a: 'availability', e: 'ebay', s: 'ebaySales', l: 'leadTimes', d: 'deliveryTimes' };
         params.get('as').split(',').forEach(part => {
           const [abbr, side] = part.split(':');
           const src = abbrMap[abbr];
@@ -3426,6 +3499,73 @@
         }
       }
 
+      // --- eBay sales overlay (bar chart) ---
+      const showEbaySales = document.getElementById('showEbaySales').checked && DATA.ebay_sales;
+      if (showEbaySales) {
+        const salesData = DATA.ebay_sales.data;
+        // Match selected products to eBay sales products
+        const salesProducts = _prods.filter(p => salesData[p] && salesData[p].length > 0);
+        if (salesProducts.length === 0) {
+          // Try all products if none match selection
+          const allSalesProds = Object.keys(salesData);
+          // Aggregate all products into a single daily total
+          const dailyTotals = {};
+          for (const prod of allSalesProds) {
+            for (const d of salesData[prod]) {
+              if (!dailyTotals[d.date]) dailyTotals[d.date] = { sold: 0, revenue: 0 };
+              dailyTotals[d.date].sold += d.sold;
+              dailyTotals[d.date].revenue += d.revenue;
+            }
+          }
+          const points = Object.entries(dailyTotals)
+            .sort((a,b) => a[0].localeCompare(b[0]))
+            .map(([date, v]) => ({ x: new Date(date + 'T12:00:00'), y: v.sold }));
+          if (points.length > 0) {
+            datasets.push({
+              label: 'eBay Est. Sales (all)',
+              type: 'bar',
+              data: points,
+              backgroundColor: '#bf5af240',
+              borderColor: '#bf5af2',
+              borderWidth: 1,
+              barThickness: Math.max(4, Math.min(20, (chartEl.clientWidth - 100) / points.length * 0.6)),
+              yAxisID: _getAxisId('ebaySales'),
+            });
+          }
+        } else if (salesProducts.length === 1) {
+          const history = salesData[salesProducts[0]];
+          const points = history.map(d => ({ x: new Date(d.date + 'T12:00:00'), y: d.sold }));
+          datasets.push({
+            label: 'eBay Est. Sales',
+            type: 'bar',
+            data: points,
+            backgroundColor: '#bf5af240',
+            borderColor: '#bf5af2',
+            borderWidth: 1,
+            barThickness: Math.max(4, Math.min(20, (chartEl.clientWidth - 100) / points.length * 0.6)),
+            yAxisID: _getAxisId('ebaySales'),
+          });
+        } else {
+          // Multiple selected products: stacked or separate bars
+          salesProducts.forEach((prod, idx) => {
+            const history = salesData[prod];
+            if (!history || history.length === 0) return;
+            const color = PRODUCT_COLORS[idx % PRODUCT_COLORS.length];
+            const points = history.map(d => ({ x: new Date(d.date + 'T12:00:00'), y: d.sold }));
+            datasets.push({
+              label: `${prod} (Sales)`,
+              type: 'bar',
+              data: points,
+              backgroundColor: color + '50',
+              borderColor: color,
+              borderWidth: 1,
+              barThickness: Math.max(3, Math.min(14, (chartEl.clientWidth - 100) / points.length * 0.4)),
+              yAxisID: _getAxisId('ebaySales'),
+            });
+          });
+        }
+      }
+
       // --- Lead time overlay ---
       const showLeadTimes = document.getElementById('showLeadTimes').checked && DATA.lead_times;
       if (showLeadTimes) {
@@ -3618,6 +3758,13 @@
           titleText = 'eBay Price ($)';
           titleColor = '#30d158';
           tickColor = '#30d158';
+        } else if (unit === 'count') {
+          min = 0;
+          max = yVals.length > 0 ? Math.max(5, Math.ceil(Math.max(...yVals) * 1.2)) : 10;
+          tickCb = v => v < 0 ? '' : Math.round(v).toString();
+          titleText = 'Est. Sales (items/day)';
+          titleColor = '#bf5af2';
+          tickColor = '#bf5af2';
         } else { // days
           min = -0.08;
           max = yVals.length > 0 ? Math.max(2, Math.ceil(Math.max(...yVals) + 0.5)) : 2;
