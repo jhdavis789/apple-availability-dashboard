@@ -847,6 +847,7 @@
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button id="qvMacMini" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #0a84ff;color:#6cb4ff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">Mac Mini — by City</button>
         <button id="qvAllProducts" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #30d158;color:#30d158;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">All Products</button>
+        <button id="qvEbayPrices" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #ff9f40;color:#ff9f40;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;display:none;">eBay Prices</button>
       </div>
     </div>
   </div>
@@ -854,7 +855,24 @@
   <div id="loading">Loading data...</div>
 
   <div class="dashboard" id="dashboard" style="display:none;">
-    <!-- Heatmap view (hidden by default, first in stack so it's on top) -->
+
+    <!-- Stats row (hidden, stats moved to header) -->
+    <div class="stats-row" id="statsRow" style="display:none;"></div>
+    <div class="excluded-info" id="excludedInfo" style="display:none;"></div>
+
+    <!-- Main chart area -->
+    <div class="chart-card heatmap-hide" style="position:relative;">
+      <h3 id="mainChartTitle">Availability Over Time</h3>
+      <div style="position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:10;">
+        <button id="downloadChartCsv" class="secondary" style="font-size:11px;padding:4px 10px;" title="Download raw data as CSV">CSV</button>
+        <button id="resetGraphBtn" class="secondary" style="display:none;font-size:11px;padding:4px 10px;">Reset axes</button>
+      </div>
+      <div class="chart-container">
+        <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Inline availability map (shown in trends view, auto-playing) -->
     <div class="chart-card" id="heatmapCard" style="display:none;">
       <h3>Store Availability Map</h3>
       <div class="map-controls">
@@ -892,22 +910,6 @@
           <table class="heatmap-table" id="heatmapTable"></table>
         </div>
       </details>
-    </div>
-
-    <!-- Stats row (hidden, stats moved to header) -->
-    <div class="stats-row" id="statsRow" style="display:none;"></div>
-    <div class="excluded-info" id="excludedInfo" style="display:none;"></div>
-
-    <!-- Main chart area -->
-    <div class="chart-card heatmap-hide" style="position:relative;">
-      <h3 id="mainChartTitle">Availability Over Time</h3>
-      <div style="position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:10;">
-        <button id="downloadChartCsv" class="secondary" style="font-size:11px;padding:4px 10px;" title="Download raw data as CSV">CSV</button>
-        <button id="resetGraphBtn" class="secondary" style="display:none;font-size:11px;padding:4px 10px;">Reset axes</button>
-      </div>
-      <div class="chart-container">
-        <canvas id="mainChart"></canvas>
-      </div>
     </div>
 
     <!-- City summary -->
@@ -2276,6 +2278,11 @@
       }
       document.getElementById('showEbaySales').addEventListener('change', render);
 
+      // Show eBay Prices quick view button if eBay data exists
+      if (DATA.ebay_prices && DATA.ebay_prices.products.length > 0) {
+        document.getElementById('qvEbayPrices').style.display = '';
+      }
+
       // Show lead time toggle if data is available
       if (DATA.lead_times && DATA.lead_times.snapshots.length > 0) {
         document.getElementById('leadTimeToggleLabel').style.display = 'flex';
@@ -2384,6 +2391,31 @@
         _cityDropdown.selected.add('__AVG__');
         _cityDropdown._updateCheckboxes();
         _cityDropdown._updateTrigger();
+        document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+        const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
+        if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
+        render();
+      });
+
+      document.getElementById('qvEbayPrices').addEventListener('click', () => {
+        // Select all products that have eBay data
+        const ebayProducts = DATA.ebay_prices ? DATA.ebay_prices.products : [];
+        _productDropdown.selected.clear();
+        ebayProducts.forEach(p => _productDropdown.selected.add(p));
+        _productDropdown._updateCheckboxes();
+        _productDropdown._updateTrigger();
+        // Clear city selection
+        _cityDropdown.selected.clear();
+        _cityDropdown._updateCheckboxes();
+        _cityDropdown._updateTrigger();
+        // Disable availability, enable eBay median
+        document.getElementById('showAvailability').checked = false;
+        document.getElementById('showEbayPrices').checked = true;
+        document.getElementById('showEbayMean').checked = false;
+        document.getElementById('showEbayMedian').checked = true;
+        document.getElementById('showEbaySales').checked = false;
+        updateEbaySubToggles();
+        // Switch to trends view
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
@@ -3031,7 +3063,17 @@
       updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
 
       if (currentView === 'trends' || currentView === 'compare') {
-        document.getElementById('heatmapCard').style.display = 'none';
+        // Show inline map in trends view too
+        if (DATA && DATA.store_map) {
+          document.getElementById('heatmapCard').style.display = 'block';
+          renderHeatmap(snapshots, selectedCities, filterZeros, blipSet);
+          setTimeout(() => {
+            initMap();
+            updateMapOverlay();
+          }, 50);
+        } else {
+          document.getElementById('heatmapCard').style.display = 'none';
+        }
         renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
       } else {
         document.getElementById('heatmapCard').style.display = 'block';
@@ -5205,8 +5247,8 @@
       if (!container) return;
 
       leafletMap = L.map(container, {
-        center: [39.5, -98.5],
-        zoom: 5,
+        center: [41.0, -73.5],
+        zoom: 8,
         zoomControl: true,
       });
 
@@ -5345,28 +5387,39 @@
       let _mapAnimating = false;
       let _mapAnimTimer = null;
       const playBtn = document.getElementById('mapPlayBtn');
+
+      function _startMapAnim() {
+        if (_mapAnimating) return;
+        _mapAnimating = true;
+        playBtn.innerHTML = '&#9646;&#9646;';
+        playBtn.title = 'Pause animation';
+        const totalFrames = max + 1;
+        const intervalMs = Math.max(50, Math.floor(10000 / totalFrames));
+        if (parseInt(slider.value) >= max) slider.value = 0;
+        _mapAnimTimer = setInterval(() => {
+          let idx = parseInt(slider.value) + 1;
+          if (idx > max) idx = 0;
+          slider.value = idx;
+          document.getElementById('mapTimeLabel').textContent = formatMapTimestamp(snaps[idx].t);
+          updateMapOverlay();
+        }, intervalMs);
+      }
+
+      function _stopMapAnim() {
+        if (!_mapAnimating) return;
+        clearInterval(_mapAnimTimer);
+        _mapAnimating = false;
+        playBtn.innerHTML = '&#9654;';
+        playBtn.title = 'Animate through time';
+      }
+
       playBtn.addEventListener('click', () => {
-        if (_mapAnimating) {
-          clearInterval(_mapAnimTimer);
-          _mapAnimating = false;
-          playBtn.innerHTML = '&#9654;';
-          playBtn.title = 'Animate through time';
-        } else {
-          _mapAnimating = true;
-          playBtn.innerHTML = '&#9646;&#9646;';
-          playBtn.title = 'Pause animation';
-          const totalFrames = max + 1;
-          const intervalMs = Math.max(50, Math.floor(10000 / totalFrames));
-          if (parseInt(slider.value) >= max) slider.value = 0;
-          _mapAnimTimer = setInterval(() => {
-            let idx = parseInt(slider.value) + 1;
-            if (idx > max) idx = 0;
-            slider.value = idx;
-            document.getElementById('mapTimeLabel').textContent = formatMapTimestamp(snaps[idx].t);
-            updateMapOverlay();
-          }, intervalMs);
-        }
+        if (_mapAnimating) _stopMapAnim();
+        else _startMapAnim();
       });
+
+      // Auto-play on first load
+      setTimeout(() => _startMapAnim(), 200);
 
       // Delta controls
       const dStart = document.getElementById('mapDeltaStart');
