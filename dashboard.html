@@ -229,7 +229,7 @@
       border-radius: 6px; font-size: 13px; cursor: pointer;
       user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .multi-dropdown .md-trigger:hover { border-color: var(--input-border-hover); }
+    .multi-dropdown .md-trigger:hover, #dataSourcesBtn:hover { border-color: var(--input-border-hover) !important; }
     .multi-dropdown.open .md-trigger { border-color: var(--accent); }
     .multi-dropdown .md-trigger::after { content: '\25BE'; margin-left: 8px; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
     .multi-dropdown .md-menu {
@@ -355,6 +355,12 @@
     }
     .period-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
     .period-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+
+    .axis-toggle { display:inline-flex; gap:1px; margin-left:auto; font-size:10px; }
+    .axis-toggle button { padding:1px 5px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--text); cursor:pointer; border-radius:0; line-height:1.4; }
+    .axis-toggle button:first-child { border-radius:3px 0 0 3px; }
+    .axis-toggle button:last-child { border-radius:0 3px 3px 0; }
+    .axis-toggle button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
 
     .movers-row {
       display: flex; gap: 10px; flex-wrap: wrap;
@@ -786,15 +792,16 @@
 
     <div class="control-group">
       <label>Data Sources</label>
-      <div class="settings-wrap">
-        <button id="dataSourcesBtn" class="secondary" style="font-size:13px;padding:6px 12px;">Sources &#9662;</button>
+      <div class="settings-wrap" style="position:relative;">
+        <div id="dataSourcesBtn" class="md-trigger" style="display:flex;align-items:center;justify-content:space-between;background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:8px 12px;border-radius:6px;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;">Sources<span style="margin-left:8px;font-size:10px;color:var(--text-muted);">&#9662;</span></div>
         <div class="settings-menu dropdown-down" id="dataSourcesMenu">
-          <label><input type="checkbox" id="showAvailability" checked> Availability</label>
-          <label id="ebayToggleLabel" style="display:none;"><input type="checkbox" id="showEbayPrices"> eBay Prices</label>
+          <label><input type="checkbox" id="showAvailability" checked> Availability <span class="axis-toggle" data-source="availability"><button class="active" data-side="left">L</button><button data-side="right">R</button></span></label>
+          <label id="ebayToggleLabel" style="display:none;"><input type="checkbox" id="showEbayPrices"> eBay Prices <span class="axis-toggle" data-source="ebay"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
           <label class="ebay-sub-toggle" id="ebayMeanLabel" style="display:none;margin-left:20px;opacity:0.4;pointer-events:none;"><input type="checkbox" id="showEbayMean" checked> Mean</label>
           <label class="ebay-sub-toggle" id="ebayMedianLabel" style="display:none;margin-left:20px;opacity:0.4;pointer-events:none;"><input type="checkbox" id="showEbayMedian"> Median</label>
-          <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Lead Times</label>
-          <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Delivery Times</label>
+          <label id="ebaySalesToggleLabel" style="display:none;"><input type="checkbox" id="showEbaySales"> eBay Sales <span class="axis-toggle" data-source="ebaySales"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
+          <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Lead Times <span class="axis-toggle" data-source="leadTimes"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
+          <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Delivery Times <span class="axis-toggle" data-source="deliveryTimes"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
         </div>
       </div>
     </div>
@@ -804,8 +811,8 @@
       <div class="period-btns" id="timeRangePeriodBtns" style="margin-bottom:8px;">
         <button class="period-btn" data-hours="24">24h</button>
         <button class="period-btn" data-hours="168">7d</button>
-        <button class="period-btn active" data-hours="336">2wk</button>
-        <button class="period-btn" data-hours="0">Max</button>
+        <button class="period-btn" data-hours="336">2wk</button>
+        <button class="period-btn active" data-hours="0">Max</button>
       </div>
       <div class="time-range-inputs">
         <input type="datetime-local" id="timeStart" step="1">
@@ -840,6 +847,7 @@
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button id="qvMacMini" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #0a84ff;color:#6cb4ff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">Mac Mini — by City</button>
         <button id="qvAllProducts" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #30d158;color:#30d158;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">All Products</button>
+        <button id="qvEbayPrices" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #ff9f40;color:#ff9f40;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;display:none;">eBay Prices</button>
       </div>
     </div>
   </div>
@@ -847,7 +855,24 @@
   <div id="loading">Loading data...</div>
 
   <div class="dashboard" id="dashboard" style="display:none;">
-    <!-- Heatmap view (hidden by default, first in stack so it's on top) -->
+
+    <!-- Stats row (hidden, stats moved to header) -->
+    <div class="stats-row" id="statsRow" style="display:none;"></div>
+    <div class="excluded-info" id="excludedInfo" style="display:none;"></div>
+
+    <!-- Main chart area -->
+    <div class="chart-card heatmap-hide" style="position:relative;">
+      <h3 id="mainChartTitle">Availability Over Time</h3>
+      <div style="position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:10;">
+        <button id="downloadChartCsv" class="secondary" style="font-size:11px;padding:4px 10px;" title="Download raw data as CSV">CSV</button>
+        <button id="resetGraphBtn" class="secondary" style="display:none;font-size:11px;padding:4px 10px;">Reset axes</button>
+      </div>
+      <div class="chart-container">
+        <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Inline availability map (shown in trends view, auto-playing) -->
     <div class="chart-card" id="heatmapCard" style="display:none;">
       <h3>Store Availability Map</h3>
       <div class="map-controls">
@@ -885,22 +910,6 @@
           <table class="heatmap-table" id="heatmapTable"></table>
         </div>
       </details>
-    </div>
-
-    <!-- Stats row (hidden, stats moved to header) -->
-    <div class="stats-row" id="statsRow" style="display:none;"></div>
-    <div class="excluded-info" id="excludedInfo" style="display:none;"></div>
-
-    <!-- Main chart area -->
-    <div class="chart-card heatmap-hide" style="position:relative;">
-      <h3 id="mainChartTitle">Availability Over Time</h3>
-      <div style="position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:10;">
-        <button id="downloadChartCsv" class="secondary" style="font-size:11px;padding:4px 10px;" title="Download raw data as CSV">CSV</button>
-        <button id="resetGraphBtn" class="secondary" style="display:none;font-size:11px;padding:4px 10px;">Reset axes</button>
-      </div>
-      <div class="chart-container">
-        <canvas id="mainChart"></canvas>
-      </div>
     </div>
 
     <!-- City summary -->
@@ -1054,6 +1063,12 @@
     let _cycleSortKey = 'avg_hours';
     let _cycleSortDir = 'asc';
     let currentView = 'trends';
+    let _axisSide = { availability: 'left', ebay: 'right', ebaySales: 'right', leadTimes: 'right', deliveryTimes: 'right' };
+    const _axisSideDefaults = { availability: 'left', ebay: 'right', ebaySales: 'right', leadTimes: 'right', deliveryTimes: 'right' };
+    const _sourceUnit = { availability: 'pct', ebay: 'dollars', ebaySales: 'count', leadTimes: 'days', deliveryTimes: 'days' };
+    function _getAxisId(source) {
+      return 'y_' + _axisSide[source] + '_' + _sourceUnit[source];
+    }
     let timeMin = 0;  // epoch ms — absolute min from data
     let timeMax = 0;  // epoch ms — absolute max from data
     let timeStartMs = 0; // current selected start
@@ -1255,66 +1270,79 @@
       };
     }
 
-    // Plugin: drag y2 axis to shift eBay prices, scroll to zoom
+    // Plugin: drag right-side axes to shift, scroll to zoom
+    // Helper: find right-position axis under cursor
+    function _findRightAxis(chart, e) {
+      const rect = chart.canvas.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      const ids = Object.keys(chart.scales).filter(id => id !== 'x');
+      for (const id of ids) {
+        const s = chart.scales[id];
+        if (!s || s.position !== 'right' || !s.options.display) continue;
+        if (cx >= s.left - 10 && cx <= s.right + 10 && cy >= s.top && cy <= s.bottom) return id;
+      }
+      return null;
+    }
     const y2DragPlugin = {
       id: 'y2DragZoom',
       _dragging: false,
+      _dragAxisId: null,
       _startY: 0,
       _startMin: 0,
       _startMax: 0,
-      _isOverY2(chart, e) {
-        const y2 = chart.scales.y2;
-        if (!y2 || !y2.options.display) return false;
-        const rect = chart.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        return x >= y2.left - 10 && x <= y2.right + 10 && y >= y2.top && y <= y2.bottom;
+      _isOverRightAxis(chart, e) {
+        return _findRightAxis(chart, e) !== null;
       },
       afterInit(chart) {
         const canvas = chart.canvas;
         canvas.addEventListener('mousedown', (e) => {
-          if (!this._isOverY2(chart, e)) return;
+          const axisId = _findRightAxis(chart, e);
+          if (!axisId) return;
           this._dragging = true;
+          this._dragAxisId = axisId;
           this._startY = e.clientY;
-          const y2 = chart.options.scales.y2;
-          this._startMin = y2.min;
-          this._startMax = y2.max;
+          const ax = chart.options.scales[axisId];
+          this._startMin = ax.min;
+          this._startMax = ax.max;
           canvas.style.cursor = 'ns-resize';
           e.preventDefault();
         });
         canvas.addEventListener('mousemove', (e) => {
           if (!this._dragging) {
-            canvas.style.cursor = this._isOverY2(chart, e) ? 'ns-resize' : '';
+            canvas.style.cursor = this._isOverRightAxis(chart, e) ? 'ns-resize' : '';
           }
         });
         window.addEventListener('mousemove', (e) => {
-          if (!this._dragging) return;
+          if (!this._dragging || !this._dragAxisId) return;
           const dy = e.clientY - this._startY;
-          const y2Scale = chart.scales.y2;
-          if (!y2Scale) return;
-          const pxRange = y2Scale.bottom - y2Scale.top;
+          const scale = chart.scales[this._dragAxisId];
+          if (!scale) return;
+          const pxRange = scale.bottom - scale.top;
           const valRange = this._startMax - this._startMin;
           const shift = (dy / pxRange) * valRange;
-          chart.options.scales.y2.min = this._startMin + shift;
-          chart.options.scales.y2.max = this._startMax + shift;
+          chart.options.scales[this._dragAxisId].min = this._startMin + shift;
+          chart.options.scales[this._dragAxisId].max = this._startMax + shift;
           chart.update('none');
         });
         window.addEventListener('mouseup', () => {
           if (this._dragging) {
             this._dragging = false;
+            this._dragAxisId = null;
             canvas.style.cursor = '';
           }
         });
         canvas.addEventListener('wheel', (e) => {
-          if (!this._isOverY2(chart, e)) return;
+          const axisId = _findRightAxis(chart, e);
+          if (!axisId) return;
           e.preventDefault();
-          const y2 = chart.options.scales.y2;
-          const range = y2.max - y2.min;
+          const ax = chart.options.scales[axisId];
+          const range = ax.max - ax.min;
           const factor = e.deltaY > 0 ? 1.15 : 0.87;
-          const mid = (y2.min + y2.max) / 2;
+          const mid = (ax.min + ax.max) / 2;
           const newRange = range * factor;
-          y2.min = mid - newRange / 2;
-          y2.max = mid + newRange / 2;
+          ax.min = mid - newRange / 2;
+          ax.max = mid + newRange / 2;
           chart.update('none');
         }, { passive: false });
       }
@@ -1433,10 +1461,14 @@
           const cx = e.clientX - rect.left;
           const cy = e.clientY - rect.top;
           if (cx < area.left || cx > area.right || cy < area.top || cy > area.bottom) return;
-          const y2 = chart.scales.y2;
-          if (y2 && y2.options.display && cx >= y2.left - 10) return;
-          const yScale = chart.scales.y;
-          if (yScale && cx <= yScale.right + 10) return;
+          // Skip if over any right-side axis
+          if (_findRightAxis(chart, e)) return;
+          // Skip if over any left-side axis
+          const leftAxes = Object.keys(chart.scales).filter(id => id !== 'x' && chart.scales[id].position === 'left');
+          for (const id of leftAxes) {
+            const s = chart.scales[id];
+            if (s && cx <= s.right + 10) return;
+          }
           const xScale = chart.scales.x;
           if (!xScale) return;
 
@@ -1639,16 +1671,15 @@
 
           const color = ds.borderColor || '#888';
           let formatted;
-          if (ds.yAxisID === 'y2') {
-            if (ds.label && ds.label.includes('Lead Time')) {
-              formatted = hit.y.toFixed(2) + ' days';
-            } else {
-              formatted = '$' + hit.y.toFixed(2);
-              if (ds._ebayData && hit.idx < ds._ebayData.length) {
-                const listings = ds._ebayData[hit.idx].total_listings;
-                if (listings != null) formatted += ` (${listings} listings)`;
-              }
+          const axisId = ds.yAxisID || '';
+          if (axisId.includes('_dollars')) {
+            formatted = '$' + hit.y.toFixed(2);
+            if (ds._ebayData && hit.idx < ds._ebayData.length) {
+              const listings = ds._ebayData[hit.idx].total_listings;
+              if (listings != null) formatted += ` (${listings} listings)`;
             }
+          } else if (axisId.includes('_days')) {
+            formatted = hit.y.toFixed(2) + ' days';
           } else {
             formatted = hit.y.toFixed(1) + '%';
           }
@@ -1750,9 +1781,17 @@
         const area = chart.chartArea;
         return area && cx >= area.left && cx <= area.right && cy >= area.bottom - 5;
       },
+      _findLeftAxis(chart, cx, cy) {
+        const ids = Object.keys(chart.scales).filter(id => id !== 'x');
+        for (const id of ids) {
+          const s = chart.scales[id];
+          if (!s || s.position !== 'left' || !s.options.display) continue;
+          if (cx >= s.left - 10 && cx <= s.right + 10 && cy >= s.top && cy <= s.bottom) return id;
+        }
+        return null;
+      },
       _isOverYAxis(chart, cx, cy) {
-        const y = chart.scales.y;
-        return y && cx >= y.left - 10 && cx <= y.right + 10 && cy >= y.top && cy <= y.bottom;
+        return this._findLeftAxis(chart, cx, cy) !== null;
       },
       _showResetBtn() {
         const btn = document.getElementById('resetGraphBtn');
@@ -1763,13 +1802,8 @@
         const canvas = chart.canvas;
         // Scroll-to-zoom on axes only
         canvas.addEventListener('wheel', (e) => {
-          // Skip if over y2 axis (handled by y2DragPlugin)
-          const y2 = chart.scales.y2;
-          if (y2) {
-            const rect = canvas.getBoundingClientRect();
-            const cx = e.clientX - rect.left;
-            if (cx >= y2.left - 10 && cx <= y2.right + 10) return;
-          }
+          // Skip if over any right-side axis (handled by y2DragPlugin)
+          if (_findRightAxis(chart, e)) return;
           const rect = canvas.getBoundingClientRect();
           const cx = e.clientX - rect.left;
           const cy = e.clientY - rect.top;
@@ -1793,17 +1827,18 @@
             return;
           }
 
-          // Y-axis zoom: only when mouse is on or near the y-axis
-          if (this._isOverYAxis(chart, cx, cy)) {
-            const yScale = chart.scales.y;
+          // Y-axis zoom: only when mouse is on or near a left-side y-axis
+          const leftAxisId = this._findLeftAxis(chart, cx, cy);
+          if (leftAxisId) {
+            const yScale = chart.scales[leftAxisId];
             if (!yScale) return;
             e.preventDefault();
             const range = yScale.max - yScale.min;
             const factor = e.deltaY > 0 ? 1.15 : 0.87;
             const mid = (yScale.min + yScale.max) / 2;
             const newRange = range * factor;
-            chart.options.scales.y.min = mid - newRange / 2;
-            chart.options.scales.y.max = mid + newRange / 2;
+            chart.options.scales[leftAxisId].min = mid - newRange / 2;
+            chart.options.scales[leftAxisId].max = mid + newRange / 2;
             chart.update('none');
             this._showResetBtn();
             return;
@@ -1824,13 +1859,17 @@
             this._dragStartXMax = chart.scales.x.max;
             canvas.style.cursor = 'ew-resize';
             e.preventDefault();
-          } else if (this._isOverYAxis(chart, cx, cy)) {
-            this._yDragging = true;
-            this._dragStartY = e.clientY;
-            this._dragStartYMin = chart.options.scales.y.min;
-            this._dragStartYMax = chart.options.scales.y.max;
-            canvas.style.cursor = 'ns-resize';
-            e.preventDefault();
+          } else {
+            const yLeftId = this._findLeftAxis(chart, cx, cy);
+            if (yLeftId) {
+              this._yDragging = true;
+              this._dragYAxisId = yLeftId;
+              this._dragStartY = e.clientY;
+              this._dragStartYMin = chart.options.scales[yLeftId].min;
+              this._dragStartYMax = chart.options.scales[yLeftId].max;
+              canvas.style.cursor = 'ns-resize';
+              e.preventDefault();
+            }
           }
         });
         window.addEventListener('mousemove', (e) => {
@@ -1843,13 +1882,13 @@
             chart.options.scales.x.max = this._dragStartXMax + shift;
             chart.update('none');
             this._showResetBtn();
-          } else if (this._yDragging) {
-            const yScale = chart.scales.y;
+          } else if (this._yDragging && this._dragYAxisId) {
+            const yScale = chart.scales[this._dragYAxisId];
             const pxRange = yScale.bottom - yScale.top;
             const valRange = this._dragStartYMax - this._dragStartYMin;
             const shift = (e.clientY - this._dragStartY) / pxRange * valRange;
-            chart.options.scales.y.min = this._dragStartYMin + shift;
-            chart.options.scales.y.max = this._dragStartYMax + shift;
+            chart.options.scales[this._dragYAxisId].min = this._dragStartYMin + shift;
+            chart.options.scales[this._dragYAxisId].max = this._dragStartYMax + shift;
             chart.update('none');
             this._showResetBtn();
           }
@@ -1858,6 +1897,7 @@
           if (this._xDragging || this._yDragging) {
             this._xDragging = false;
             this._yDragging = false;
+            this._dragYAxisId = null;
             canvas.style.cursor = '';
           }
         });
@@ -1879,8 +1919,72 @@
     };
 
     async function loadData() {
-      const resp = await fetch('data.json');
+      const resp = await fetch(`data.json?t=${Date.now()}`);
       DATA = await resp.json();
+
+      // Expand delta-encoded store_map snapshots into full state
+      if (DATA.store_map && DATA.store_map.snapshots && DATA.store_map.products) {
+        const smProducts = DATA.store_map.products;
+        const snaps = DATA.store_map.snapshots;
+        let prevState = null;
+        for (let i = 0; i < snaps.length; i++) {
+          if (snaps[i].a) {
+            // Full snapshot: convert numeric keys back to product names
+            const expanded = {};
+            for (const [storeId, prods] of Object.entries(snaps[i].a)) {
+              expanded[storeId] = {};
+              for (const [pidx, val] of Object.entries(prods))
+                expanded[storeId][smProducts[+pidx]] = val;
+            }
+            snaps[i].a = expanded;
+            prevState = {};
+            for (const [sid, p] of Object.entries(expanded))
+              prevState[sid] = Object.assign({}, p);
+          } else if (snaps[i].d !== undefined) {
+            // Delta snapshot: apply changes to previous state
+            for (const [storeId, changes] of Object.entries(snaps[i].d)) {
+              if (!prevState[storeId]) prevState[storeId] = {};
+              for (const [pidx, val] of Object.entries(changes))
+                prevState[storeId][smProducts[+pidx]] = val;
+            }
+            const full = {};
+            for (const [sid, p] of Object.entries(prevState))
+              full[sid] = Object.assign({}, p);
+            snaps[i].a = full;
+            delete snaps[i].d;
+          }
+        }
+      }
+
+      // Expand numeric product IDs in lead_times
+      if (DATA.lead_times && DATA.all_models) {
+        for (const snap of DATA.lead_times.snapshots) {
+          const newData = {};
+          for (const [city, prods] of Object.entries(snap.data)) {
+            newData[city] = {};
+            for (const [pidx, val] of Object.entries(prods)) {
+              const name = DATA.all_models[+pidx];
+              if (name) newData[city][name] = val;
+            }
+          }
+          snap.data = newData;
+        }
+      }
+
+      // Expand numeric product IDs in delivery_times
+      if (DATA.delivery_times && DATA.all_models) {
+        for (const snap of DATA.delivery_times.snapshots) {
+          const newData = {};
+          for (const [city, prods] of Object.entries(snap.data)) {
+            newData[city] = {};
+            for (const [pidx, val] of Object.entries(prods)) {
+              const name = DATA.all_models[+pidx];
+              if (name) newData[city][name] = val;
+            }
+          }
+          snap.data = newData;
+        }
+      }
 
       // Show last-updated time from most recent snapshot
       if (DATA.snapshots && DATA.snapshots.length > 0) {
@@ -1891,8 +1995,9 @@
         const ampm = h >= 12 ? 'PM' : 'AM';
         const h12 = h % 12 || 12;
         const minStr = m < 10 ? '0' + m : m;
+        const tzAbbr = new Intl.DateTimeFormat('en-US', {timeZoneName:'short'}).formatToParts(last).find(p => p.type === 'timeZoneName')?.value || '';
         document.getElementById('lastUpdated').textContent =
-          `Data updated ${days[last.getDay()]} ${months[last.getMonth()]} ${last.getDate()} at ${h12}:${minStr} ${ampm}`;
+          `Data updated ${days[last.getDay()]} ${months[last.getMonth()]} ${last.getDate()} at ${h12}:${minStr} ${ampm} ${tzAbbr}`;
       }
 
       // Show website file modification time in header top-right
@@ -1904,8 +2009,9 @@
         const ampm = h >= 12 ? 'PM' : 'AM';
         const h12 = h % 12 || 12;
         const minStr = m < 10 ? '0' + m : m;
+        const tzAbbr2 = new Intl.DateTimeFormat('en-US', {timeZoneName:'short'}).formatToParts(gen).find(p => p.type === 'timeZoneName')?.value || '';
         document.getElementById('lastUpdatedSite').textContent =
-          `Site updated ${months[gen.getMonth()]} ${gen.getDate()} at ${h12}:${minStr} ${ampm}`;
+          `Site updated ${months[gen.getMonth()]} ${gen.getDate()} at ${h12}:${minStr} ${ampm} ${tzAbbr2}`;
       }
 
       // Total stats in header
@@ -2122,14 +2228,15 @@
         });
       });
 
-      // Product multi-dropdown — default: all products selected
+      // Product multi-dropdown — default: Mac Mini + Mac Studio only
+      const defaultProducts = modelsWithData.filter(m => m.startsWith('Mac Mini') || m.startsWith('Mac Studio'));
       _productDropdown = new MultiDropdown(document.getElementById('productDropdown'), {
         items: modelsWithData.map(m => ({ value: m, label: m })),
         headers: [
           { value: '__ALL__', label: 'All Products (Average)', btnLabel: 'all', isSelectAll: true },
           { value: '__AVG_SEL__', label: 'Avg of Selected', noButtons: true }
         ],
-        initialSelected: modelsWithData.slice(),
+        initialSelected: defaultProducts.length > 0 ? defaultProducts : modelsWithData.slice(),
         onChange: () => render()
       });
       _addCompToggle(_productDropdown, '__AVG_SEL__',
@@ -2165,6 +2272,17 @@
         document.getElementById('ebayMedianLabel').style.display = 'flex';
       }
 
+      // Show eBay sales toggle if data is available
+      if (DATA.ebay_sales && Object.keys(DATA.ebay_sales.data).length > 0) {
+        document.getElementById('ebaySalesToggleLabel').style.display = 'flex';
+      }
+      document.getElementById('showEbaySales').addEventListener('change', render);
+
+      // Show eBay Prices quick view button if eBay data exists
+      if (DATA.ebay_prices && DATA.ebay_prices.products.length > 0) {
+        document.getElementById('qvEbayPrices').style.display = '';
+      }
+
       // Show lead time toggle if data is available
       if (DATA.lead_times && DATA.lead_times.snapshots.length > 0) {
         document.getElementById('leadTimeToggleLabel').style.display = 'flex';
@@ -2177,17 +2295,26 @@
       }
       document.getElementById('showDeliveryTimes').addEventListener('change', render);
 
+      // Axis side toggles (L/R buttons)
+      document.querySelectorAll('.axis-toggle').forEach(toggle => {
+        const source = toggle.dataset.source;
+        toggle.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const side = btn.dataset.side;
+            _axisSide[source] = side;
+            toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.side === side));
+            render();
+          });
+        });
+      });
+
       // Reset axes button
       document.getElementById('resetGraphBtn').addEventListener('click', () => {
-        if (mainChart) {
-          delete mainChart.options.scales.x.min;
-          delete mainChart.options.scales.x.max;
-          mainChart.options.scales.y.min = 0;
-          mainChart.options.scales.y.max = 100;
-          mainChart.update('none');
-        }
-        document.getElementById('resetGraphBtn').style.display = 'none';
         xZoomPlugin._axesModified = false;
+        document.getElementById('resetGraphBtn').style.display = 'none';
+        render(); // full re-render resets all axes
       });
 
       document.getElementById('resetCities').addEventListener('click', () => {
@@ -2264,6 +2391,31 @@
         _cityDropdown.selected.add('__AVG__');
         _cityDropdown._updateCheckboxes();
         _cityDropdown._updateTrigger();
+        document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+        const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
+        if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
+        render();
+      });
+
+      document.getElementById('qvEbayPrices').addEventListener('click', () => {
+        // Select all products that have eBay data
+        const ebayProducts = DATA.ebay_prices ? DATA.ebay_prices.products : [];
+        _productDropdown.selected.clear();
+        ebayProducts.forEach(p => _productDropdown.selected.add(p));
+        _productDropdown._updateCheckboxes();
+        _productDropdown._updateTrigger();
+        // Clear city selection
+        _cityDropdown.selected.clear();
+        _cityDropdown._updateCheckboxes();
+        _cityDropdown._updateTrigger();
+        // Disable availability, enable eBay median
+        document.getElementById('showAvailability').checked = false;
+        document.getElementById('showEbayPrices').checked = true;
+        document.getElementById('showEbayMean').checked = false;
+        document.getElementById('showEbayMedian').checked = true;
+        document.getElementById('showEbaySales').checked = false;
+        updateEbaySubToggles();
+        // Switch to trends view
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
@@ -2359,8 +2511,8 @@
       timeMin = Math.min(...timestamps);
       timeMax = Math.max(...timestamps);
       timeEndMs = timeMax;
-      // Default to 2wk view
-      timeStartMs = Math.max(timeMin, timeMax - 336 * 3600000);
+      // Default to Max view
+      timeStartMs = timeMin;
 
       const startInput = document.getElementById('timeStart');
       const endInput = document.getElementById('timeEnd');
@@ -2548,10 +2700,21 @@
       if (document.getElementById('showEbayPrices').checked) params.set('ebay', '1');
       if (!document.getElementById('showEbayMean').checked) params.set('emean', '0');
       if (document.getElementById('showEbayMedian').checked) params.set('emed', '1');
+      if (document.getElementById('showEbaySales').checked) params.set('esales', '1');
       if (document.getElementById('showLeadTimes').checked) params.set('lt', '1');
       if (document.getElementById('showDeliveryTimes').checked) params.set('dt', '1');
       if (document.getElementById('showPoints').checked) params.set('pts', '1');
       if (!document.getElementById('showCrosshair').checked) params.set('ch', '0');
+
+      // Axis sides (only non-defaults)
+      const asKeys = { availability: 'a', ebay: 'e', ebaySales: 's', leadTimes: 'l', deliveryTimes: 'd' };
+      const asParts = [];
+      for (const [src, abbr] of Object.entries(asKeys)) {
+        if (_axisSide[src] !== _axisSideDefaults[src]) {
+          asParts.push(abbr + ':' + (_axisSide[src] === 'left' ? 'l' : 'r'));
+        }
+      }
+      if (asParts.length > 0) params.set('as', asParts.join(','));
 
       // Cycles
       if (_cycleGroupBy !== 'region') params.set('cg', _cycleGroupBy);
@@ -2653,6 +2816,7 @@
       }
       if (params.has('emean')) document.getElementById('showEbayMean').checked = params.get('emean') === '1';
       if (params.has('emed')) document.getElementById('showEbayMedian').checked = params.get('emed') === '1';
+      if (params.has('esales')) document.getElementById('showEbaySales').checked = params.get('esales') === '1';
       if (params.has('lt')) document.getElementById('showLeadTimes').checked = params.get('lt') === '1';
       if (params.has('dt')) document.getElementById('showDeliveryTimes').checked = params.get('dt') === '1';
       if (params.has('pts')) document.getElementById('showPoints').checked = params.get('pts') === '1';
@@ -2660,6 +2824,23 @@
         const chOn = params.get('ch') !== '0';
         document.getElementById('showCrosshair').checked = chOn;
         _crosshairHidden = !chOn;
+      }
+
+      // Axis sides
+      if (params.has('as')) {
+        const abbrMap = { a: 'availability', e: 'ebay', s: 'ebaySales', l: 'leadTimes', d: 'deliveryTimes' };
+        params.get('as').split(',').forEach(part => {
+          const [abbr, side] = part.split(':');
+          const src = abbrMap[abbr];
+          if (src && (side === 'l' || side === 'r')) {
+            _axisSide[src] = side === 'l' ? 'left' : 'right';
+            // Update toggle button UI
+            const toggle = document.querySelector(`.axis-toggle[data-source="${src}"]`);
+            if (toggle) {
+              toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.side === _axisSide[src]));
+            }
+          }
+        });
       }
 
       // Cycles
@@ -2882,7 +3063,17 @@
       updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
 
       if (currentView === 'trends' || currentView === 'compare') {
-        document.getElementById('heatmapCard').style.display = 'none';
+        // Show inline map in trends view too
+        if (DATA && DATA.store_map) {
+          document.getElementById('heatmapCard').style.display = 'block';
+          renderHeatmap(snapshots, selectedCities, filterZeros, blipSet);
+          setTimeout(() => {
+            initMap();
+            updateMapOverlay();
+          }, 50);
+        } else {
+          document.getElementById('heatmapCard').style.display = 'none';
+        }
         renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
       } else {
         document.getElementById('heatmapCard').style.display = 'block';
@@ -2949,6 +3140,35 @@
       `;
 
       excludedInfo.textContent = '';
+    }
+
+    /** Rolling 2-sigma bands: 3-day trailing window.
+     *  Input: array of {t: epochMs, v: number}
+     *  Returns: array of {t, upper, lower} */
+    function _rollingBands(points) {
+      const WINDOW_MS = 3 * 24 * 3600000; // 3 days
+      const MIN_PTS = 3;
+      const result = [];
+      for (let i = 0; i < points.length; i++) {
+        const cur = points[i];
+        // Gather points in trailing window [t - WINDOW_MS, t]
+        let windowPts = [];
+        for (let j = i; j >= 0; j--) {
+          if (cur.t - points[j].t <= WINDOW_MS) windowPts.push(points[j].v);
+          else break;
+        }
+        // Fall back to expanding window from start if too few points
+        if (windowPts.length < MIN_PTS) {
+          windowPts = [];
+          for (let j = 0; j <= i; j++) windowPts.push(points[j].v);
+        }
+        const n = windowPts.length;
+        const mean = windowPts.reduce((a, b) => a + b, 0) / n;
+        const variance = windowPts.reduce((a, b) => a + (b - mean) ** 2, 0) / n;
+        const sigma2 = Math.sqrt(variance) * 2;
+        result.push({ t: cur.t, upper: cur.v + sigma2, lower: cur.v - sigma2 });
+      }
+      return result;
     }
 
     function renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
@@ -3138,7 +3358,8 @@
               borderColor: color, backgroundColor: color + '20',
               pointBackgroundColor: color, borderWidth: width, borderDash: dash,
               pointRadius: showPoints ? (isAvgProd || isAvgCity ? 1.5 : 2.5) : (isAvgProd || isAvgCity ? 0 : 1),
-              pointHoverRadius: showPoints ? 4 : 2.5, pointBorderWidth: 0, tension: 0.3, fill: false
+              pointHoverRadius: showPoints ? 4 : 2.5, pointBorderWidth: 0, tension: 0.3, fill: false,
+              yAxisID: _getAxisId('availability'),
             });
           });
         });
@@ -3156,7 +3377,8 @@
               label: 'Custom Avg (' + customCities.join(', ') + ')', data: customPoints,
               borderColor: '#ffd60a', backgroundColor: '#ffd60a20',
               borderWidth: 3, borderDash: [3, 3], pointRadius: 0,
-              pointHoverRadius: 5, tension: 0.3, fill: false
+              pointHoverRadius: 5, tension: 0.3, fill: false,
+              yAxisID: _getAxisId('availability'),
             });
           }
         }
@@ -3193,7 +3415,7 @@
                 pointStyle: 'rectRot',
                 tension: 0.3,
                 fill: false,
-                yAxisID: 'y2',
+                yAxisID: _getAxisId('ebay'),
               });
             }
             if (showMedian) {
@@ -3212,39 +3434,35 @@
                 pointStyle: 'triangle',
                 tension: 0.3,
                 fill: false,
-                yAxisID: 'y2',
+                yAxisID: _getAxisId('ebay'),
               });
             }
-            // 2-sigma band around the mean price (always shown when eBay is on)
+            // Rolling 2-sigma band around the mean price (always shown when eBay is on)
             {
-              const validPrices = ebayHistory.filter(d => d.avg_price !== null).map(d => d.avg_price);
-              if (validPrices.length >= 2) {
-                const mean = validPrices.reduce((a,b) => a+b, 0) / validPrices.length;
-                const variance = validPrices.reduce((a,b) => a + (b - mean) ** 2, 0) / validPrices.length;
-                const sigma2 = Math.sqrt(variance) * 2;
-                const upperData = ebayHistory.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price + sigma2 }));
-                const lowerData = ebayHistory.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price - sigma2 }));
+              const meanPoints = ebayHistory.filter(d => d.avg_price !== null);
+              if (meanPoints.length >= 2) {
+                const bands = _rollingBands(meanPoints.map(d => ({ t: new Date(d.timestamp).getTime(), v: d.avg_price })));
                 datasets.push({
                   label: 'eBay +2\u03c3',
-                  data: upperData,
+                  data: bands.map(b => ({ x: new Date(b.t), y: b.upper })),
                   borderColor: 'transparent',
                   backgroundColor: 'rgba(48,209,88,0.08)',
                   pointRadius: 0,
                   pointHoverRadius: 0,
                   tension: 0.3,
                   fill: '+1',
-                  yAxisID: 'y2',
+                  yAxisID: _getAxisId('ebay'),
                 });
                 datasets.push({
                   label: 'eBay -2\u03c3',
-                  data: lowerData,
+                  data: bands.map(b => ({ x: new Date(b.t), y: b.lower })),
                   borderColor: 'transparent',
                   backgroundColor: 'rgba(48,209,88,0.08)',
                   pointRadius: 0,
                   pointHoverRadius: 0,
                   tension: 0.3,
                   fill: '-1',
-                  yAxisID: 'y2',
+                  yAxisID: _getAxisId('ebay'),
                 });
               }
             }
@@ -3270,7 +3488,7 @@
                 pointStyle: 'rectRot',
                 tension: 0.3,
                 fill: false,
-                yAxisID: 'y2',
+                yAxisID: _getAxisId('ebay'),
               });
             }
             if (showMedian) {
@@ -3287,42 +3505,105 @@
                 pointStyle: 'triangle',
                 tension: 0.3,
                 fill: false,
-                yAxisID: 'y2',
+                yAxisID: _getAxisId('ebay'),
               });
             }
-            // 2-sigma band per product (always shown when eBay is on)
+            // Rolling 2-sigma band per product (always shown when eBay is on)
             {
-              const validPrices = history.filter(d => d.avg_price !== null).map(d => d.avg_price);
-              if (validPrices.length >= 2) {
-                const mean = validPrices.reduce((a,b) => a+b, 0) / validPrices.length;
-                const variance = validPrices.reduce((a,b) => a + (b - mean) ** 2, 0) / validPrices.length;
-                const sigma2 = Math.sqrt(variance) * 2;
-                const upperData = history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price + sigma2 }));
-                const lowerData = history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price - sigma2 }));
+              const meanPoints = history.filter(d => d.avg_price !== null);
+              if (meanPoints.length >= 2) {
+                const bands = _rollingBands(meanPoints.map(d => ({ t: new Date(d.timestamp).getTime(), v: d.avg_price })));
                 datasets.push({
                   label: `${productName} +2\u03c3`,
-                  data: upperData,
+                  data: bands.map(b => ({ x: new Date(b.t), y: b.upper })),
                   borderColor: 'transparent',
                   backgroundColor: color + '10',
                   pointRadius: 0,
                   pointHoverRadius: 0,
                   tension: 0.3,
                   fill: '+1',
-                  yAxisID: 'y2',
+                  yAxisID: _getAxisId('ebay'),
                 });
                 datasets.push({
                   label: `${productName} -2\u03c3`,
-                  data: lowerData,
+                  data: bands.map(b => ({ x: new Date(b.t), y: b.lower })),
                   borderColor: 'transparent',
                   backgroundColor: color + '10',
                   pointRadius: 0,
                   pointHoverRadius: 0,
                   tension: 0.3,
                   fill: '-1',
-                  yAxisID: 'y2',
+                  yAxisID: _getAxisId('ebay'),
                 });
               }
             }
+          });
+        }
+      }
+
+      // --- eBay sales overlay (bar chart) ---
+      const showEbaySales = document.getElementById('showEbaySales').checked && DATA.ebay_sales;
+      if (showEbaySales) {
+        const salesData = DATA.ebay_sales.data;
+        // Match selected products to eBay sales products
+        const salesProducts = _prods.filter(p => salesData[p] && salesData[p].length > 0);
+        if (salesProducts.length === 0) {
+          // Try all products if none match selection
+          const allSalesProds = Object.keys(salesData);
+          // Aggregate all products into a single daily total
+          const dailyTotals = {};
+          for (const prod of allSalesProds) {
+            for (const d of salesData[prod]) {
+              if (!dailyTotals[d.date]) dailyTotals[d.date] = { sold: 0, revenue: 0 };
+              dailyTotals[d.date].sold += d.sold;
+              dailyTotals[d.date].revenue += d.revenue;
+            }
+          }
+          const points = Object.entries(dailyTotals)
+            .sort((a,b) => a[0].localeCompare(b[0]))
+            .map(([date, v]) => ({ x: new Date(date + 'T12:00:00'), y: v.sold }));
+          if (points.length > 0) {
+            datasets.push({
+              label: 'eBay Est. Sales (all)',
+              type: 'bar',
+              data: points,
+              backgroundColor: '#bf5af240',
+              borderColor: '#bf5af2',
+              borderWidth: 1,
+              barThickness: Math.max(4, Math.min(20, (chartEl.clientWidth - 100) / points.length * 0.6)),
+              yAxisID: _getAxisId('ebaySales'),
+            });
+          }
+        } else if (salesProducts.length === 1) {
+          const history = salesData[salesProducts[0]];
+          const points = history.map(d => ({ x: new Date(d.date + 'T12:00:00'), y: d.sold }));
+          datasets.push({
+            label: 'eBay Est. Sales',
+            type: 'bar',
+            data: points,
+            backgroundColor: '#bf5af240',
+            borderColor: '#bf5af2',
+            borderWidth: 1,
+            barThickness: Math.max(4, Math.min(20, (chartEl.clientWidth - 100) / points.length * 0.6)),
+            yAxisID: _getAxisId('ebaySales'),
+          });
+        } else {
+          // Multiple selected products: stacked or separate bars
+          salesProducts.forEach((prod, idx) => {
+            const history = salesData[prod];
+            if (!history || history.length === 0) return;
+            const color = PRODUCT_COLORS[idx % PRODUCT_COLORS.length];
+            const points = history.map(d => ({ x: new Date(d.date + 'T12:00:00'), y: d.sold }));
+            datasets.push({
+              label: `${prod} (Sales)`,
+              type: 'bar',
+              data: points,
+              backgroundColor: color + '50',
+              borderColor: color,
+              borderWidth: 1,
+              barThickness: Math.max(3, Math.min(14, (chartEl.clientWidth - 100) / points.length * 0.4)),
+              yAxisID: _getAxisId('ebaySales'),
+            });
           });
         }
       }
@@ -3362,7 +3643,7 @@
               pointBackgroundColor: cityColor,
               stepped: 'before',
               fill: false,
-              yAxisID: 'y2',
+              yAxisID: _getAxisId('leadTimes'),
             });
           }
         });
@@ -3394,7 +3675,7 @@
               pointHoverRadius: 3,
               stepped: 'before',
               fill: false,
-              yAxisID: 'y2',
+              yAxisID: _getAxisId('leadTimes'),
             });
           }
         }
@@ -3434,7 +3715,7 @@
               pointBackgroundColor: cityColor,
               stepped: 'before',
               fill: false,
-              yAxisID: 'y2',
+              yAxisID: _getAxisId('deliveryTimes'),
             });
           }
         });
@@ -3466,63 +3747,90 @@
               pointHoverRadius: 3,
               stepped: 'before',
               fill: false,
-              yAxisID: 'y2',
+              yAxisID: _getAxisId('deliveryTimes'),
             });
           }
         }
       }
 
-      // Compute y2 axis max from eBay/lead time data
-      let y2Max = 100;
-      let y2Config;
-      if (showEbay) {
-        const ebayYValues = datasets
-          .filter(ds => ds.yAxisID === 'y2')
+      // --- Dynamic multi-axis scale builder ---
+      const tc = getThemeColors();
+      const _scalesConfig = { x: _makeTimeAxisConfig({ max: new Date() }) };
+
+      // Collect which (side, unit) combos are actually used by active datasets
+      const _usedAxes = new Set();
+      datasets.forEach(ds => { if (ds.yAxisID) _usedAxes.add(ds.yAxisID); });
+
+      // Count how many axes per side (for grid drawing decisions)
+      let leftCount = 0, rightCount = 0;
+      _usedAxes.forEach(id => { if (id.startsWith('y_left_')) leftCount++; else rightCount++; });
+
+      // Track how many axes stacked per side (for weight/offset)
+      let leftIdx = 0, rightIdx = 0;
+
+      _usedAxes.forEach(axisId => {
+        const isLeft = axisId.startsWith('y_left_');
+        const unit = axisId.split('_').pop(); // pct, dollars, days
+        const position = isLeft ? 'left' : 'right';
+        const sameCount = isLeft ? leftCount : rightCount;
+        const stackIdx = isLeft ? leftIdx++ : rightIdx++;
+
+        // Gather values for auto-ranging
+        const yVals = datasets.filter(ds => ds.yAxisID === axisId)
           .flatMap(ds => ds.data.map(pt => pt.y))
           .filter(v => v !== null && v !== undefined);
-        if (ebayYValues.length > 0) {
-          const rawMax = Math.max(...ebayYValues);
-          y2Max = Math.ceil(rawMax / 100) * 100;
-          if (y2Max < rawMax * 1.1) y2Max = Math.ceil(rawMax * 1.1 / 50) * 50;
-        }
-        y2Config = {
-          position: 'right',
-          min: 0,
-          max: y2Max,
-          grid: { drawOnChartArea: !showAvailability, color: getThemeColors().grid },
-          ticks: { color: '#30d158', callback: v => '$' + Math.round(v).toLocaleString() },
-          title: { display: true, text: 'eBay Price ($)', color: '#30d158', font: { size: 12 } }
-        };
-      } else if (showLeadTimes || showDeliveryTimes) {
-        const daysYValues = datasets.filter(ds => ds.yAxisID === 'y2').flatMap(ds => ds.data.map(pt => pt.y)).filter(v => v != null);
-        y2Max = daysYValues.length > 0 ? Math.max(2, Math.ceil(Math.max(...daysYValues) + 0.5)) : 2;
-        const axisColor = showLeadTimes && showDeliveryTimes ? '#aaa' : showDeliveryTimes ? '#ff9f0a' : '#64d2ff';
-        const axisLabel = showLeadTimes && showDeliveryTimes ? 'Lead / Delivery (days)' : showDeliveryTimes ? 'Delivery Time (days)' : 'Avg Lead Time (days)';
-        y2Config = {
-          position: 'right',
-          min: -0.08,
-          max: y2Max,
-          grid: { drawOnChartArea: !showAvailability, color: getThemeColors().grid },
-          ticks: { color: axisColor, callback: v => v < 0 ? '' : v.toFixed(1) + 'd' },
-          title: { display: true, text: axisLabel, color: axisColor, font: { size: 12 } }
-        };
-      } else {
-        y2Config = {
-          position: 'right',
-          min: 0, max: 100,
-          grid: { drawOnChartArea: false },
-          ticks: { color: getThemeColors().tick, callback: v => Math.round(v) + '%' }
-        };
-      }
 
-      // Hide left y-axis when availability is off
-      const yConfig = {
-        position: 'left',
-        min: 0, max: 100,
-        display: showAvailability,
-        grid: { color: getThemeColors().grid },
-        ticks: { color: getThemeColors().tick, callback: v => Math.round(v) + '%' }
-      };
+        let min, max, tickCb, titleText, titleColor, tickColor;
+        if (unit === 'pct') {
+          min = 0; max = 100;
+          tickCb = v => Math.round(v) + '%';
+          titleText = 'Availability (%)';
+          titleColor = tc.tick;
+          tickColor = tc.tick;
+        } else if (unit === 'dollars') {
+          min = 0;
+          if (yVals.length > 0) {
+            const rawMax = Math.max(...yVals);
+            max = Math.ceil(rawMax / 100) * 100;
+            if (max < rawMax * 1.1) max = Math.ceil(rawMax * 1.1 / 50) * 50;
+          } else {
+            max = 100;
+          }
+          tickCb = v => '$' + Math.round(v).toLocaleString();
+          titleText = 'eBay Price ($)';
+          titleColor = '#30d158';
+          tickColor = '#30d158';
+        } else if (unit === 'count') {
+          min = 0;
+          max = yVals.length > 0 ? Math.max(5, Math.ceil(Math.max(...yVals) * 1.2)) : 10;
+          tickCb = v => v < 0 ? '' : Math.round(v).toString();
+          titleText = 'Est. Sales (items/day)';
+          titleColor = '#bf5af2';
+          tickColor = '#bf5af2';
+        } else { // days
+          min = -0.08;
+          max = yVals.length > 0 ? Math.max(2, Math.ceil(Math.max(...yVals) + 0.5)) : 2;
+          tickCb = v => v < 0 ? '' : v.toFixed(1) + 'd';
+          // Determine color from which day sources are active
+          const ltOn = showLeadTimes, dtOn = showDeliveryTimes;
+          titleColor = ltOn && dtOn ? '#aaa' : dtOn ? '#ff9f0a' : '#64d2ff';
+          tickColor = titleColor;
+          titleText = ltOn && dtOn ? 'Lead / Delivery (days)' : dtOn ? 'Delivery Time (days)' : 'Avg Lead Time (days)';
+        }
+
+        // First axis on each side draws grid, others don't
+        const drawGrid = stackIdx === 0;
+
+        _scalesConfig[axisId] = {
+          position,
+          min, max,
+          display: true,
+          grid: { drawOnChartArea: drawGrid, color: tc.grid },
+          ticks: { color: tickColor, callback: tickCb },
+          title: { display: true, text: titleText, color: titleColor, font: { size: 12 } },
+          ...(sameCount > 1 && stackIdx > 0 ? { weight: stackIdx } : {})
+        };
+      });
 
       const highlightPlugin = makeHighlightPlugin('mainChart');
       mainChart = new Chart(ctx, {
@@ -3537,7 +3845,7 @@
           plugins: {
             legend: {
               position: 'top',
-              labels: { color: getThemeColors().tickLabel, usePointStyle: true, pointStyle: 'circle', padding: 16 },
+              labels: { color: tc.tickLabel, usePointStyle: true, pointStyle: 'circle', padding: 16 },
               onClick: (e, legendItem, legend) => {
                 // Clicking a legend item highlights that dataset
                 highlightPlugin._highlight(legend.chart, legendItem.datasetIndex);
@@ -3545,11 +3853,7 @@
             },
             tooltip: { enabled: false }
           },
-          scales: {
-            x: _makeTimeAxisConfig({ max: new Date() }),
-            y: yConfig,
-            y2: y2Config
-          }
+          scales: _scalesConfig
         },
         plugins: [highlightPlugin, crosshairTooltipPlugin, dragMeasurePlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin, nowLinePlugin]
       });
@@ -3969,9 +4273,10 @@
       let csv = 'Timestamp,' + selectedCities.map(c => `${c} (${getCityStoreCount(c)})`).join(',') + ',Weighted Avg\n';
 
       snapshots.forEach((s, si) => {
-        const ts = s.timestamp.replace('T', ' ').slice(0, 19);
-        html += `<tr><td style="white-space:nowrap;color:var(--text-label);">${ts}</td>`;
-        let csvRow = ts;
+        const tsDisplay = formatMapTimestamp(s.timestamp);
+        const tsCsv = toLocalDatetimeStr(new Date(s.timestamp).getTime());
+        html += `<tr><td style="white-space:nowrap;color:var(--text-label);">${tsDisplay}</td>`;
+        let csvRow = tsCsv;
 
         const _isLight = document.documentElement.getAttribute('data-theme') === 'light';
         let wSum = 0, wTotal = 0;
@@ -4575,18 +4880,16 @@
             const now = Date.now();
             _cycleTimeStart = now - hours * 3600000;
             _cycleTimeEnd = now;
-            const fmt = d => new Date(d).toISOString().slice(0, 16);
-            document.getElementById('cycleTimeStart').value = fmt(_cycleTimeStart);
-            document.getElementById('cycleTimeEnd').value = fmt(_cycleTimeEnd);
+            document.getElementById('cycleTimeStart').value = toLocalDatetimeStr(_cycleTimeStart);
+            document.getElementById('cycleTimeEnd').value = toLocalDatetimeStr(_cycleTimeEnd);
           }
           renderCycles();
         });
       });
       // Populate datetime inputs with 2w default
       if (_cycleTimeStart && _cycleTimeEnd) {
-        const fmt = d => new Date(d).toISOString().slice(0, 16);
-        document.getElementById('cycleTimeStart').value = fmt(_cycleTimeStart);
-        document.getElementById('cycleTimeEnd').value = fmt(_cycleTimeEnd);
+        document.getElementById('cycleTimeStart').value = toLocalDatetimeStr(_cycleTimeStart);
+        document.getElementById('cycleTimeEnd').value = toLocalDatetimeStr(_cycleTimeEnd);
       }
       // Min cycles filter
       document.getElementById('cycleMinCycles').addEventListener('change', () => renderCycles());
@@ -4679,7 +4982,7 @@
 
       // Stats
       const hrs = cycles.map(c => c.hours);
-      const sameDayN = cycles.filter(c => c.restock.slice(0, 10) === c.sellout.slice(0, 10)).length;
+      const sameDayN = cycles.filter(c => new Date(c.restock).toLocaleDateString() === new Date(c.sellout).toLocaleDateString()).length;
       const statsEl = document.getElementById('cyclesStats');
       statsEl.innerHTML = `
         <div class="cycle-stat"><div class="stat-val">${cycles.length}</div><div class="stat-lbl">Total Cycles</div></div>
@@ -4783,8 +5086,8 @@
         th += `<tr><td>${c.store_name} <span style="color:var(--text-dim);font-size:11px;">${c.city ? c.city + ', ' + c.state : ''}</span></td>`;
         th += `<td style="font-size:12px;">${c.region || '—'}</td>`;
         if (isAllProd) th += `<td style="color:var(--text-muted);font-size:12px;">${c.product}</td>`;
-        th += `<td style="white-space:nowrap;font-size:12px;">${c.restock.replace('T',' ').slice(0,16)}</td>`;
-        th += `<td style="white-space:nowrap;font-size:12px;">${c.sellout.replace('T',' ').slice(0,16)}</td>`;
+        th += `<td style="white-space:nowrap;font-size:12px;">${formatMapTimestamp(c.restock)}</td>`;
+        th += `<td style="white-space:nowrap;font-size:12px;">${formatMapTimestamp(c.sellout)}</td>`;
         const wallNote = c.wall_hours && c.wall_hours !== c.hours ? ` <span style="color:var(--text-dimmer);font-size:10px;">(${formatDuration(c.wall_hours)} wall)</span>` : '';
         th += `<td style="color:${clr};font-weight:600;">${formatDuration(c.hours)}${wallNote}</td></tr>`;
       });
@@ -4944,8 +5247,8 @@
       if (!container) return;
 
       leafletMap = L.map(container, {
-        center: [39.5, -98.5],
-        zoom: 5,
+        center: [41.0, -73.5],
+        zoom: 8,
         zoomControl: true,
       });
 
@@ -5084,28 +5387,39 @@
       let _mapAnimating = false;
       let _mapAnimTimer = null;
       const playBtn = document.getElementById('mapPlayBtn');
+
+      function _startMapAnim() {
+        if (_mapAnimating) return;
+        _mapAnimating = true;
+        playBtn.innerHTML = '&#9646;&#9646;';
+        playBtn.title = 'Pause animation';
+        const totalFrames = max + 1;
+        const intervalMs = Math.max(50, Math.floor(10000 / totalFrames));
+        if (parseInt(slider.value) >= max) slider.value = 0;
+        _mapAnimTimer = setInterval(() => {
+          let idx = parseInt(slider.value) + 1;
+          if (idx > max) idx = 0;
+          slider.value = idx;
+          document.getElementById('mapTimeLabel').textContent = formatMapTimestamp(snaps[idx].t);
+          updateMapOverlay();
+        }, intervalMs);
+      }
+
+      function _stopMapAnim() {
+        if (!_mapAnimating) return;
+        clearInterval(_mapAnimTimer);
+        _mapAnimating = false;
+        playBtn.innerHTML = '&#9654;';
+        playBtn.title = 'Animate through time';
+      }
+
       playBtn.addEventListener('click', () => {
-        if (_mapAnimating) {
-          clearInterval(_mapAnimTimer);
-          _mapAnimating = false;
-          playBtn.innerHTML = '&#9654;';
-          playBtn.title = 'Animate through time';
-        } else {
-          _mapAnimating = true;
-          playBtn.innerHTML = '&#9646;&#9646;';
-          playBtn.title = 'Pause animation';
-          const totalFrames = max + 1;
-          const intervalMs = Math.max(50, Math.floor(10000 / totalFrames));
-          if (parseInt(slider.value) >= max) slider.value = 0;
-          _mapAnimTimer = setInterval(() => {
-            let idx = parseInt(slider.value) + 1;
-            if (idx > max) idx = 0;
-            slider.value = idx;
-            document.getElementById('mapTimeLabel').textContent = formatMapTimestamp(snaps[idx].t);
-            updateMapOverlay();
-          }, intervalMs);
-        }
+        if (_mapAnimating) _stopMapAnim();
+        else _startMapAnim();
       });
+
+      // Auto-play on first load
+      setTimeout(() => _startMapAnim(), 200);
 
       // Delta controls
       const dStart = document.getElementById('mapDeltaStart');
