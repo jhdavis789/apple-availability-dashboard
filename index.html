@@ -903,7 +903,17 @@
         </div>
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;text-align:center;">Zoom in to view store-by-store information</p>
-      <div id="mapContainer"></div>
+      <div id="mapWrapper" style="position:relative;">
+        <div id="mapContainer"></div>
+        <div id="mapPauseOverlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:1000;cursor:pointer;transition:opacity 0.3s;">
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;">
+              <svg width="28" height="32" viewBox="0 0 28 32" fill="none"><polygon points="4,0 28,16 4,32" fill="white"/></svg>
+            </div>
+            <span style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:500;">Click to resume</span>
+          </div>
+        </div>
+      </div>
       <details style="margin-top:12px;">
         <summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">Show data table</summary>
         <div style="overflow-x:auto;margin-top:8px;">
@@ -5388,9 +5398,23 @@
       let _mapAnimTimer = null;
       const playBtn = document.getElementById('mapPlayBtn');
 
+      const pauseOverlay = document.getElementById('mapPauseOverlay');
+
+      function _showPauseOverlay() {
+        pauseOverlay.style.display = 'block';
+        pauseOverlay.style.opacity = '0';
+        requestAnimationFrame(() => { pauseOverlay.style.opacity = '1'; });
+      }
+
+      function _hidePauseOverlay() {
+        pauseOverlay.style.opacity = '0';
+        setTimeout(() => { pauseOverlay.style.display = 'none'; }, 300);
+      }
+
       function _startMapAnim() {
         if (_mapAnimating) return;
         _mapAnimating = true;
+        _hidePauseOverlay();
         playBtn.innerHTML = '&#9646;&#9646;';
         playBtn.title = 'Pause animation';
         const totalFrames = max + 1;
@@ -5405,21 +5429,31 @@
         }, intervalMs);
       }
 
-      function _stopMapAnim() {
+      function _stopMapAnim(showOverlay) {
         if (!_mapAnimating) return;
         clearInterval(_mapAnimTimer);
         _mapAnimating = false;
         playBtn.innerHTML = '&#9654;';
         playBtn.title = 'Animate through time';
+        if (showOverlay) _showPauseOverlay();
       }
 
       playBtn.addEventListener('click', () => {
-        if (_mapAnimating) _stopMapAnim();
+        if (_mapAnimating) _stopMapAnim(false);
         else _startMapAnim();
       });
 
-      // Auto-play on first load
-      setTimeout(() => _startMapAnim(), 200);
+      pauseOverlay.addEventListener('click', () => {
+        _startMapAnim();
+      });
+
+      // Auto-play on first load, then pause with overlay after 3s
+      setTimeout(() => {
+        _startMapAnim();
+        setTimeout(() => {
+          if (_mapAnimating) _stopMapAnim(true);
+        }, 3000);
+      }, 200);
 
       // Delta controls
       const dStart = document.getElementById('mapDeltaStart');
