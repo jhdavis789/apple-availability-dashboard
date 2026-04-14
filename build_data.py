@@ -869,7 +869,8 @@ def main():
             downsampled.append(snap)
             last_kept_hour = bucket
 
-    print(f"Downsampled {len(snapshots)} → {len(downsampled)} snapshots")
+    raw_snapshot_count = len(snapshots)
+    print(f"Downsampled {raw_snapshot_count} → {len(downsampled)} snapshots")
     snapshots = downsampled
 
     # Load eBay price data and downsample older points
@@ -933,7 +934,7 @@ def main():
 
     output = {
         "generated_at": datetime.now().isoformat(),
-        "total_snapshots": len(snapshots),
+        "total_snapshots": raw_snapshot_count,
         "all_models": sorted(all_models),
         "all_cities": sorted(all_cities),
         "snapshots": snapshots,
