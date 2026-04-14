@@ -950,6 +950,70 @@
       };
     }
 
+    /** LTTB (Largest-Triangle-Three-Buckets) downsampling for chart data */
+    function lttbDownsample(data, threshold) {
+      if (data.length <= threshold) return data;
+      const out = [data[0]];
+      const bucketSize = (data.length - 2) / (threshold - 2);
+      let a = 0;
+      for (let i = 1; i < threshold - 1; i++) {
+        const rangeStart = Math.floor((i - 1) * bucketSize) + 1;
+        const rangeEnd = Math.min(Math.floor(i * bucketSize) + 1, data.length - 1);
+        const nextStart = Math.floor(i * bucketSize) + 1;
+        const nextEnd = Math.min(Math.floor((i + 1) * bucketSize) + 1, data.length - 1);
+        let avgX = 0, avgY = 0, count = 0;
+        for (let j = nextStart; j <= nextEnd; j++) {
+          avgX += data[j].x.getTime(); avgY += data[j].y; count++;
+        }
+        avgX /= count; avgY /= count;
+        let maxArea = -1, maxIdx = rangeStart;
+        const ax = data[a].x.getTime(), ay = data[a].y;
+        for (let j = rangeStart; j <= rangeEnd; j++) {
+          const area = Math.abs((ax - avgX) * (data[j].y - ay) - (ax - data[j].x.getTime()) * (avgY - ay));
+          if (area > maxArea) { maxArea = area; maxIdx = j; }
+        }
+        out.push(data[maxIdx]);
+        a = maxIdx;
+      }
+      out.push(data[data.length - 1]);
+      return out;
+    }
+
+    /** Format number with commas for display */
+    function fmt(n) { return n.toLocaleString(); }
+
+    let storeMapLoading = false;
+    let storeMapLoaded = false;
+
+    /** Lazy-load store_map.json and expand compact indexed format */
+    async function ensureStoreMap() {
+      if (storeMapLoaded || storeMapLoading) return storeMapLoaded;
+      storeMapLoading = true;
+      try {
+        const resp = await fetch('store_map.json');
+        const sm = await resp.json();
+        // Expand compact format: product arrays → product name dicts
+        if (sm.products && sm.snapshots) {
+          const prods = sm.products;
+          for (const snap of sm.snapshots) {
+            const expanded = {};
+            for (const [storeId, vals] of Object.entries(snap.a)) {
+              const d = {};
+              for (let i = 0; i < vals.length; i++) { d[prods[i]] = vals[i]; }
+              expanded[storeId] = d;
+            }
+            snap.a = expanded;
+          }
+        }
+        DATA.store_map = sm;
+        storeMapLoaded = true;
+      } catch (e) {
+        console.warn('Failed to load store_map.json:', e);
+      }
+      storeMapLoading = false;
+      return storeMapLoaded;
+    }
+
     async function loadData() {
       const resp = await fetch('data.json');
       DATA = await resp.json();
@@ -984,6 +1048,9 @@
       render();
       document.getElementById('loading').style.display = 'none';
       document.getElementById('dashboard').style.display = 'flex';
+
+      // Preload store map in the background
+      ensureStoreMap();
     }
 
     function updateEbaySubToggles() {
@@ -1465,13 +1532,10 @@
         document.getElementById('heatmapCard').style.display = 'block';
         renderHeatmap(snapshots, selectedCities, filterZeros, blipSet);
         renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
-        // Initialize & update map
-        if (DATA && DATA.store_map) {
-          setTimeout(() => {
-            initMap();
-            updateMapOverlay();
-          }, 50);
-        }
+        // Lazy-load store map, then initialize & update map
+        ensureStoreMap().then(ok => {
+          if (ok) setTimeout(() => { initMap(); updateMapOverlay(); }, 50);
+        });
       }
 
       // City Averages now uses the same time-filtered snapshots as the main chart.
@@ -1514,16 +1578,16 @@
       statsRow.innerHTML = `
         <div class="stat-box">
           <div class="stat-label">Snapshots</div>
-          <div class="stat-value">${snapshots.length}</div>
+          <div class="stat-value">${fmt(snapshots.length)}</div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Data Points</div>
-          <div class="stat-value">${validValues.length}</div>
+          <div class="stat-value">${fmt(validValues.length)}</div>
         </div>
       `;
 
       excludedInfo.textContent = excludedPoints > 0
-        ? `${excludedPoints} data points excluded by filters (ERR, N/A, error snapshots with 0 stores, or isolated single-call 0% values)`
+        ? `${fmt(excludedPoints)} data points excluded by filters (ERR, N/A, error snapshots with 0 stores, or isolated single-call 0% values)`
         : '';
     }
 
@@ -1591,9 +1655,10 @@
           });
 
           // Only keep points with actual data — no interpolation
-          const points = rawPoints
+          let points = rawPoints
             .filter(pt => pt.y !== null)
             .map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
+          points = lttbDownsample(points, 200);
 
           if (points.length > 0) {
             datasets.push({
@@ -1602,9 +1667,9 @@
               borderColor: CITY_COLORS[city] || '#888',
               backgroundColor: (CITY_COLORS[city] || '#888') + '20',
               borderWidth: 2,
-              pointRadius: 3,
+              pointRadius: points.length > 100 ? 0 : 3,
               pointHoverRadius: 5,
-              tension: 0.3,
+              tension: 0,
               fill: false
             });
           }
@@ -1623,14 +1688,14 @@
           if (avgPoints.length > 0) {
             datasets.push({
               label: 'Weighted Avg',
-              data: avgPoints,
+              data: lttbDownsample(avgPoints, 200),
               borderColor: '#ffffff',
               backgroundColor: '#ffffff20',
               borderWidth: 3,
               borderDash: [6, 3],
               pointRadius: 0,
               pointHoverRadius: 5,
-              tension: 0.3,
+              tension: 0,
               fill: false
             });
           }
@@ -1657,7 +1722,7 @@
               borderDash: [3, 3],
               pointRadius: 0,
               pointHoverRadius: 5,
-              tension: 0.3,
+              tension: 0,
               fill: false
             });
           }
@@ -1701,12 +1766,12 @@
         modelStats.forEach((m, sortIdx) => {
           datasets.push({
             label: `${m.model} (${m.overallAvg.toFixed(0)}%)`,
-            data: m.points,
+            data: lttbDownsample(m.points, 150),
             borderColor: PRODUCT_COLORS[sortIdx % PRODUCT_COLORS.length],
             borderWidth: 2,
-            pointRadius: 2,
+            pointRadius: 0,
             pointHoverRadius: 5,
-            tension: 0.3,
+            tension: 0,
             fill: false
           });
         });
@@ -1728,17 +1793,18 @@
           // Single product: look for matching eBay product
           const ebayHistory = ebayData[selectedProduct];
           if (ebayHistory && ebayHistory.length > 0) {
+            const meanPts = ebayHistory.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price }));
+            const medPts = ebayHistory.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price }));
             if (showMean) {
               datasets.push({
                 label: 'eBay Mean Price',
-                data: ebayHistory.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price })),
+                data: lttbDownsample(meanPts, 150),
                 borderColor: '#30d158',
                 backgroundColor: '#30d15820',
                 borderWidth: 2.5,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-                pointStyle: 'rectRot',
-                tension: 0.3,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                tension: 0,
                 fill: false,
                 yAxisID: 'y2',
               });
@@ -1746,15 +1812,14 @@
             if (showMedian) {
               datasets.push({
                 label: 'eBay Median Price',
-                data: ebayHistory.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price })),
+                data: lttbDownsample(medPts, 150),
                 borderColor: '#ff9f0a',
                 backgroundColor: '#ff9f0a20',
                 borderWidth: 2,
                 borderDash: [6, 3],
-                pointRadius: 5,
-                pointHoverRadius: 7,
-                pointStyle: 'triangle',
-                tension: 0.3,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                tension: 0,
                 fill: false,
                 yAxisID: 'y2',
               });
@@ -1767,18 +1832,19 @@
             const history = ebayData[productName];
             if (!history || history.length === 0) return;
             const color = PRODUCT_COLORS[idx % PRODUCT_COLORS.length];
+            const meanPts = history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price }));
+            const medPts = history.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price }));
             if (showMean) {
               datasets.push({
                 label: `${productName} (eBay Mean)`,
-                data: history.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price })),
+                data: lttbDownsample(meanPts, 100),
                 borderColor: color,
                 backgroundColor: color + '20',
                 borderWidth: 2,
                 borderDash: [8, 4],
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                pointStyle: 'rectRot',
-                tension: 0.3,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                tension: 0,
                 fill: false,
                 yAxisID: 'y2',
               });
@@ -1786,15 +1852,14 @@
             if (showMedian) {
               datasets.push({
                 label: `${productName} (eBay Median)`,
-                data: history.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price })),
+                data: lttbDownsample(medPts, 100),
                 borderColor: color,
                 backgroundColor: color + '20',
                 borderWidth: 1.5,
                 borderDash: [3, 3],
-                pointRadius: 3,
+                pointRadius: 0,
                 pointHoverRadius: 5,
-                pointStyle: 'triangle',
-                tension: 0.3,
+                tension: 0,
                 fill: false,
                 yAxisID: 'y2',
               });
@@ -2987,10 +3052,10 @@
         const totalDatapoints = numStores * numSnapshots;
         const statsEl = document.getElementById('mapStats');
         statsEl.innerHTML =
-          `<span><strong>${numCities}</strong> cities</span>` +
-          `<span><strong>${numStores}</strong> stores</span>` +
-          `<span><strong>${numSnapshots}</strong> snapshots</span>` +
-          `<span><strong>${totalDatapoints.toLocaleString()}</strong> data points</span>`;
+          `<span><strong>${fmt(numCities)}</strong> cities</span>` +
+          `<span><strong>${fmt(numStores)}</strong> stores</span>` +
+          `<span><strong>${fmt(numSnapshots)}</strong> snapshots</span>` +
+          `<span><strong>${fmt(totalDatapoints)}</strong> data points</span>`;
       }
     }
 
