@@ -687,7 +687,11 @@
           <button class="map-mode-btn" data-mode="delta">Delta</button>
         </div>
         <div id="mapSnapshotControls" class="map-time-slider">
-          <div class="map-time-label" id="mapTimeLabel" style="font-weight:700;text-decoration:underline;font-size:13px;margin-bottom:4px;">Latest</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <div class="map-time-label" id="mapTimeLabel" style="font-weight:700;text-decoration:underline;font-size:13px;flex:1;">Latest</div>
+            <button id="mapPlayBtn" style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:6px;padding:4px 12px;cursor:pointer;font-size:13px;" title="Play/Pause">&#9654;</button>
+            <button id="mapSpeedBtn" style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text-muted);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;" title="Playback speed">1x</button>
+          </div>
           <input type="range" id="mapTimeSlider" min="0" max="100" value="100">
           <div id="mapTimeTicks" style="display:flex;justify-content:space-between;position:relative;height:14px;"></div>
         </div>
@@ -3098,6 +3102,55 @@
         document.getElementById('mapTimeLabel').textContent = formatMapTimestamp(snaps[idx].t);
         updateMapOverlay();
       });
+
+      // Play/pause animation
+      let mapPlayInterval = null;
+      let mapPlaySpeed = 1; // 1x, 2x, 4x
+      const speeds = [1, 2, 4];
+      const playBtn = document.getElementById('mapPlayBtn');
+      const speedBtn = document.getElementById('mapSpeedBtn');
+
+      function mapPlayTick() {
+        let idx = parseInt(slider.value) + 1;
+        if (idx > max) idx = 0; // loop
+        slider.value = idx;
+        document.getElementById('mapTimeLabel').textContent = formatMapTimestamp(snaps[idx].t);
+        updateMapOverlay();
+      }
+
+      function startMapPlay() {
+        if (mapPlayInterval) return;
+        const ms = Math.max(80, 400 / mapPlaySpeed);
+        mapPlayInterval = setInterval(mapPlayTick, ms);
+        playBtn.innerHTML = '&#9646;&#9646;'; // pause icon
+        playBtn.style.borderColor = 'var(--accent)';
+        playBtn.style.color = 'var(--accent)';
+      }
+
+      function stopMapPlay() {
+        if (mapPlayInterval) { clearInterval(mapPlayInterval); mapPlayInterval = null; }
+        playBtn.innerHTML = '&#9654;'; // play icon
+        playBtn.style.borderColor = 'var(--input-border)';
+        playBtn.style.color = 'var(--text)';
+      }
+
+      playBtn.addEventListener('click', () => {
+        if (mapPlayInterval) stopMapPlay(); else startMapPlay();
+      });
+
+      speedBtn.addEventListener('click', () => {
+        const curIdx = speeds.indexOf(mapPlaySpeed);
+        mapPlaySpeed = speeds[(curIdx + 1) % speeds.length];
+        speedBtn.textContent = mapPlaySpeed + 'x';
+        if (mapPlayInterval) {
+          stopMapPlay();
+          startMapPlay();
+        }
+      });
+
+      // Stop animation when user drags slider manually
+      slider.addEventListener('mousedown', stopMapPlay);
+      slider.addEventListener('touchstart', stopMapPlay);
 
       // Delta controls
       const dStart = document.getElementById('mapDeltaStart');
