@@ -1575,13 +1575,20 @@
       const min = validValues.length ? Math.min(...validValues) : 'N/A';
       const max = validValues.length ? Math.max(...validValues) : 'N/A';
 
+      const rawSnapshots = DATA.total_snapshots || snapshots.length;
+      const storeCount = DATA.store_map ? DATA.store_map.stores.length : 140;
+      const rawObservations = rawSnapshots * storeCount * DATA.all_models.length;
       statsRow.innerHTML = `
         <div class="stat-box">
-          <div class="stat-label">Snapshots</div>
-          <div class="stat-value">${fmt(snapshots.length)}</div>
+          <div class="stat-label">Raw Snapshots</div>
+          <div class="stat-value">${fmt(rawSnapshots)}</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label">Data Points</div>
+          <div class="stat-label">Observations</div>
+          <div class="stat-value">${fmt(rawObservations)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Displayed</div>
           <div class="stat-value">${fmt(validValues.length)}</div>
         </div>
       `;
