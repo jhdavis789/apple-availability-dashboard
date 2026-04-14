@@ -841,31 +841,98 @@ def main():
     for snap in snapshots:
         snap["products"] = [p for p in snap["products"] if p["model"] not in EXCLUDED_MODELS]
 
-    # Load eBay price data
+    # --- Downsample old snapshots to reduce data size ---
+    # Last 48h: full resolution, 2-7d: hourly, 7-30d: 4h, 30d+: 8h
+    now = datetime.now()
+    downsampled = []
+    last_kept_hour = None
+    for snap in snapshots:
+        try:
+            ts = datetime.fromisoformat(snap["timestamp"])
+        except Exception:
+            downsampled.append(snap)
+            continue
+        age_hours = (now - ts).total_seconds() / 3600
+        if age_hours <= 48:
+            bucket = None  # keep all
+        elif age_hours <= 168:  # 7 days
+            bucket = ts.strftime("%Y%m%d%H")  # hourly
+        elif age_hours <= 720:  # 30 days
+            bucket = ts.strftime("%Y%m%d") + str(ts.hour // 4)  # 4h
+        else:
+            bucket = ts.strftime("%Y%m%d") + str(ts.hour // 8)  # 8h
+
+        if bucket is None or bucket != last_kept_hour:
+            # Strip unnecessary fields
+            snap.pop("file", None)
+            snap.pop("file_type", None)
+            downsampled.append(snap)
+            last_kept_hour = bucket
+
+    print(f"Downsampled {len(snapshots)} → {len(downsampled)} snapshots")
+    snapshots = downsampled
+
+    # Load eBay price data and downsample older points
     ebay_prices = load_ebay_prices()
+    if ebay_prices and "data" in ebay_prices:
+        for prod, points in ebay_prices["data"].items():
+            if not points:
+                continue
+            recent = []
+            last_day = None
+            for pt in points:
+                ts_str = pt.get("timestamp", "")
+                try:
+                    ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00").replace("+00:00", ""))
+                    age_days = (now - ts).total_seconds() / 86400
+                except Exception:
+                    age_days = 0
+                if age_days <= 14:
+                    recent.append(pt)
+                else:
+                    day = ts_str[:10]
+                    if day != last_day:
+                        recent.append(pt)
+                        last_day = day
+            ebay_prices["data"][prod] = recent
+        total_pts = sum(len(v) for v in ebay_prices["data"].values())
+        print(f"eBay prices downsampled to {total_pts} points")
 
-    # Load per-store map data
+    # Load per-store map data → separate file with compact encoding
     store_map = load_store_map()
+    STORE_MAP_FILE = os.path.join(SCRIPT_DIR, "store_map.json")
+    if store_map:
+        sm_snaps = store_map.get("snapshots", [])
+        # Drop empty snapshots, keep every 2nd
+        sm_snaps = [s for s in sm_snaps if s.get("a") and any(len(v) > 0 for v in s["a"].values())]
+        sm_snaps = sm_snaps[::2]
 
-    # Load restock/sellout cycle data
-    cycle_data = load_cycles()
+        # Build product index for compact encoding
+        all_sm_products = set()
+        for snap in sm_snaps:
+            for store_avail in snap["a"].values():
+                all_sm_products.update(store_avail.keys())
+        product_index = sorted(all_sm_products)
 
-    # Load lead time data from raw API responses
-    lead_times = load_lead_times()
+        # Convert {product_name: 0|1} → [0|1] array by index
+        for snap in sm_snaps:
+            compact_a = {}
+            for store_id, avail_dict in snap["a"].items():
+                compact_a[store_id] = [avail_dict.get(p, 0) for p in product_index]
+            snap["a"] = compact_a
 
-    # Load delivery time data from raw API responses
-    delivery_times = load_delivery_times()
-
-    # Site updated timestamp (file modification time of dashboard.html)
-    dashboard_html_path = os.path.join(SCRIPT_DIR, "dashboard.html")
-    site_updated_at = None
-    if os.path.exists(dashboard_html_path):
-        mtime = os.path.getmtime(dashboard_html_path)
-        site_updated_at = datetime.fromtimestamp(mtime).isoformat()
+        compact_store_map = {
+            "stores": store_map["stores"],
+            "products": product_index,
+            "snapshots": sm_snaps,
+        }
+        with open(STORE_MAP_FILE, "w") as f:
+            json.dump(compact_store_map, f, separators=(",", ":"))
+        sm_size = os.path.getsize(STORE_MAP_FILE)
+        print(f"Store map: {len(sm_snaps)} snapshots, {len(product_index)} products → {sm_size/1024/1024:.1f} MB")
 
     output = {
         "generated_at": datetime.now().isoformat(),
-        "site_updated_at": site_updated_at,
         "total_snapshots": len(snapshots),
         "all_models": sorted(all_models),
         "all_cities": sorted(all_cities),
@@ -873,25 +940,12 @@ def main():
     }
     if ebay_prices:
         output["ebay_prices"] = ebay_prices
-    if store_map:
-        # Subsample store_map snapshots to keep file size under GitHub's 100MB limit.
-        # Drop empty snapshots, then keep every 2nd for the map animation.
-        sm_snaps = store_map.get("snapshots", [])
-        sm_snaps = [s for s in sm_snaps if s.get("a") and any(len(v) > 0 for v in s["a"].values())]
-        sm_snaps = sm_snaps[::2]
-        store_map["snapshots"] = sm_snaps
-        output["store_map"] = store_map
-    if cycle_data:
-        output["cycles"] = cycle_data
-    if lead_times:
-        output["lead_times"] = lead_times
-    if delivery_times:
-        output["delivery_times"] = delivery_times
 
     with open(OUTPUT_FILE, "w") as f:
         json.dump(output, f, separators=(",", ":"))
 
-    print(f"Written {len(snapshots)} snapshots to {OUTPUT_FILE}")
+    core_size = os.path.getsize(OUTPUT_FILE)
+    print(f"Core data: {len(snapshots)} snapshots → {core_size/1024/1024:.1f} MB")
     print(f"Models: {sorted(all_models)}")
     print(f"Cities: {sorted(all_cities)}")
     if EXCLUDED_MODELS:
