@@ -140,50 +140,6 @@
     .theme-toggle:hover {
       border-color: var(--input-border-hover);
     }
-    .md-comp-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 10px;
-      color: var(--text-dimmer);
-      cursor: pointer;
-      margin-left: auto;
-      white-space: nowrap;
-      user-select: none;
-      padding: 1px 4px;
-      border-radius: 3px;
-    }
-    .md-comp-toggle:hover { color: var(--text-muted); }
-    .md-comp-toggle input { margin: 0; width: 12px; height: 12px; }
-    .settings-wrap { position: relative; display: inline-block; }
-    .settings-menu {
-      display: none; position: absolute; bottom: 100%; right: 0; margin-bottom: 6px;
-      background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px;
-      padding: 8px 12px; min-width: 160px; z-index: 90; box-shadow: 0 4px 12px rgba(0,0,0,.4);
-    }
-    .settings-menu.open { display: block; }
-    .settings-menu.dropdown-down { bottom: auto; top: 100%; margin-bottom: 0; margin-top: 6px; right: auto; left: 0; }
-    .settings-menu label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); cursor: pointer; padding: 4px 0; white-space: nowrap; }
-    .settings-menu label input { margin: 0; }
-    .share-btn {
-      background: transparent;
-      border: 1px solid var(--secondary-border);
-      color: var(--text-secondary-btn);
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
-      white-space: nowrap;
-    }
-    .share-btn:hover {
-      border-color: var(--secondary-border-hover);
-      color: var(--text-secondary-btn-hover);
-    }
-    .share-btn.copied {
-      border-color: #30d158;
-      color: #30d158;
-    }
     .controls {
       display: flex;
       flex-wrap: wrap;
@@ -221,42 +177,6 @@
       min-height: 120px;
       min-width: 180px;
     }
-    .multi-dropdown { position: relative; min-width: 180px; }
-    .multi-dropdown .md-trigger {
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--input-bg); color: var(--text);
-      border: 1px solid var(--input-border); padding: 8px 12px;
-      border-radius: 6px; font-size: 13px; cursor: pointer;
-      user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .multi-dropdown .md-trigger:hover, #dataSourcesBtn:hover { border-color: var(--input-border-hover) !important; }
-    .multi-dropdown.open .md-trigger { border-color: var(--accent); }
-    .multi-dropdown .md-trigger::after { content: '\25BE'; margin-left: 8px; font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
-    .multi-dropdown .md-menu {
-      display: none; position: absolute; top: 100%; left: 0;
-      z-index: 1000; background: var(--input-bg);
-      border: 1px solid var(--input-border); border-radius: 6px;
-      margin-top: 2px; max-height: 300px; overflow-y: auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4); min-width: 220px;
-    }
-    .multi-dropdown.open .md-menu { display: block; }
-    .multi-dropdown .md-option {
-      display: flex; align-items: center; padding: 6px 10px;
-      cursor: pointer; font-size: 13px; position: relative;
-    }
-    .multi-dropdown .md-option:hover { background: rgba(255,255,255,0.05); }
-    [data-theme="light"] .multi-dropdown .md-option:hover { background: rgba(0,0,0,0.05); }
-    .multi-dropdown .md-option input[type="checkbox"] { margin-right: 8px; accent-color: var(--accent); flex-shrink: 0; }
-    .multi-dropdown .md-option .md-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .multi-dropdown .md-option .md-only-btn {
-      display: none; font-size: 10px; padding: 2px 6px;
-      background: var(--accent); color: #fff; border: none; border-radius: 3px;
-      cursor: pointer; flex-shrink: 0; margin-left: 6px;
-    }
-    .multi-dropdown .md-option:hover .md-only-btn { display: inline-block; }
-    .multi-dropdown .md-option .md-only-btn.md-always { display: inline-block; }
-    .multi-dropdown .md-divider { height: 1px; background: var(--input-border); margin: 4px 0; }
-    [data-theme="light"] .multi-dropdown .md-menu { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
     button {
       background: var(--accent);
       border-color: var(--accent);
@@ -355,12 +275,6 @@
     }
     .period-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
     .period-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
-
-    .axis-toggle { display:inline-flex; gap:1px; margin-left:auto; font-size:10px; }
-    .axis-toggle button { padding:1px 5px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--text); cursor:pointer; border-radius:0; line-height:1.4; }
-    .axis-toggle button:first-child { border-radius:3px 0 0 3px; }
-    .axis-toggle button:last-child { border-radius:0 3px 3px 0; }
-    .axis-toggle button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
 
     .movers-row {
       display: flex; gap: 10px; flex-wrap: wrap;
@@ -537,12 +451,6 @@
       height: 4px;
       background: var(--accent);
       border-radius: 2px;
-      cursor: grab;
-      z-index: 1;
-      pointer-events: all;
-    }
-    .dual-range .track-fill.dragging {
-      cursor: grabbing;
     }
     .time-range-label {
       font-size: 11px;
@@ -662,105 +570,20 @@
       flex: 1;
       accent-color: var(--accent);
     }
-    /* Hide main controls and non-map content in heatmap view */
+    /* Hide main controls in heatmap view */
     body.heatmap-view .controls .control-group:not(.map-keep) {
       display: none;
-    }
-    body.heatmap-view .heatmap-hide {
-      display: none !important;
-    }
-    body.cycles-view .controls .control-group:not(.map-keep) {
-      display: none;
-    }
-    body.cycles-view .dashboard > *:not(#cyclesView) {
-      display: none !important;
-    }
-    body.cycles-view #cyclesView {
-      display: block !important;
-    }
-    /* Cycles view styles */
-    .cycles-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-    .cycles-card h3 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--text-white);
-    }
-    .cycles-stats-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .cycle-stat {
-      background: var(--summary-bg);
-      border: 1px solid var(--summary-border);
-      border-radius: 10px;
-      padding: 16px 20px;
-      flex: 1;
-      min-width: 130px;
-      text-align: center;
-    }
-    .cycle-stat .stat-val {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--text-white);
-    }
-    .cycle-stat .stat-lbl {
-      font-size: 11px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 4px;
-    }
-    .ranking-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    .ranking-table th, .ranking-table td {
-      padding: 10px 12px;
-      text-align: left;
-      border-bottom: 1px solid var(--card-border);
-    }
-    .ranking-table th {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      font-weight: 600;
-      position: sticky;
-      top: 0;
-      background: var(--card-bg);
-    }
-    .ranking-table td:first-child { font-weight: 600; color: var(--text-white); }
-    .ranking-table tr:hover td { background: var(--summary-bg); }
-    .dur-bar {
-      display: inline-block;
-      height: 8px;
-      border-radius: 4px;
-      background: var(--accent);
-      vertical-align: middle;
-      margin-right: 8px;
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Apple Product Availability Tracker <span style="font-size:14px;font-weight:400;color:var(--text-muted);margin-left:8px;">Jackson Davis // JAOD</span></h1>
+    <h1>Apple Product Availability Tracker</h1>
+    <div class="subtitle">Pickup availability across 12 US cities</div>
     <div class="subtitle" style="margin-top:8px;font-size:13px;"><span style="background:#ffd60a;color:#000;padding:4px 8px;border-radius:4px;text-decoration:underline;font-weight:600;">⚠️ Percentages = % of stores with at least one unit in stock (not inventory depth)</span></div>
+    <div class="subtitle" style="margin-top:6px;font-size:12px;color:var(--text-dim);">ℹ️ iPhone and some other products are no longer tracked to prioritize API availability for more relevant products. They were consistently available (~95-100%).</div>
     <div class="header-top-right">
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
-        <span class="last-updated-badge" id="lastUpdated"></span>
-        <span class="last-updated-badge" id="lastUpdatedSite" style="opacity:0.7;"></span>
-        <span class="last-updated-badge" id="headerStats" style="opacity:0.7;"></span>
-      </div>
-      <button class="share-btn" id="shareViewBtn" title="Copy shareable URL to clipboard">Share View</button>
+      <span class="last-updated-badge" id="lastUpdated"></span>
       <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">🌙</button>
     </div>
   </div>
@@ -771,38 +594,54 @@
       <div class="view-tabs" id="viewTabs">
         <div class="view-tab active" data-view="trends">Trends</div>
         <div class="view-tab" data-view="heatmap">Heatmap</div>
-        <div class="view-tab" data-view="cycles">Cycles</div>
+        <div class="view-tab" data-view="compare">Compare Cities</div>
       </div>
     </div>
 
     <div class="control-group map-keep">
       <label>Product</label>
-      <div id="productDropdown" class="multi-dropdown"></div>
+      <select id="productSelect"></select>
     </div>
 
     <div class="control-group">
       <label>Cities</label>
-      <div id="cityDropdown" class="multi-dropdown"></div>
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <select id="citySelect" multiple></select>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <button id="selectAllCities" class="secondary" style="font-size:11px;padding:4px 8px;">All</button>
+          <button id="clearCities" class="secondary" style="font-size:11px;padding:4px 8px;">None</button>
+        </div>
+      </div>
     </div>
 
-    <div class="control-group" style="display:none;">
+    <div class="control-group">
       <label>Custom Avg (city names, comma-sep)</label>
       <input type="text" id="customAvgInput" placeholder="e.g. NYC, LA, SF" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:8px 12px;border-radius:6px;font-size:13px;outline:none;min-width:200px;">
     </div>
 
     <div class="control-group">
-      <label>Data Sources</label>
-      <div class="settings-wrap" style="position:relative;">
-        <div id="dataSourcesBtn" class="md-trigger" style="display:flex;align-items:center;justify-content:space-between;background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:8px 12px;border-radius:6px;font-size:13px;cursor:pointer;user-select:none;white-space:nowrap;">Sources<span style="margin-left:8px;font-size:10px;color:var(--text-muted);">&#9662;</span></div>
-        <div class="settings-menu dropdown-down" id="dataSourcesMenu">
-          <label><input type="checkbox" id="showAvailability" checked> Availability <span class="axis-toggle" data-source="availability"><button class="active" data-side="left">L</button><button data-side="right">R</button></span></label>
-          <label id="ebayToggleLabel" style="display:none;"><input type="checkbox" id="showEbayPrices"> eBay Prices <span class="axis-toggle" data-source="ebay"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
-          <label class="ebay-sub-toggle" id="ebayMeanLabel" style="display:none;margin-left:20px;opacity:0.4;pointer-events:none;"><input type="checkbox" id="showEbayMean" checked> Mean</label>
-          <label class="ebay-sub-toggle" id="ebayMedianLabel" style="display:none;margin-left:20px;opacity:0.4;pointer-events:none;"><input type="checkbox" id="showEbayMedian"> Median</label>
-          <label id="ebaySalesToggleLabel" style="display:none;"><input type="checkbox" id="showEbaySales"> eBay Sales <span class="axis-toggle" data-source="ebaySales"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
-          <label id="leadTimeToggleLabel" style="display:none;"><input type="checkbox" id="showLeadTimes"> Lead Times <span class="axis-toggle" data-source="leadTimes"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
-          <label id="deliveryTimeToggleLabel" style="display:none;"><input type="checkbox" id="showDeliveryTimes"> Delivery Times <span class="axis-toggle" data-source="deliveryTimes"><button data-side="left">L</button><button class="active" data-side="right">R</button></span></label>
-        </div>
+      <label>Data Filters</label>
+      <div class="filter-toggles">
+        <label class="toggle-label">
+          <input type="checkbox" id="filterZeros" checked>
+          Filter likely errors?
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="showAvailability" checked>
+          Show Availability
+        </label>
+        <label class="toggle-label" id="ebayToggleLabel" style="display:none;">
+          <input type="checkbox" id="showEbayPrices">
+          Show eBay Prices
+        </label>
+        <label class="toggle-label ebay-sub-toggle" id="ebayMeanLabel" style="display:none;margin-left:24px;opacity:0.4;pointer-events:none;">
+          <input type="checkbox" id="showEbayMean" checked>
+          Mean
+        </label>
+        <label class="toggle-label ebay-sub-toggle" id="ebayMedianLabel" style="display:none;margin-left:24px;opacity:0.4;pointer-events:none;">
+          <input type="checkbox" id="showEbayMedian" checked>
+          Median
+        </label>
       </div>
     </div>
 
@@ -818,6 +657,7 @@
         <input type="datetime-local" id="timeStart" step="1">
         <span>to</span>
         <input type="datetime-local" id="timeEnd" step="1">
+        <button class="time-range-reset" id="timeReset">Reset</button>
       </div>
       <div class="dual-range" id="dualRange">
         <div class="track"></div>
@@ -829,25 +669,8 @@
 
     <div class="control-group">
       <label>&nbsp;</label>
-      <div style="display:flex;gap:8px;align-items:center;">
+      <div style="display:flex;gap:8px;">
         <button id="resetCities" class="secondary">Reset</button>
-        <div class="settings-wrap">
-          <button id="settingsBtn" class="secondary" style="font-size:14px;padding:6px 10px;">&#9881;</button>
-          <div class="settings-menu" id="settingsMenu">
-            <label><input type="checkbox" id="showCrosshair" checked> Show Crosshair</label>
-            <label><input type="checkbox" id="showPoints"> Show Points</label>
-            <label><input type="checkbox" id="filterZeros" checked> Filter likely errors</label>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="control-group heatmap-hide">
-      <label>Quick Views</label>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button id="qvMacMini" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #0a84ff;color:#6cb4ff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">Mac Mini — by City</button>
-        <button id="qvAllProducts" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #30d158;color:#30d158;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">All Products</button>
-        <button id="qvEbayPrices" class="quick-view-btn" style="background:var(--input-bg);border:1px solid #ff9f40;color:#ff9f40;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;display:none;">eBay Prices</button>
       </div>
     </div>
   </div>
@@ -855,24 +678,7 @@
   <div id="loading">Loading data...</div>
 
   <div class="dashboard" id="dashboard" style="display:none;">
-
-    <!-- Stats row (hidden, stats moved to header) -->
-    <div class="stats-row" id="statsRow" style="display:none;"></div>
-    <div class="excluded-info" id="excludedInfo" style="display:none;"></div>
-
-    <!-- Main chart area -->
-    <div class="chart-card heatmap-hide" style="position:relative;">
-      <h3 id="mainChartTitle">Availability Over Time</h3>
-      <div style="position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:10;">
-        <button id="downloadChartCsv" class="secondary" style="font-size:11px;padding:4px 10px;" title="Download raw data as CSV">CSV</button>
-        <button id="resetGraphBtn" class="secondary" style="display:none;font-size:11px;padding:4px 10px;">Reset axes</button>
-      </div>
-      <div class="chart-container">
-        <canvas id="mainChart"></canvas>
-      </div>
-    </div>
-
-    <!-- Inline availability map (shown in trends view, auto-playing) -->
+    <!-- Heatmap view (hidden by default, first in stack so it's on top) -->
     <div class="chart-card" id="heatmapCard" style="display:none;">
       <h3>Store Availability Map</h3>
       <div class="map-controls">
@@ -881,16 +687,12 @@
           <button class="map-mode-btn" data-mode="delta">Delta</button>
         </div>
         <div id="mapSnapshotControls" class="map-time-slider">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-            <div class="map-time-label" id="mapTimeLabel" style="font-weight:700;text-decoration:underline;font-size:13px;">Latest</div>
-            <button id="mapPlayBtn" class="secondary" style="font-size:12px;padding:2px 10px;min-width:auto;" title="Animate through time">&#9654;</button>
-          </div>
+          <div class="map-time-label" id="mapTimeLabel" style="font-weight:700;text-decoration:underline;font-size:13px;margin-bottom:4px;">Latest</div>
           <input type="range" id="mapTimeSlider" min="0" max="100" value="100">
           <div id="mapTimeTicks" style="display:flex;justify-content:space-between;position:relative;height:14px;"></div>
         </div>
         <div id="mapDeltaControls" style="display:none;" class="map-delta-range">
           <div style="flex:1;">
-            <div style="font-size:14px;color:var(--text);margin-bottom:6px;">How has availability changed over the selected time period?</div>
             <div class="map-time-label" id="mapDeltaSelectedLabel" style="font-weight:700;text-decoration:underline;font-size:13px;margin-bottom:4px;">Full range</div>
             <div style="display:flex;gap:8px;align-items:center;">
               <span style="font-size:11px;color:var(--text-muted);font-weight:600;">From</span>
@@ -902,18 +704,8 @@
           </div>
         </div>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;text-align:center;">Zoom in to view store-by-store information</p>
-      <div id="mapWrapper" style="position:relative;">
-        <div id="mapContainer"></div>
-        <div id="mapPauseOverlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:1000;cursor:pointer;transition:opacity 0.3s;">
-          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;">
-            <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;">
-              <svg width="28" height="32" viewBox="0 0 28 32" fill="none"><polygon points="4,0 28,16 4,32" fill="white"/></svg>
-            </div>
-            <span style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:500;">Click to resume</span>
-          </div>
-        </div>
-      </div>
+      <div id="mapContainer"></div>
+      <div id="mapStats" style="display:flex;gap:16px;margin-top:8px;font-size:12px;color:var(--text-muted);"></div>
       <details style="margin-top:12px;">
         <summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">Show data table</summary>
         <div style="overflow-x:auto;margin-top:8px;">
@@ -922,15 +714,33 @@
       </details>
     </div>
 
+    <!-- Stats row -->
+    <div class="stats-row" id="statsRow"></div>
+    <div class="excluded-info" id="excludedInfo"></div>
+
+    <!-- Quick Views -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <button id="qvMacMini" class="view-tab" style="background:var(--input-bg);border-color:#0a84ff;color:#6cb4ff;padding:8px 16px;">🖥 Base Mac Mini — by City</button>
+      <button id="qvAllProducts" class="view-tab" style="background:var(--input-bg);border-color:#30d158;color:#30d158;padding:8px 16px;">📊 All Products — Over Time</button>
+    </div>
+
+    <!-- Main chart area -->
+    <div class="chart-card">
+      <h3 id="mainChartTitle">Availability Over Time</h3>
+      <div class="chart-container">
+        <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+
     <!-- City summary -->
-    <div class="chart-card heatmap-hide">
-      <h3>City Averages <span id="cityAvgTimeRange" style="font-weight:400;font-size:12px;color:var(--text-muted);margin-left:8px;"></span></h3>
+    <div class="chart-card">
+      <h3>City Averages</h3>
       <div class="summary-grid" id="citySummary"></div>
     </div>
 
     <!-- City moves -->
-    <div class="chart-card heatmap-hide">
-      <h3>Largest Moves by City <span id="moversTimeRange" style="font-weight:400;font-size:12px;color:var(--text-muted);margin-left:8px;"></span></h3>
+    <div class="chart-card">
+      <h3>Largest Moves by City</h3>
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
         <div class="period-btns" id="moverPeriodBtns">
           <button class="period-btn active" data-hours="24">24h</button>
@@ -947,113 +757,22 @@
       <div class="summary-grid" id="moversGrid"></div>
     </div>
 
-    <!-- Per-product chart (hidden) -->
-    <div class="chart-card heatmap-hide" style="display:none;">
-      <h3 id="productChartTitle">Product Comparison <span id="productChartTimeRange" style="font-weight:400;font-size:12px;color:var(--text-muted);margin-left:8px;"></span></h3>
+    <!-- Per-product chart -->
+    <div class="chart-card">
+      <h3 id="productChartTitle">Product Comparison</h3>
       <div class="chart-container">
         <canvas id="productChart"></canvas>
       </div>
     </div>
 
     <!-- Data matrix (shown when a specific product is selected) -->
-    <div class="chart-card heatmap-hide" id="dataMatrixCard" style="display:none;">
+    <div class="chart-card" id="dataMatrixCard" style="display:none;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 id="dataMatrixTitle" style="margin-bottom:0;">Data Matrix <span id="dataMatrixTimeRange" style="font-weight:400;font-size:12px;color:var(--text-muted);margin-left:8px;"></span></h3>
+        <h3 id="dataMatrixTitle" style="margin-bottom:0;">Data Matrix</h3>
         <button id="downloadCsv" class="secondary" style="font-size:12px;padding:6px 14px;">Download CSV</button>
       </div>
       <div style="overflow-x:auto;max-height:500px;overflow-y:auto;">
         <table class="heatmap-table" id="dataMatrixTable"></table>
-      </div>
-    </div>
-
-    <!-- Cycles view (hidden by default) -->
-    <div id="cyclesView" style="display:none;">
-      <div style="margin-bottom:8px;">
-        <a href="#methodology" style="font-size:12px;color:var(--accent);cursor:pointer;text-decoration:underline;"
-           onclick="document.getElementById('methodology').scrollIntoView({behavior:'smooth'});return false;">Click to see methodology</a>
-      </div>
-      <!-- Filters row -->
-      <div style="margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Product</span>
-          <div id="cycleProductDropdown" class="multi-dropdown" style="min-width:200px;"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Region</span>
-          <select id="cycleRegionSelect" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:6px 10px;border-radius:6px;font-size:12px;">
-            <option value="__ALL__">All Regions</option>
-          </select>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Time Range</span>
-          <div style="display:flex;gap:4px;margin-bottom:4px;" id="cyclePeriodBtns">
-            <button class="period-btn" data-hours="0">Max</button>
-            <button class="period-btn" data-hours="24">24h</button>
-            <button class="period-btn" data-hours="168">1w</button>
-            <button class="period-btn active" data-hours="336">2w</button>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <input type="datetime-local" id="cycleTimeStart" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:6px 8px;border-radius:6px;font-size:12px;color-scheme:var(--range-input-scheme);">
-            <span style="color:var(--text-dim);font-size:12px;">to</span>
-            <input type="datetime-local" id="cycleTimeEnd" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:6px 8px;border-radius:6px;font-size:12px;color-scheme:var(--range-input-scheme);">
-            <button id="cycleTimeReset" class="secondary" style="font-size:11px;padding:5px 10px;">Reset</button>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Group by</span>
-          <div style="display:flex;gap:4px;">
-            <button id="cycleGroupStore" class="period-btn">Store</button>
-            <button id="cycleGroupRegion" class="period-btn active">Region</button>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Min Cycles</span>
-          <input type="number" id="cycleMinCycles" min="1" value="5" style="background:var(--input-bg);color:var(--text);border:1px solid var(--input-border);padding:6px 8px;border-radius:6px;font-size:12px;width:60px;">
-        </div>
-      </div>
-
-      <div class="cycles-stats-row" id="cyclesStats"></div>
-
-      <div class="cycles-card" style="margin-bottom:20px;">
-        <h3 id="rankingTitle">Store Demand Ranking</h3>
-        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;" id="rankingSubtitle">Ranked by average time-to-sellout (fastest = highest demand).</p>
-        <div style="overflow-x:auto;max-height:600px;overflow-y:auto;">
-          <table class="ranking-table" id="rankingTable"></table>
-        </div>
-      </div>
-
-      <div class="cycles-card" style="margin-bottom:20px;">
-        <h3>Sellout Duration Distribution</h3>
-        <div class="chart-container" style="height:300px;">
-          <canvas id="cycleHistChart"></canvas>
-        </div>
-      </div>
-
-      <div class="cycles-card" style="margin-bottom:20px;" id="cycleTimelineCard">
-        <h3>Cycle Duration Over Time by Region</h3>
-        <div class="chart-container" style="height:350px;">
-          <canvas id="cycleTimelineChart"></canvas>
-        </div>
-      </div>
-
-      <div class="cycles-card" style="margin-bottom:20px;">
-        <h3>Recent Cycles</h3>
-        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Individual restock-to-sellout events, most recent first.</p>
-        <div style="overflow-x:auto;max-height:500px;overflow-y:auto;">
-          <table class="ranking-table" id="cyclesTable"></table>
-        </div>
-      </div>
-
-      <div class="cycles-card" id="methodology" style="background:var(--summary-bg);border-color:var(--summary-border);">
-        <h3 style="font-size:14px;">Methodology</h3>
-        <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
-          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Data source:</strong> Apple's <code style="background:var(--input-bg);padding:2px 5px;border-radius:3px;font-size:11px;">retail/pickup-message</code> API, polled every 1-3 hours across 19 zip codes covering 12 US metro areas (~119 stores). Each poll returns per-store, per-product pickup availability as one of three states: <strong>available</strong> (in stock for pickup), <strong>unavailable</strong> (out of stock), or <strong>ineligible</strong> (not offered at this store).</p>
-          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Cycle detection:</strong> For each (store, product) pair, we build a timeline of availability state changes. A <em>restock</em> is a transition from unavailable/ineligible to available. A <em>sellout</em> is a transition from available back to unavailable/ineligible. One complete cycle = restock followed by sellout. Cycles shorter than 5 minutes are filtered as noise.</p>
-          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Store hours adjustment:</strong> Cycle durations reflect <em>open hours only</em>. Each store's operating schedule (e.g., 9 AM–9 PM Mon–Sat, 10 AM–8 PM Sun) is extracted from the Apple API and used to subtract hours the store was closed. A cycle spanning overnight only counts the hours the store was actually open for business. Store timezones are accounted for.</p>
-          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Glitch filtering:</strong> Snapshots where &gt;80% of all (store, product) observations show "ineligible" are discarded as backend glitches (e.g., the Feb 9 outage where Apple's system briefly returned rank=0 for all stores).</p>
-          <p style="margin-bottom:10px;"><strong style="color:var(--text);">Demand proxy:</strong> Apple does not expose inventory quantities through any API. Sellout velocity (time from restock to out-of-stock) serves as an indirect demand signal: faster sellouts indicate higher demand or lower stock allocation. Stores selling out within hours likely have both high foot traffic and limited inventory.</p>
-          <p><strong style="color:var(--text);">Limitations:</strong> Polling frequency (1-3 hours) means exact restock/sellout times have up to ~3 hour margin of error. Same-day cycles where both transitions happen between polls may be missed entirely. The "available" flag is binary (at least 1 unit in stock), so a store with 1 unit and a store with 50 units both appear identical until one sells out.</p>
-        </div>
       </div>
     </div>
   </div>
@@ -1062,23 +781,7 @@
     let DATA = null;
     let mainChart = null;
     let productChart = null;
-    let cycleHistChart = null;
-    let cycleTimelineChart = null;
-    let _cycleProductFilter = 'Mac Mini M4 ($599)'; // legacy — now using _cycleProductDropdown
-    let _cycleProductDropdown = null;
-    let _cycleRegionFilter = '__ALL__';
-    let _cycleGroupBy = 'region'; // 'store' or 'region'
-    let _cycleTimeStart = Date.now() - 336 * 3600000;  // default 2w
-    let _cycleTimeEnd = Date.now();
-    let _cycleSortKey = 'avg_hours';
-    let _cycleSortDir = 'asc';
     let currentView = 'trends';
-    let _axisSide = { availability: 'left', ebay: 'right', ebaySales: 'right', leadTimes: 'right', deliveryTimes: 'right' };
-    const _axisSideDefaults = { availability: 'left', ebay: 'right', ebaySales: 'right', leadTimes: 'right', deliveryTimes: 'right' };
-    const _sourceUnit = { availability: 'pct', ebay: 'dollars', ebaySales: 'count', leadTimes: 'days', deliveryTimes: 'days' };
-    function _getAxisId(source) {
-      return 'y_' + _axisSide[source] + '_' + _sourceUnit[source];
-    }
     let timeMin = 0;  // epoch ms — absolute min from data
     let timeMax = 0;  // epoch ms — absolute max from data
     let timeStartMs = 0; // current selected start
@@ -1200,16 +903,8 @@
             this._origStyles = chart.data.datasets.map(ds => ({
               borderColor: ds.borderColor,
               borderWidth: ds.borderWidth,
-              backgroundColor: ds.backgroundColor,
-              borderDash: ds.borderDash || [],
               pointRadius: ds.pointRadius,
-              pointHoverRadius: ds.pointHoverRadius,
-              pointBackgroundColor: ds.pointBackgroundColor || ds.borderColor,
-              pointBorderColor: ds.pointBorderColor || ds.borderColor,
-              pointBorderWidth: ds.pointBorderWidth,
-              pointHoverBackgroundColor: ds.pointHoverBackgroundColor,
-              pointHoverBorderColor: ds.pointHoverBorderColor,
-              pointHoverBorderWidth: ds.pointHoverBorderWidth,
+              borderDash: ds.borderDash || [],
             }));
           }
         },
@@ -1220,35 +915,18 @@
           }
           this._ensureOrigStyles(chart);
           chart.data.datasets.forEach((ds, i) => {
+            // Never dim eBay price datasets (y2 axis)
+            if (ds.yAxisID === 'y2') return;
             if (i === idx) {
-              // Selected line: bigger points, slightly thicker
               ds.borderColor = this._origStyles[i].borderColor;
-              ds.borderWidth = this._origStyles[i].borderWidth + 1;
-              ds.backgroundColor = this._origStyles[i].backgroundColor;
-              ds.borderDash = this._origStyles[i].borderDash;
-              ds.pointRadius = Math.max(this._origStyles[i].pointRadius, 3);
-              ds.pointHoverRadius = this._origStyles[i].pointHoverRadius;
-              ds.pointBackgroundColor = this._origStyles[i].pointBackgroundColor;
-              ds.pointBorderColor = this._origStyles[i].pointBorderColor;
-              ds.pointBorderWidth = this._origStyles[i].pointBorderWidth;
-              ds.pointHoverBackgroundColor = this._origStyles[i].pointHoverBackgroundColor;
-              ds.pointHoverBorderColor = this._origStyles[i].pointHoverBorderColor;
-              ds.pointHoverBorderWidth = this._origStyles[i].pointHoverBorderWidth;
+              ds.borderWidth = 3;
+              ds.pointRadius = 4;
+              ds.borderDash = [];
             } else {
-              // Dimmed line: everything transparent/invisible
               ds.borderColor = this._dimColor(this._origStyles[i].borderColor);
               ds.borderWidth = 1;
-              ds.backgroundColor = this._dimColor(this._origStyles[i].borderColor);
-              ds.borderDash = this._origStyles[i].borderDash;
-              // Kill all point rendering — normal AND hover state
               ds.pointRadius = 0;
-              ds.pointHoverRadius = 0;
-              ds.pointBackgroundColor = 'transparent';
-              ds.pointBorderColor = 'transparent';
-              ds.pointBorderWidth = 0;
-              ds.pointHoverBackgroundColor = 'transparent';
-              ds.pointHoverBorderColor = 'transparent';
-              ds.pointHoverBorderWidth = 0;
+              ds.borderDash = [];
             }
           });
           this._highlighted = idx;
@@ -1260,16 +938,8 @@
           chart.data.datasets.forEach((ds, i) => {
             ds.borderColor = this._origStyles[i].borderColor;
             ds.borderWidth = this._origStyles[i].borderWidth;
-            ds.backgroundColor = this._origStyles[i].backgroundColor;
-            ds.borderDash = this._origStyles[i].borderDash;
             ds.pointRadius = this._origStyles[i].pointRadius;
-            ds.pointHoverRadius = this._origStyles[i].pointHoverRadius;
-            ds.pointBackgroundColor = this._origStyles[i].pointBackgroundColor;
-            ds.pointBorderColor = this._origStyles[i].pointBorderColor;
-            ds.pointBorderWidth = this._origStyles[i].pointBorderWidth;
-            ds.pointHoverBackgroundColor = this._origStyles[i].pointHoverBackgroundColor;
-            ds.pointHoverBorderColor = this._origStyles[i].pointHoverBorderColor;
-            ds.pointHoverBorderWidth = this._origStyles[i].pointHoverBorderWidth;
+            ds.borderDash = this._origStyles[i].borderDash;
           });
           this._origStyles = [];
           this._highlighted = -1;
@@ -1280,721 +950,9 @@
       };
     }
 
-    // Plugin: drag right-side axes to shift, scroll to zoom
-    // Helper: find right-position axis under cursor
-    function _findRightAxis(chart, e) {
-      const rect = chart.canvas.getBoundingClientRect();
-      const cx = e.clientX - rect.left;
-      const cy = e.clientY - rect.top;
-      const ids = Object.keys(chart.scales).filter(id => id !== 'x');
-      for (const id of ids) {
-        const s = chart.scales[id];
-        if (!s || s.position !== 'right' || !s.options.display) continue;
-        if (cx >= s.left - 10 && cx <= s.right + 10 && cy >= s.top && cy <= s.bottom) return id;
-      }
-      return null;
-    }
-    const y2DragPlugin = {
-      id: 'y2DragZoom',
-      _dragging: false,
-      _dragAxisId: null,
-      _startY: 0,
-      _startMin: 0,
-      _startMax: 0,
-      _isOverRightAxis(chart, e) {
-        return _findRightAxis(chart, e) !== null;
-      },
-      afterInit(chart) {
-        const canvas = chart.canvas;
-        canvas.addEventListener('mousedown', (e) => {
-          const axisId = _findRightAxis(chart, e);
-          if (!axisId) return;
-          this._dragging = true;
-          this._dragAxisId = axisId;
-          this._startY = e.clientY;
-          const ax = chart.options.scales[axisId];
-          this._startMin = ax.min;
-          this._startMax = ax.max;
-          canvas.style.cursor = 'ns-resize';
-          e.preventDefault();
-        });
-        canvas.addEventListener('mousemove', (e) => {
-          if (!this._dragging) {
-            canvas.style.cursor = this._isOverRightAxis(chart, e) ? 'ns-resize' : '';
-          }
-        });
-        window.addEventListener('mousemove', (e) => {
-          if (!this._dragging || !this._dragAxisId) return;
-          const dy = e.clientY - this._startY;
-          const scale = chart.scales[this._dragAxisId];
-          if (!scale) return;
-          const pxRange = scale.bottom - scale.top;
-          const valRange = this._startMax - this._startMin;
-          const shift = (dy / pxRange) * valRange;
-          chart.options.scales[this._dragAxisId].min = this._startMin + shift;
-          chart.options.scales[this._dragAxisId].max = this._startMax + shift;
-          chart.update('none');
-        });
-        window.addEventListener('mouseup', () => {
-          if (this._dragging) {
-            this._dragging = false;
-            this._dragAxisId = null;
-            canvas.style.cursor = '';
-          }
-        });
-        canvas.addEventListener('wheel', (e) => {
-          const axisId = _findRightAxis(chart, e);
-          if (!axisId) return;
-          e.preventDefault();
-          const ax = chart.options.scales[axisId];
-          const range = ax.max - ax.min;
-          const factor = e.deltaY > 0 ? 1.15 : 0.87;
-          const mid = (ax.min + ax.max) / 2;
-          const newRange = range * factor;
-          ax.min = mid - newRange / 2;
-          ax.max = mid + newRange / 2;
-          chart.update('none');
-        }, { passive: false });
-      }
-    };
-
-    // Shared chart helpers
-    function _timeTickCallback(value, index, ticks) {
-      const raw = ticks[index] ? ticks[index].value : value;
-      const d = new Date(raw);
-      if (isNaN(d.getTime())) return value;
-      const hour = d.getHours(), min = d.getMinutes();
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-      const h12 = hour % 12 || 12;
-      const minStr = min < 10 ? '0' + min : min;
-      const xScale = this.chart ? this.chart.options.scales.x : null;
-      const isMinuteMode = xScale && xScale.time && xScale.time.unit === 'minute';
-      if (!isMinuteMode && min !== 0) return '';
-      const timeLine = isMinuteMode ? `${h12}:${minStr} ${ampm}` : `${h12} ${ampm}`;
-      if (ticks[index].major) {
-        const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return [timeLine, `${dayNames[d.getDay()]} ${monthNames[d.getMonth()]} ${d.getDate()}`];
-      }
-      return timeLine;
-    }
-
-    function _makeTimeAxisConfig(opts = {}) {
-      const tc = getThemeColors();
-      return {
-        type: 'time',
-        time: { tooltipFormat: 'MMM d, yyyy h:mm a', displayFormats: { hour: 'h a', day: 'MMM d' } },
-        grid: { color: tc.grid },
-        ticks: { color: tc.tick, maxRotation: 0, autoSkip: true, major: { enabled: true }, callback: _timeTickCallback },
-        ...opts
-      };
-    }
-
-    const timeTicksPlugin = {
-      id: 'sharedTimeTicks',
-      beforeUpdate(chart) {
-        const xScale = chart.options.scales.x;
-        if (!xScale || xScale.type !== 'time') return;
-        let minT = Infinity, maxT = -Infinity;
-        chart.data.datasets.forEach(ds => {
-          ds.data.forEach(pt => {
-            const t = pt.x ? pt.x.getTime() : 0;
-            if (t > 0 && t < minT) minT = t;
-            if (t > maxT) maxT = t;
-          });
-        });
-        if (minT === Infinity) return;
-        const rangeHours = (maxT - minT) / (1000 * 60 * 60);
-        let unit, step;
-        if (rangeHours < 1) {
-          unit = 'minute';
-          const rangeMins = rangeHours * 60;
-          step = rangeMins <= 10 ? 1 : rangeMins <= 30 ? 5 : 10;
-        } else {
-          unit = 'hour';
-          step = rangeHours <= 12 ? 1 : rangeHours <= 24 ? 2 : rangeHours <= 48 ? 4 : rangeHours <= 96 ? 6 : rangeHours <= 192 ? 8 : 12;
-        }
-        xScale.time.unit = unit;
-        xScale.time.stepSize = step;
-      },
-      afterBuildTicks(chart) {
-        const xScale = chart.scales.x;
-        if (!xScale || !xScale.ticks || xScale.ticks.length === 0) return;
-        let lastDay = -1;
-        xScale.ticks.forEach(tick => {
-          const d = new Date(tick.value);
-          const day = d.getDate();
-          if (day !== lastDay) { tick.major = true; lastDay = day; }
-        });
-      }
-    };
-
-    // === Drag-to-measure state ===
-    let _dragMeasure = {
-      active: false,
-      startX: 0,
-      startMs: 0,
-      currentX: 0,
-      currentMs: 0,
-      anchorValues: [],
-    };
-
-    /**
-     * Drag-to-measure plugin.
-     * Click+drag on chart to see % change between two time points.
-     * Always calculates % from left to right regardless of drag direction.
-     * Shades the selected horizontal region across full chart height.
-     */
-    const dragMeasurePlugin = {
-      id: 'dragMeasure',
-
-      _getAnchorValues(chart, targetMs) {
-        const values = [];
-        chart.data.datasets.forEach((ds, i) => {
-          if (chart.getDatasetMeta(i).hidden) return;
-          if (ds.label && ds.label.includes('\u03c3')) return;
-          const hit = crosshairTooltipPlugin._findNearest(ds.data, targetMs);
-          if (!hit) return;
-          values.push({ datasetIndex: i, y: hit.y, label: ds.label, color: ds.borderColor, yAxisID: ds.yAxisID });
-        });
-        return values;
-      },
-
-      afterInit(chart) {
-        const canvas = chart.canvas;
-
-        canvas.addEventListener('mousedown', (e) => {
-          if (e.button !== 0) return;
-          const area = chart.chartArea;
-          if (!area) return;
-          const rect = canvas.getBoundingClientRect();
-          const cx = e.clientX - rect.left;
-          const cy = e.clientY - rect.top;
-          if (cx < area.left || cx > area.right || cy < area.top || cy > area.bottom) return;
-          // Skip if over any right-side axis
-          if (_findRightAxis(chart, e)) return;
-          // Skip if over any left-side axis
-          const leftAxes = Object.keys(chart.scales).filter(id => id !== 'x' && chart.scales[id].position === 'left');
-          for (const id of leftAxes) {
-            const s = chart.scales[id];
-            if (s && cx <= s.right + 10) return;
-          }
-          const xScale = chart.scales.x;
-          if (!xScale) return;
-
-          const ms = xScale.getValueForPixel(cx);
-          _dragMeasure.active = true;
-          _dragMeasure.startX = cx;
-          _dragMeasure.startMs = ms;
-          _dragMeasure.currentX = cx;
-          _dragMeasure.currentMs = ms;
-          _dragMeasure.anchorValues = this._getAnchorValues(chart, ms);
-        });
-
-        window.addEventListener('mousemove', (e) => {
-          if (!_dragMeasure.active) return;
-          const rect = canvas.getBoundingClientRect();
-          const cx = e.clientX - rect.left;
-          const xScale = chart.scales.x;
-          if (!xScale) return;
-          _dragMeasure.currentX = cx;
-          _dragMeasure.currentMs = xScale.getValueForPixel(cx);
-          chart.draw();
-        });
-
-        window.addEventListener('mouseup', () => {
-          if (_dragMeasure.active) {
-            _dragMeasure.active = false;
-            _dragMeasure.anchorValues = [];
-            chart.draw();
-          }
-        });
-      },
-
-      afterDraw(chart) {
-        if (!_dragMeasure.active) return;
-        const ctx = chart.ctx;
-        const area = chart.chartArea;
-        if (!area) return;
-
-        const leftX = Math.max(area.left, Math.min(_dragMeasure.startX, _dragMeasure.currentX));
-        const rightX = Math.min(area.right, Math.max(_dragMeasure.startX, _dragMeasure.currentX));
-
-        ctx.save();
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        ctx.fillStyle = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
-        ctx.fillRect(leftX, area.top, rightX - leftX, area.bottom - area.top);
-
-        ctx.beginPath();
-        ctx.setLineDash([3, 3]);
-        ctx.strokeStyle = isLight ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)';
-        ctx.lineWidth = 1;
-        ctx.moveTo(leftX, area.top);
-        ctx.lineTo(leftX, area.bottom);
-        ctx.moveTo(rightX, area.top);
-        ctx.lineTo(rightX, area.bottom);
-        ctx.stroke();
-        ctx.restore();
-      }
-    };
-
-    /**
-     * Crosshair tooltip plugin.
-     * Shows nearest actual data point values for all visible datasets at cursor position.
-     * Only includes a dataset if the cursor time falls within its data range.
-     */
-    let _crosshairHidden = false;
-    const crosshairTooltipPlugin = {
-      id: 'crosshairTooltip',
-      _tooltipEl: null,
-      _lastX: null,
-
-      /** Find the nearest actual data point. Returns null if cursor is outside data range. */
-      _findNearest(data, targetMs) {
-        if (!data || data.length === 0) return null;
-        const getMs = (pt) => pt.x instanceof Date ? pt.x.getTime() : +pt.x;
-        const first = getMs(data[0]), last = getMs(data[data.length - 1]);
-        // Cursor outside this dataset's range → skip
-        if (targetMs < first || targetMs > last) return null;
-        // Binary search for nearest point
-        let lo = 0, hi = data.length - 1;
-        while (lo < hi - 1) {
-          const mid = (lo + hi) >> 1;
-          if (getMs(data[mid]) <= targetMs) lo = mid;
-          else hi = mid;
-        }
-        // Return whichever bracket point is closer
-        const dLo = Math.abs(targetMs - getMs(data[lo]));
-        const dHi = Math.abs(targetMs - getMs(data[hi]));
-        return dLo <= dHi ? { y: data[lo].y, t: getMs(data[lo]), idx: lo }
-                          : { y: data[hi].y, t: getMs(data[hi]), idx: hi };
-      },
-
-      _getTooltipEl(chart) {
-        if (!this._tooltipEl) {
-          this._tooltipEl = document.createElement('div');
-          this._tooltipEl.className = 'crosshair-tooltip';
-          this._tooltipEl.style.cssText = 'position:absolute;pointer-events:none;z-index:100;' +
-            'background:var(--tooltip-bg);border:1px solid var(--tooltip-border);border-radius:8px;' +
-            'padding:8px 12px;font-size:12px;line-height:1.6;white-space:nowrap;display:none;' +
-            'box-shadow:0 4px 12px rgba(0,0,0,0.3);max-height:400px;overflow-y:auto;';
-          chart.canvas.parentElement.style.position = 'relative';
-          chart.canvas.parentElement.appendChild(this._tooltipEl);
-        }
-        return this._tooltipEl;
-      },
-
-      afterInit(chart) {
-        chart.canvas.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-        });
-      },
-
-      afterEvent(chart, args) {
-        if (_crosshairHidden) return;
-        const evt = args.event;
-        if (evt.type === 'mouseout') {
-          this._lastX = null;
-          const el = this._getTooltipEl(chart);
-          el.style.display = 'none';
-          chart.draw();
-          return;
-        }
-        if (evt.type === 'mousemove') {
-          const area = chart.chartArea;
-          if (evt.x < area.left || evt.x > area.right || evt.y < area.top || evt.y > area.bottom) {
-            this._lastX = null;
-            const el = this._getTooltipEl(chart);
-            el.style.display = 'none';
-            chart.draw();
-            return;
-          }
-          this._lastX = evt.x;
-          this._showTooltip(chart, evt.x, evt.y);
-          chart.draw();
-        }
-      },
-
-      afterDraw(chart) {
-        if (this._lastX === null) return;
-        const ctx = chart.ctx;
-        const area = chart.chartArea;
-        ctx.save();
-        ctx.beginPath();
-        ctx.setLineDash([3, 3]);
-        ctx.strokeStyle = document.documentElement.getAttribute('data-theme') === 'light'
-          ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)';
-        ctx.lineWidth = 1;
-        ctx.moveTo(this._lastX, area.top);
-        ctx.lineTo(this._lastX, area.bottom);
-        ctx.stroke();
-        ctx.restore();
-      },
-
-      _showTooltip(chart, mouseX, mouseY) {
-        const el = this._getTooltipEl(chart);
-        const xScale = chart.scales.x;
-        if (!xScale) { el.style.display = 'none'; return; }
-
-        const targetMs = xScale.getValueForPixel(mouseX);
-        const targetDate = new Date(targetMs);
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        const h = targetDate.getHours(), m = targetDate.getMinutes();
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        const h12 = h % 12 || 12;
-        const timeStr = `${months[targetDate.getMonth()]} ${targetDate.getDate()}, ${h12}:${m < 10 ? '0' + m : m} ${ampm}`;
-
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-        const titleColor = isLight ? '#1d1d1f' : '#fff';
-        const bodyColor = isLight ? '#1d1d1f' : '#ccc';
-
-        // Build anchor map for % change during drag-to-measure
-        const anchorMap = new Map();
-        if (_dragMeasure.active && _dragMeasure.anchorValues.length > 0) {
-          const leftMs = Math.min(_dragMeasure.startMs, _dragMeasure.currentMs);
-          const isDraggingRight = _dragMeasure.currentMs >= _dragMeasure.startMs;
-          if (isDraggingRight) {
-            _dragMeasure.anchorValues.forEach(av => anchorMap.set(av.datasetIndex, av));
-          } else {
-            // Need values at the left (current) position as anchor
-            chart.data.datasets.forEach((ds, i) => {
-              if (chart.getDatasetMeta(i).hidden) return;
-              if (ds.label && ds.label.includes('\u03c3')) return;
-              const hit = this._findNearest(ds.data, leftMs);
-              if (hit) anchorMap.set(i, { datasetIndex: i, y: hit.y, yAxisID: ds.yAxisID });
-            });
-          }
-        }
-
-        // When dragging, show values at the right (later) time point
-        const displayMs = _dragMeasure.active
-          ? Math.max(_dragMeasure.startMs, _dragMeasure.currentMs)
-          : targetMs;
-
-        let lines = [];
-        chart.data.datasets.forEach((ds, i) => {
-          if (chart.getDatasetMeta(i).hidden) return;
-          if (ds.label && ds.label.includes('\u03c3')) return;
-
-          const hit = this._findNearest(ds.data, displayMs);
-          if (!hit) return;
-
-          const color = ds.borderColor || '#888';
-          let formatted;
-          const axisId = ds.yAxisID || '';
-          if (axisId.includes('_dollars')) {
-            formatted = '$' + hit.y.toFixed(2);
-            if (ds._ebayData && hit.idx < ds._ebayData.length) {
-              const listings = ds._ebayData[hit.idx].total_listings;
-              if (listings != null) formatted += ` (${listings} listings)`;
-            }
-          } else if (axisId.includes('_days')) {
-            formatted = hit.y.toFixed(2) + ' days';
-          } else {
-            formatted = hit.y.toFixed(1) + '%';
-          }
-
-          // Compute % change if dragging
-          let pctChange = null;
-          if (_dragMeasure.active && anchorMap.has(i)) {
-            const anchor = anchorMap.get(i);
-            if (anchor.y !== 0) {
-              pctChange = ((hit.y - anchor.y) / Math.abs(anchor.y)) * 100;
-            }
-          }
-
-          lines.push({ label: ds.label, color, formatted, y: hit.y, datasetIndex: i, pctChange });
-        });
-
-        if (lines.length === 0) { el.style.display = 'none'; return; }
-
-        lines.sort((a, b) => b.y - a.y);
-
-        let html = `<div style="color:${titleColor};font-weight:600;margin-bottom:4px;">${timeStr}</div>`;
-        lines.forEach(l => {
-          let pctHtml = '';
-          if (l.pctChange !== null) {
-            const sign = l.pctChange >= 0 ? '+' : '';
-            const pctColor = l.pctChange >= 0 ? '#30d158' : '#ff453a';
-            pctHtml = `<span style="color:${pctColor};font-weight:600;font-size:11px;margin-right:4px;">${sign}${l.pctChange.toFixed(1)}%</span>`;
-          }
-          html += `<div style="color:${bodyColor};">${pctHtml}<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${l.color};margin-right:6px;"></span>${l.label}: <strong>${l.formatted}</strong></div>`;
-        });
-
-        el.innerHTML = html;
-        el.style.display = 'block';
-
-        const tooltipW = el.offsetWidth;
-        const tooltipH = el.offsetHeight;
-        let left = mouseX + 16;
-        if (left + tooltipW > chart.canvas.clientWidth - 10) {
-          left = mouseX - tooltipW - 16;
-        }
-        let top = mouseY - tooltipH / 2;
-        top = Math.max(chart.chartArea.top, Math.min(top, chart.chartArea.bottom - tooltipH));
-
-        el.style.left = left + 'px';
-        el.style.top = top + 'px';
-      },
-
-      destroy(chart) {
-        if (this._tooltipEl && this._tooltipEl.parentElement) {
-          this._tooltipEl.parentElement.removeChild(this._tooltipEl);
-          this._tooltipEl = null;
-        }
-      }
-    };
-
-    /** Draw a dotted vertical "now" line when the chart extends into the future */
-    const nowLinePlugin = {
-      id: 'nowLine',
-      afterDraw(chart) {
-        const xScale = chart.scales.x;
-        if (!xScale) return;
-        const now = Date.now();
-        const xMax = xScale.max;
-        // Only draw if the chart x-axis extends past the current time
-        if (xMax <= now) return;
-        const xPixel = xScale.getPixelForValue(now);
-        if (xPixel < xScale.left || xPixel > xScale.right) return;
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.beginPath();
-        ctx.setLineDash([4, 4]);
-        ctx.strokeStyle = document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)';
-        ctx.lineWidth = 1.5;
-        ctx.moveTo(xPixel, chart.chartArea.top);
-        ctx.lineTo(xPixel, chart.chartArea.bottom);
-        ctx.stroke();
-        // Label
-        ctx.setLineDash([]);
-        ctx.font = '10px -apple-system, sans-serif';
-        ctx.fillStyle = document.documentElement.getAttribute('data-theme') === 'light' ? '#86868b' : '#666';
-        ctx.textAlign = 'center';
-        ctx.fillText('Now', xPixel, chart.chartArea.top - 4);
-        ctx.restore();
-      }
-    };
-
-    const xZoomPlugin = {
-      id: 'xAxisZoom',
-      _xDragging: false,
-      _yDragging: false,
-      _dragStartX: 0,
-      _dragStartY: 0,
-      _dragStartXMin: 0,
-      _dragStartXMax: 0,
-      _dragStartYMin: 0,
-      _dragStartYMax: 0,
-      _axesModified: false,
-      _isOverXAxis(chart, cx, cy) {
-        const area = chart.chartArea;
-        return area && cx >= area.left && cx <= area.right && cy >= area.bottom - 5;
-      },
-      _findLeftAxis(chart, cx, cy) {
-        const ids = Object.keys(chart.scales).filter(id => id !== 'x');
-        for (const id of ids) {
-          const s = chart.scales[id];
-          if (!s || s.position !== 'left' || !s.options.display) continue;
-          if (cx >= s.left - 10 && cx <= s.right + 10 && cy >= s.top && cy <= s.bottom) return id;
-        }
-        return null;
-      },
-      _isOverYAxis(chart, cx, cy) {
-        return this._findLeftAxis(chart, cx, cy) !== null;
-      },
-      _showResetBtn() {
-        const btn = document.getElementById('resetGraphBtn');
-        if (btn) btn.style.display = 'inline-block';
-        this._axesModified = true;
-      },
-      afterInit(chart) {
-        const canvas = chart.canvas;
-        // Scroll-to-zoom on axes only
-        canvas.addEventListener('wheel', (e) => {
-          // Skip if over any right-side axis (handled by y2DragPlugin)
-          if (_findRightAxis(chart, e)) return;
-          const rect = canvas.getBoundingClientRect();
-          const cx = e.clientX - rect.left;
-          const cy = e.clientY - rect.top;
-
-          // X-axis zoom: only when mouse is on or near the x-axis
-          if (this._isOverXAxis(chart, cx, cy)) {
-            const xScale = chart.scales.x;
-            if (!xScale) return;
-            e.preventDefault();
-            const min = xScale.min;
-            const max = xScale.max;
-            const range = max - min;
-            const factor = e.deltaY > 0 ? 1.15 : 0.87;
-            const pct = (cx - xScale.left) / (xScale.right - xScale.left);
-            const center = min + pct * range;
-            const newRange = range * factor;
-            chart.options.scales.x.min = center - pct * newRange;
-            chart.options.scales.x.max = center + (1 - pct) * newRange;
-            chart.update('none');
-            this._showResetBtn();
-            return;
-          }
-
-          // Y-axis zoom: only when mouse is on or near a left-side y-axis
-          const leftAxisId = this._findLeftAxis(chart, cx, cy);
-          if (leftAxisId) {
-            const yScale = chart.scales[leftAxisId];
-            if (!yScale) return;
-            e.preventDefault();
-            const range = yScale.max - yScale.min;
-            const factor = e.deltaY > 0 ? 1.15 : 0.87;
-            const mid = (yScale.min + yScale.max) / 2;
-            const newRange = range * factor;
-            chart.options.scales[leftAxisId].min = mid - newRange / 2;
-            chart.options.scales[leftAxisId].max = mid + newRange / 2;
-            chart.update('none');
-            this._showResetBtn();
-            return;
-          }
-
-          // Otherwise: let the page scroll normally (don't preventDefault)
-        }, { passive: false });
-
-        // Drag-to-pan on X axis
-        canvas.addEventListener('mousedown', (e) => {
-          const rect = canvas.getBoundingClientRect();
-          const cx = e.clientX - rect.left;
-          const cy = e.clientY - rect.top;
-          if (this._isOverXAxis(chart, cx, cy)) {
-            this._xDragging = true;
-            this._dragStartX = e.clientX;
-            this._dragStartXMin = chart.scales.x.min;
-            this._dragStartXMax = chart.scales.x.max;
-            canvas.style.cursor = 'ew-resize';
-            e.preventDefault();
-          } else {
-            const yLeftId = this._findLeftAxis(chart, cx, cy);
-            if (yLeftId) {
-              this._yDragging = true;
-              this._dragYAxisId = yLeftId;
-              this._dragStartY = e.clientY;
-              this._dragStartYMin = chart.options.scales[yLeftId].min;
-              this._dragStartYMax = chart.options.scales[yLeftId].max;
-              canvas.style.cursor = 'ns-resize';
-              e.preventDefault();
-            }
-          }
-        });
-        window.addEventListener('mousemove', (e) => {
-          if (this._xDragging) {
-            const xScale = chart.scales.x;
-            const pxRange = xScale.right - xScale.left;
-            const valRange = this._dragStartXMax - this._dragStartXMin;
-            const shift = -(e.clientX - this._dragStartX) / pxRange * valRange;
-            chart.options.scales.x.min = this._dragStartXMin + shift;
-            chart.options.scales.x.max = this._dragStartXMax + shift;
-            chart.update('none');
-            this._showResetBtn();
-          } else if (this._yDragging && this._dragYAxisId) {
-            const yScale = chart.scales[this._dragYAxisId];
-            const pxRange = yScale.bottom - yScale.top;
-            const valRange = this._dragStartYMax - this._dragStartYMin;
-            const shift = (e.clientY - this._dragStartY) / pxRange * valRange;
-            chart.options.scales[this._dragYAxisId].min = this._dragStartYMin + shift;
-            chart.options.scales[this._dragYAxisId].max = this._dragStartYMax + shift;
-            chart.update('none');
-            this._showResetBtn();
-          }
-        });
-        window.addEventListener('mouseup', () => {
-          if (this._xDragging || this._yDragging) {
-            this._xDragging = false;
-            this._yDragging = false;
-            this._dragYAxisId = null;
-            canvas.style.cursor = '';
-          }
-        });
-
-        // Cursor hints
-        canvas.addEventListener('mousemove', (e) => {
-          if (this._xDragging || this._yDragging) return;
-          const rect = canvas.getBoundingClientRect();
-          const cx = e.clientX - rect.left;
-          const cy = e.clientY - rect.top;
-          if (this._isOverXAxis(chart, cx, cy)) {
-            canvas.style.cursor = 'ew-resize';
-          } else if (this._isOverYAxis(chart, cx, cy)) {
-            canvas.style.cursor = 'ns-resize';
-          }
-          // Don't reset cursor here — let highlight plugin handle it
-        });
-      }
-    };
-
     async function loadData() {
-      const resp = await fetch(`data.json?t=${Date.now()}`);
+      const resp = await fetch('data.json');
       DATA = await resp.json();
-
-      // Expand delta-encoded store_map snapshots into full state
-      if (DATA.store_map && DATA.store_map.snapshots && DATA.store_map.products) {
-        const smProducts = DATA.store_map.products;
-        const snaps = DATA.store_map.snapshots;
-        let prevState = null;
-        for (let i = 0; i < snaps.length; i++) {
-          if (snaps[i].a) {
-            // Full snapshot: convert numeric keys back to product names
-            const expanded = {};
-            for (const [storeId, prods] of Object.entries(snaps[i].a)) {
-              expanded[storeId] = {};
-              for (const [pidx, val] of Object.entries(prods))
-                expanded[storeId][smProducts[+pidx]] = val;
-            }
-            snaps[i].a = expanded;
-            prevState = {};
-            for (const [sid, p] of Object.entries(expanded))
-              prevState[sid] = Object.assign({}, p);
-          } else if (snaps[i].d !== undefined) {
-            // Delta snapshot: apply changes to previous state
-            for (const [storeId, changes] of Object.entries(snaps[i].d)) {
-              if (!prevState[storeId]) prevState[storeId] = {};
-              for (const [pidx, val] of Object.entries(changes))
-                prevState[storeId][smProducts[+pidx]] = val;
-            }
-            const full = {};
-            for (const [sid, p] of Object.entries(prevState))
-              full[sid] = Object.assign({}, p);
-            snaps[i].a = full;
-            delete snaps[i].d;
-          }
-        }
-      }
-
-      // Expand numeric product IDs in lead_times
-      if (DATA.lead_times && DATA.all_models) {
-        for (const snap of DATA.lead_times.snapshots) {
-          const newData = {};
-          for (const [city, prods] of Object.entries(snap.data)) {
-            newData[city] = {};
-            for (const [pidx, val] of Object.entries(prods)) {
-              const name = DATA.all_models[+pidx];
-              if (name) newData[city][name] = val;
-            }
-          }
-          snap.data = newData;
-        }
-      }
-
-      // Expand numeric product IDs in delivery_times
-      if (DATA.delivery_times && DATA.all_models) {
-        for (const snap of DATA.delivery_times.snapshots) {
-          const newData = {};
-          for (const [city, prods] of Object.entries(snap.data)) {
-            newData[city] = {};
-            for (const [pidx, val] of Object.entries(prods)) {
-              const name = DATA.all_models[+pidx];
-              if (name) newData[city][name] = val;
-            }
-          }
-          snap.data = newData;
-        }
-      }
 
       // Show last-updated time from most recent snapshot
       if (DATA.snapshots && DATA.snapshots.length > 0) {
@@ -2005,218 +963,27 @@
         const ampm = h >= 12 ? 'PM' : 'AM';
         const h12 = h % 12 || 12;
         const minStr = m < 10 ? '0' + m : m;
-        const tzAbbr = new Intl.DateTimeFormat('en-US', {timeZoneName:'short'}).formatToParts(last).find(p => p.type === 'timeZoneName')?.value || '';
         document.getElementById('lastUpdated').textContent =
-          `Data updated ${days[last.getDay()]} ${months[last.getMonth()]} ${last.getDate()} at ${h12}:${minStr} ${ampm} ${tzAbbr}`;
+          `Last updated ${days[last.getDay()]} ${months[last.getMonth()]} ${last.getDate()} at ${h12}:${minStr} ${ampm}`;
       }
 
-      // Show website file modification time in header top-right
-      if (DATA.site_updated_at || DATA.generated_at) {
-        const gen = new Date(DATA.site_updated_at || DATA.generated_at);
+      // Show website build time in footer
+      if (DATA.generated_at) {
+        const gen = new Date(DATA.generated_at);
         const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const h = gen.getHours(), m = gen.getMinutes();
         const ampm = h >= 12 ? 'PM' : 'AM';
         const h12 = h % 12 || 12;
         const minStr = m < 10 ? '0' + m : m;
-        const tzAbbr2 = new Intl.DateTimeFormat('en-US', {timeZoneName:'short'}).formatToParts(gen).find(p => p.type === 'timeZoneName')?.value || '';
-        document.getElementById('lastUpdatedSite').textContent =
-          `Site updated ${months[gen.getMonth()]} ${gen.getDate()} at ${h12}:${minStr} ${ampm} ${tzAbbr2}`;
+        document.getElementById('lastUpdatedFooter').textContent =
+          `${days[gen.getDay()]} ${months[gen.getMonth()]} ${gen.getDate()}, ${gen.getFullYear()} at ${h12}:${minStr} ${ampm}`;
       }
-
-      // Total stats in header
-      const totalSnapshots = DATA.snapshots ? DATA.snapshots.length : 0;
-      let totalDatapoints = 0;
-      if (DATA.snapshots) {
-        DATA.snapshots.forEach(s => {
-          s.products.forEach(p => {
-            totalDatapoints += Object.values(p.values).filter(v => v !== null && v !== undefined).length;
-          });
-        });
-      }
-      document.getElementById('headerStats').textContent =
-        `${totalSnapshots.toLocaleString()} snapshots · ${totalDatapoints.toLocaleString()} data points`;
 
       initControls();
-      deserializeState(window.location.hash);
       render();
       document.getElementById('loading').style.display = 'none';
       document.getElementById('dashboard').style.display = 'flex';
-    }
-
-    /* ── MultiDropdown reusable component ────────────────────────── */
-    class MultiDropdown {
-      /**
-       * @param {HTMLElement} el  – container div
-       * @param {Object} opts
-       * @param {Array<{value:string,label:string}>} opts.items – regular options
-       * @param {Array<{value:string,label:string}>} [opts.headers] – independent toggle options at top
-       * @param {Array<string>} [opts.initialSelected] – values to pre-select
-       * @param {Function} [opts.onChange] – called after every change
-       */
-      constructor(el, opts) {
-        this.el = el;
-        this.items = opts.items || [];
-        // Support both `headers` (array) and legacy `header` (single object)
-        if (opts.headers) {
-          this.headers = opts.headers;
-        } else if (opts.header) {
-          this.headers = [opts.header];
-        } else {
-          this.headers = [];
-        }
-        this.selected = new Set(opts.initialSelected != null
-          ? opts.initialSelected
-          : this.items.map(i => i.value));
-        this.onChange = opts.onChange || (() => {});
-        this._build();
-      }
-
-      /** Selected regular-item values (header values excluded) */
-      getSelected() {
-        return this.items.filter(i => this.selected.has(i.value)).map(i => i.value);
-      }
-
-      /** Which header values are currently checked */
-      getSelectedHeaders() {
-        return this.headers.filter(h => this.selected.has(h.value)).map(h => h.value);
-      }
-
-      /** Legacy compat: check if the first header is selected */
-      isHeaderSelected() {
-        return this.headers.length > 0 && this.selected.has(this.headers[0].value);
-      }
-
-      _build() {
-        this.el.innerHTML = '';
-        this.triggerEl = document.createElement('div');
-        this.triggerEl.className = 'md-trigger';
-        this.el.appendChild(this.triggerEl);
-        this.menuEl = document.createElement('div');
-        this.menuEl.className = 'md-menu';
-        this.el.appendChild(this.menuEl);
-        this.triggerEl.addEventListener('click', e => { e.stopPropagation(); this.el.classList.toggle('open'); });
-        document.addEventListener('click', e => { if (!this.el.contains(e.target)) this.el.classList.remove('open'); });
-        this._renderOptions();
-        this._updateTrigger();
-      }
-
-      _renderOptions() {
-        this.menuEl.innerHTML = '';
-        this.headers.forEach(h => this._addRow(h.value, h.label, true, h));
-        if (this.headers.length > 0) {
-          const d = document.createElement('div'); d.className = 'md-divider'; this.menuEl.appendChild(d);
-        }
-        this.items.forEach(item => this._addRow(item.value, item.label, false, null));
-      }
-
-      _addRow(value, label, isHeader, headerOpts) {
-        const row = document.createElement('div');
-        row.className = 'md-option';
-        row.dataset.value = value;
-
-        const cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.checked = this.selected.has(value);
-
-        const lbl = document.createElement('span');
-        lbl.className = 'md-label';
-        lbl.textContent = label;
-
-        row.appendChild(cb); row.appendChild(lbl);
-
-        row.addEventListener('click', e => { if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' && e.target.classList.contains('md-comp-cb')) return; e.stopPropagation(); this._toggle(value); });
-
-        const self = this;
-        const addBtn = (text, action, alwaysShow) => {
-          const btn = document.createElement('button');
-          btn.className = 'md-only-btn' + (alwaysShow ? ' md-always' : '');
-          btn.textContent = text;
-          btn.addEventListener('click', e => { e.stopPropagation(); action(); self._sync(); });
-          row.appendChild(btn);
-        };
-
-        if (isHeader && !(headerOpts && headerOpts.noButtons)) {
-          addBtn('only', () => {
-            this.selected.clear();
-            this.selected.add(value);
-          }, true);
-          addBtn('all', () => {
-            this.items.forEach(i => this.selected.add(i.value));
-          }, true);
-        } else if (!isHeader) {
-          addBtn('only', () => {
-            // Keep header selections when clicking "only" on a regular item
-            const keepHeaders = this.headers.filter(h => this.selected.has(h.value)).map(h => h.value);
-            this.selected.clear();
-            this.selected.add(value);
-            keepHeaders.forEach(v => this.selected.add(v));
-          }, false);
-        }
-
-        this.menuEl.appendChild(row);
-      }
-
-      _toggle(value) {
-        if (this.selected.has(value)) this.selected.delete(value);
-        else this.selected.add(value);
-        this._sync();
-      }
-
-      _sync() {
-        this._updateCheckboxes();
-        this._updateTrigger();
-        this.onChange(this.getSelected());
-      }
-
-      _updateCheckboxes() {
-        this.menuEl.querySelectorAll('.md-option').forEach(row => {
-          const cb = row.querySelector('input[type="checkbox"]');
-          if (cb) cb.checked = this.selected.has(row.dataset.value);
-        });
-      }
-
-      _updateTrigger() {
-        const sel = this.getSelected();
-        const hdrs = this.getSelectedHeaders();
-        const total = this.items.length;
-        const hdrLabels = hdrs.map(v => {
-          const h = this.headers.find(x => x.value === v);
-          return h ? h.label : v;
-        });
-
-        let parts = [];
-        if (sel.length === 0 && hdrs.length === 0) { this.triggerEl.textContent = 'None selected'; return; }
-        if (sel.length === 1) parts.push(sel[0]);
-        else if (sel.length === total) parts.push('All');
-        else if (sel.length > 1) parts.push(sel.length + ' selected');
-        hdrLabels.forEach(l => parts.push(l));
-        this.triggerEl.textContent = parts.join(' + ') || 'None selected';
-      }
-    }
-
-    let _productDropdown, _cityDropdown;
-    let _prodAvgSelComponents = true;
-    let _cityAvgSelComponents = true;
-
-    function _addCompToggle(dropdown, headerValue, getState, setState) {
-      const row = dropdown.menuEl.querySelector('.md-option[data-value="' + headerValue + '"]');
-      if (!row) return;
-      const toggle = document.createElement('label');
-      toggle.className = 'md-comp-toggle';
-      const tcb = document.createElement('input');
-      tcb.type = 'checkbox';
-      tcb.className = 'md-comp-cb';
-      tcb.checked = getState();
-      toggle.appendChild(tcb);
-      toggle.appendChild(document.createTextNode(' parts'));
-      tcb.addEventListener('change', (e) => {
-        e.stopPropagation();
-        setState(tcb.checked);
-        render();
-      });
-      toggle.addEventListener('click', (e) => e.stopPropagation());
-      row.appendChild(toggle);
     }
 
     function updateEbaySubToggles() {
@@ -2228,6 +995,13 @@
     }
 
     function initControls() {
+      const productSelect = document.getElementById('productSelect');
+      // Add "All Products (Average)" option
+      const allOpt = document.createElement('option');
+      allOpt.value = '__ALL__';
+      allOpt.textContent = 'All Products (Average)';
+      productSelect.appendChild(allOpt);
+
       // Only include models that have data in recent snapshots (last 10)
       const recentSnapshots = DATA.snapshots.slice(-10);
       const modelsWithData = DATA.all_models.filter(model => {
@@ -2238,33 +1012,28 @@
         });
       });
 
-      // Product multi-dropdown — default: Mac Mini + Mac Studio only
-      const defaultProducts = modelsWithData.filter(m => m.startsWith('Mac Mini') || m.startsWith('Mac Studio'));
-      _productDropdown = new MultiDropdown(document.getElementById('productDropdown'), {
-        items: modelsWithData.map(m => ({ value: m, label: m })),
-        headers: [
-          { value: '__ALL__', label: 'All Products (Average)', btnLabel: 'all', isSelectAll: true },
-          { value: '__AVG_SEL__', label: 'Avg of Selected', noButtons: true }
-        ],
-        initialSelected: defaultProducts.length > 0 ? defaultProducts : modelsWithData.slice(),
-        onChange: () => render()
+      modelsWithData.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        productSelect.appendChild(opt);
       });
-      _addCompToggle(_productDropdown, '__AVG_SEL__',
-        () => _prodAvgSelComponents, v => { _prodAvgSelComponents = v; });
 
-      // City multi-dropdown — default: only Average (All Cities)
-      _cityDropdown = new MultiDropdown(document.getElementById('cityDropdown'), {
-        items: DATA.all_cities.map(c => ({ value: c, label: c })),
-        headers: [
-          { value: '__AVG__', label: 'Average (All Cities)', btnLabel: 'all', isSelectAll: false },
-          { value: '__AVG_SEL_CITY__', label: 'Avg of Selected', noButtons: true }
-        ],
-        initialSelected: ['__AVG__'],
-        onChange: () => render()
+      // Default to Mac Mini M4 ($599) on load
+      const defaultProduct = modelsWithData.find(m => m === 'Mac Mini M4 ($599)');
+      if (defaultProduct) productSelect.value = defaultProduct;
+
+      const citySelect = document.getElementById('citySelect');
+      DATA.all_cities.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        opt.selected = true;
+        citySelect.appendChild(opt);
       });
-      _addCompToggle(_cityDropdown, '__AVG_SEL_CITY__',
-        () => _cityAvgSelComponents, v => { _cityAvgSelComponents = v; });
 
+      productSelect.addEventListener('change', render);
+      citySelect.addEventListener('change', render);
       document.getElementById('filterZeros').addEventListener('change', render);
       document.getElementById('showAvailability').addEventListener('change', render);
       document.getElementById('showEbayPrices').addEventListener('change', () => {
@@ -2282,81 +1051,19 @@
         document.getElementById('ebayMedianLabel').style.display = 'flex';
       }
 
-      // Show eBay sales toggle if data is available
-      if (DATA.ebay_sales && Object.keys(DATA.ebay_sales.data).length > 0) {
-        document.getElementById('ebaySalesToggleLabel').style.display = 'flex';
-      }
-      document.getElementById('showEbaySales').addEventListener('change', render);
-
-      // Show eBay Prices quick view button if eBay data exists
-      if (DATA.ebay_prices && DATA.ebay_prices.products.length > 0) {
-        document.getElementById('qvEbayPrices').style.display = '';
-      }
-
-      // Show lead time toggle if data is available
-      if (DATA.lead_times && DATA.lead_times.snapshots.length > 0) {
-        document.getElementById('leadTimeToggleLabel').style.display = 'flex';
-      }
-      document.getElementById('showLeadTimes').addEventListener('change', render);
-
-      // Show delivery time toggle if data is available
-      if (DATA.delivery_times && DATA.delivery_times.snapshots.length > 0) {
-        document.getElementById('deliveryTimeToggleLabel').style.display = 'flex';
-      }
-      document.getElementById('showDeliveryTimes').addEventListener('change', render);
-
-      // Axis side toggles (L/R buttons)
-      document.querySelectorAll('.axis-toggle').forEach(toggle => {
-        const source = toggle.dataset.source;
-        toggle.querySelectorAll('button').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const side = btn.dataset.side;
-            _axisSide[source] = side;
-            toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.side === side));
-            render();
-          });
-        });
-      });
-
-      // Reset axes button
-      document.getElementById('resetGraphBtn').addEventListener('click', () => {
-        xZoomPlugin._axesModified = false;
-        document.getElementById('resetGraphBtn').style.display = 'none';
-        render(); // full re-render resets all axes
-      });
-
       document.getElementById('resetCities').addEventListener('click', () => {
-        _cityDropdown.items.forEach(i => _cityDropdown.selected.add(i.value));
-        _cityDropdown._sync();
+        [...citySelect.options].forEach(o => o.selected = true);
+        render();
       });
 
-      // Data Sources dropdown
-      const dataSourcesBtn = document.getElementById('dataSourcesBtn');
-      const dataSourcesMenu = document.getElementById('dataSourcesMenu');
-      dataSourcesBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        settingsMenu.classList.remove('open');
-        dataSourcesMenu.classList.toggle('open');
+      document.getElementById('selectAllCities').addEventListener('click', () => {
+        [...citySelect.options].forEach(o => o.selected = true);
+        render();
       });
 
-      // Settings dropdown
-      const settingsBtn = document.getElementById('settingsBtn');
-      const settingsMenu = document.getElementById('settingsMenu');
-      settingsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dataSourcesMenu.classList.remove('open');
-        settingsMenu.classList.toggle('open');
-      });
-      document.addEventListener('click', (e) => {
-        if (!dataSourcesMenu.contains(e.target) && e.target !== dataSourcesBtn) dataSourcesMenu.classList.remove('open');
-        if (!settingsMenu.contains(e.target) && e.target !== settingsBtn) settingsMenu.classList.remove('open');
-      });
-      document.getElementById('showPoints').addEventListener('change', render);
-      document.getElementById('showCrosshair').addEventListener('change', (e) => {
-        _crosshairHidden = !e.target.checked;
-        if (mainChart) mainChart.draw();
+      document.getElementById('clearCities').addEventListener('click', () => {
+        [...citySelect.options].forEach(o => o.selected = false);
+        render();
       });
 
       document.querySelectorAll('.view-tab').forEach(tab => {
@@ -2364,68 +1071,25 @@
           document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
           currentView = tab.dataset.view;
-          // Reset to Mac Mini only when switching to heatmap
-          if (currentView === 'heatmap') {
-            _productDropdown.selected.clear();
-            _productDropdown.selected.add('Mac Mini M4 ($599)');
-            _productDropdown._sync();
-          }
           render();
         });
       });
 
       // Quick view buttons
       document.getElementById('qvMacMini').addEventListener('click', () => {
-        _productDropdown.selected.clear();
-        _productDropdown.selected.add('Mac Mini M4 ($599)');
-        _productDropdown._updateCheckboxes();
-        _productDropdown._updateTrigger();
-        // Select all cities + average
-        _cityDropdown.selected.clear();
-        _cityDropdown.selected.add('__AVG__');
-        _cityDropdown.items.forEach(i => _cityDropdown.selected.add(i.value));
-        _cityDropdown._updateCheckboxes();
-        _cityDropdown._updateTrigger();
+        // Set product to Mac Mini M4 ($599), view to Compare Cities
+        const ps = document.getElementById('productSelect');
+        const macMini = [...ps.options].find(o => o.value === 'Mac Mini M4 ($599)');
+        if (macMini) ps.value = macMini.value;
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-        const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
-        if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
+        const compareTab = document.querySelector('.view-tab[data-view="compare"]');
+        if (compareTab) { compareTab.classList.add('active'); currentView = 'compare'; }
         render();
       });
 
       document.getElementById('qvAllProducts').addEventListener('click', () => {
-        _productDropdown.items.forEach(i => _productDropdown.selected.add(i.value));
-        _productDropdown._updateCheckboxes();
-        _productDropdown._updateTrigger();
-        // Clear city selection so it shows per-product averages
-        _cityDropdown.selected.clear();
-        _cityDropdown.selected.add('__AVG__');
-        _cityDropdown._updateCheckboxes();
-        _cityDropdown._updateTrigger();
-        document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-        const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
-        if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
-        render();
-      });
-
-      document.getElementById('qvEbayPrices').addEventListener('click', () => {
-        // Select all products that have eBay data
-        const ebayProducts = DATA.ebay_prices ? DATA.ebay_prices.products : [];
-        _productDropdown.selected.clear();
-        ebayProducts.forEach(p => _productDropdown.selected.add(p));
-        _productDropdown._updateCheckboxes();
-        _productDropdown._updateTrigger();
-        // Clear city selection
-        _cityDropdown.selected.clear();
-        _cityDropdown._updateCheckboxes();
-        _cityDropdown._updateTrigger();
-        // Disable availability, enable eBay median
-        document.getElementById('showAvailability').checked = false;
-        document.getElementById('showEbayPrices').checked = true;
-        document.getElementById('showEbayMean').checked = false;
-        document.getElementById('showEbayMedian').checked = true;
-        document.getElementById('showEbaySales').checked = false;
-        updateEbaySubToggles();
-        // Switch to trends view
+        // Set product to All Products, view to Trends
+        document.getElementById('productSelect').value = '__ALL__';
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
@@ -2475,15 +1139,6 @@
       return new Date(str).getTime();
     }
 
-    function _timeRangeLabel() {
-      const fmt = (ms) => {
-        const d = new Date(ms);
-        const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
-        return `${mon} ${d.getDate()}, ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
-      };
-      return `${fmt(timeStartMs)} \u2013 ${fmt(timeEndMs)}`;
-    }
-
     // Global time range sync functions
     function updateTrackFill() {
       const pctL = ((timeStartMs - timeMin) / (timeMax - timeMin)) * 100;
@@ -2520,9 +1175,8 @@
       const timestamps = DATA.snapshots.map(s => new Date(s.timestamp).getTime());
       timeMin = Math.min(...timestamps);
       timeMax = Math.max(...timestamps);
-      timeEndMs = timeMax;
-      // Default to Max view
       timeStartMs = timeMin;
+      timeEndMs = timeMax;
 
       const startInput = document.getElementById('timeStart');
       const endInput = document.getElementById('timeEnd');
@@ -2530,7 +1184,7 @@
       const rangeEnd = document.getElementById('rangeEnd');
       const resetBtn = document.getElementById('timeReset');
 
-      startInput.value = toLocalDatetimeStr(timeStartMs);
+      startInput.value = toLocalDatetimeStr(timeMin);
       endInput.value = toLocalDatetimeStr(timeMax);
 
       function clearPeriodBtnActive() {
@@ -2560,46 +1214,6 @@
         render();
       });
 
-      // Track-fill drag to pan the time window
-      const trackFill = document.getElementById('trackFill');
-      let _fillDragging = false;
-      let _fillDragStartX = 0;
-      let _fillDragStartMs = 0;
-      let _fillDragEndMs = 0;
-      trackFill.addEventListener('mousedown', (e) => {
-        _fillDragging = true;
-        _fillDragStartX = e.clientX;
-        _fillDragStartMs = timeStartMs;
-        _fillDragEndMs = timeEndMs;
-        trackFill.classList.add('dragging');
-        e.preventDefault();
-      });
-      window.addEventListener('mousemove', (e) => {
-        if (!_fillDragging) return;
-        const dualRange = document.getElementById('dualRange');
-        const rect = dualRange.getBoundingClientRect();
-        const pxPerMs = rect.width / (timeMax - timeMin);
-        const deltaMs = (e.clientX - _fillDragStartX) / pxPerMs;
-        const windowSize = _fillDragEndMs - _fillDragStartMs;
-        let newStart = _fillDragStartMs + deltaMs;
-        let newEnd = _fillDragEndMs + deltaMs;
-        // Clamp to bounds
-        if (newStart < timeMin) { newStart = timeMin; newEnd = timeMin + windowSize; }
-        if (newEnd > timeMax) { newEnd = timeMax; newStart = timeMax - windowSize; }
-        timeStartMs = newStart;
-        timeEndMs = newEnd;
-        syncInputsFromMs();
-        syncSlidersFromMs();
-        clearPeriodBtnActive();
-        render();
-      });
-      window.addEventListener('mouseup', () => {
-        if (_fillDragging) {
-          _fillDragging = false;
-          trackFill.classList.remove('dragging');
-        }
-      });
-
       // Text input -> update slider + render
       startInput.addEventListener('change', () => {
         const ms = fromLocalDatetimeStr(startInput.value);
@@ -2624,7 +1238,7 @@
       });
 
       // Reset button
-      if (resetBtn) resetBtn.addEventListener('click', () => {
+      resetBtn.addEventListener('click', () => {
         timeStartMs = timeMin;
         timeEndMs = timeMax;
         syncInputsFromMs();
@@ -2667,213 +1281,6 @@
       updateTrackFill();
     }
 
-    /* ── Share View: URL state serialization ─────────────────────── */
-
-    function serializeState() {
-      const params = new URLSearchParams();
-
-      // View (default: trends)
-      if (currentView !== 'trends') params.set('v', currentView);
-
-      // Products — encode as comma-separated indices into dropdown items
-      if (_productDropdown) {
-        const allItems = _productDropdown.items;
-        const selected = _productDropdown.getSelected();
-        if (selected.length !== allItems.length) {
-          const indices = selected.map(v => allItems.findIndex(i => i.value === v)).filter(i => i >= 0);
-          params.set('p', indices.join(','));
-        }
-      }
-
-      // Cities
-      if (_cityDropdown) {
-        const avg = _cityDropdown.isHeaderSelected();
-        if (!avg) params.set('avg', '0');
-        const cities = _cityDropdown.getSelected();
-        if (cities.length > 0) params.set('c', cities.join(','));
-      }
-
-      // Time range — always include
-      params.set('ts', String(Math.round(timeStartMs)));
-      params.set('te', String(Math.round(timeEndMs)));
-
-      // Avg of Selected headers
-      if (_productDropdown && _productDropdown.selected.has('__AVG_SEL__')) params.set('pas', '1');
-      if (_cityDropdown && _cityDropdown.selected.has('__AVG_SEL_CITY__')) params.set('cas', '1');
-      // Components toggles (default true, so only serialize when off)
-      if (!_prodAvgSelComponents) params.set('pasc', '0');
-      if (!_cityAvgSelComponents) params.set('casc', '0');
-
-      // Checkboxes (only include non-defaults)
-      if (!document.getElementById('filterZeros').checked) params.set('fz', '0');
-      if (!document.getElementById('showAvailability').checked) params.set('sa', '0');
-      if (document.getElementById('showEbayPrices').checked) params.set('ebay', '1');
-      if (!document.getElementById('showEbayMean').checked) params.set('emean', '0');
-      if (document.getElementById('showEbayMedian').checked) params.set('emed', '1');
-      if (document.getElementById('showEbaySales').checked) params.set('esales', '1');
-      if (document.getElementById('showLeadTimes').checked) params.set('lt', '1');
-      if (document.getElementById('showDeliveryTimes').checked) params.set('dt', '1');
-      if (document.getElementById('showPoints').checked) params.set('pts', '1');
-      if (!document.getElementById('showCrosshair').checked) params.set('ch', '0');
-
-      // Axis sides (only non-defaults)
-      const asKeys = { availability: 'a', ebay: 'e', ebaySales: 's', leadTimes: 'l', deliveryTimes: 'd' };
-      const asParts = [];
-      for (const [src, abbr] of Object.entries(asKeys)) {
-        if (_axisSide[src] !== _axisSideDefaults[src]) {
-          asParts.push(abbr + ':' + (_axisSide[src] === 'left' ? 'l' : 'r'));
-        }
-      }
-      if (asParts.length > 0) params.set('as', asParts.join(','));
-
-      // Cycles
-      if (_cycleGroupBy !== 'region') params.set('cg', _cycleGroupBy);
-      if (_cycleRegionFilter !== '__ALL__') params.set('cr', _cycleRegionFilter);
-      const _mc = parseInt(document.getElementById('cycleMinCycles').value) || 5;
-      if (_mc !== 5) params.set('mc', String(_mc));
-
-      // Theme
-      if (document.documentElement.getAttribute('data-theme') === 'light') params.set('theme', 'light');
-
-      return params.toString();
-    }
-
-    function deserializeState(hash) {
-      if (!hash || hash.length <= 1) return;
-      const str = hash.startsWith('#') ? hash.slice(1) : hash;
-      if (!str) return;
-      const params = new URLSearchParams(str);
-
-      // View
-      const v = params.get('v');
-      if (v && ['trends', 'heatmap', 'cycles'].includes(v)) {
-        currentView = v;
-        document.querySelectorAll('.view-tab').forEach(t => {
-          t.classList.toggle('active', t.dataset.view === v);
-        });
-      }
-
-      // Products
-      if (params.has('p') && _productDropdown) {
-        const indices = params.get('p').split(',').map(Number).filter(n => !isNaN(n));
-        _productDropdown.selected.clear();
-        indices.forEach(idx => {
-          if (idx >= 0 && idx < _productDropdown.items.length) {
-            _productDropdown.selected.add(_productDropdown.items[idx].value);
-          }
-        });
-        if (params.get('pas') === '1') _productDropdown.selected.add('__AVG_SEL__');
-        _productDropdown._updateCheckboxes();
-        _productDropdown._updateTrigger();
-      } else if (params.has('pas') && _productDropdown) {
-        if (params.get('pas') === '1') _productDropdown.selected.add('__AVG_SEL__');
-        _productDropdown._updateCheckboxes();
-        _productDropdown._updateTrigger();
-      }
-
-      // Cities
-      if (params.has('avg') || params.has('c') || params.has('cas')) {
-        if (_cityDropdown) {
-          _cityDropdown.selected.clear();
-          if (params.get('avg') !== '0') _cityDropdown.selected.add('__AVG__');
-          if (params.get('cas') === '1') _cityDropdown.selected.add('__AVG_SEL_CITY__');
-          const c = params.get('c');
-          if (c) {
-            c.split(',').forEach(city => {
-              if (_cityDropdown.items.some(i => i.value === city)) {
-                _cityDropdown.selected.add(city);
-              }
-            });
-          }
-          _cityDropdown._updateCheckboxes();
-          _cityDropdown._updateTrigger();
-        }
-      }
-
-      // Avg-of-selected components toggles
-      if (params.has('pasc')) {
-        _prodAvgSelComponents = params.get('pasc') !== '0';
-        const pcb = _productDropdown && _productDropdown.menuEl.querySelector('.md-comp-cb');
-        if (pcb) pcb.checked = _prodAvgSelComponents;
-      }
-      if (params.has('casc')) {
-        _cityAvgSelComponents = params.get('casc') !== '0';
-        const ccb = _cityDropdown && _cityDropdown.menuEl.querySelector('.md-comp-cb');
-        if (ccb) ccb.checked = _cityAvgSelComponents;
-      }
-
-      // Time range
-      if (params.has('ts')) {
-        const ts = Number(params.get('ts'));
-        if (!isNaN(ts) && ts >= timeMin && ts <= timeMax) timeStartMs = ts;
-      }
-      if (params.has('te')) {
-        const te = Number(params.get('te'));
-        if (!isNaN(te) && te >= timeMin && te <= timeMax) timeEndMs = te;
-      }
-      if (params.has('ts') || params.has('te')) {
-        syncInputsFromMs();
-        syncSlidersFromMs();
-        document.querySelectorAll('#timeRangePeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
-      }
-
-      // Checkboxes
-      if (params.has('fz')) document.getElementById('filterZeros').checked = params.get('fz') === '1';
-      if (params.has('sa')) document.getElementById('showAvailability').checked = params.get('sa') === '1';
-      if (params.has('ebay')) {
-        document.getElementById('showEbayPrices').checked = params.get('ebay') === '1';
-        updateEbaySubToggles();
-      }
-      if (params.has('emean')) document.getElementById('showEbayMean').checked = params.get('emean') === '1';
-      if (params.has('emed')) document.getElementById('showEbayMedian').checked = params.get('emed') === '1';
-      if (params.has('esales')) document.getElementById('showEbaySales').checked = params.get('esales') === '1';
-      if (params.has('lt')) document.getElementById('showLeadTimes').checked = params.get('lt') === '1';
-      if (params.has('dt')) document.getElementById('showDeliveryTimes').checked = params.get('dt') === '1';
-      if (params.has('pts')) document.getElementById('showPoints').checked = params.get('pts') === '1';
-      if (params.has('ch')) {
-        const chOn = params.get('ch') !== '0';
-        document.getElementById('showCrosshair').checked = chOn;
-        _crosshairHidden = !chOn;
-      }
-
-      // Axis sides
-      if (params.has('as')) {
-        const abbrMap = { a: 'availability', e: 'ebay', s: 'ebaySales', l: 'leadTimes', d: 'deliveryTimes' };
-        params.get('as').split(',').forEach(part => {
-          const [abbr, side] = part.split(':');
-          const src = abbrMap[abbr];
-          if (src && (side === 'l' || side === 'r')) {
-            _axisSide[src] = side === 'l' ? 'left' : 'right';
-            // Update toggle button UI
-            const toggle = document.querySelector(`.axis-toggle[data-source="${src}"]`);
-            if (toggle) {
-              toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.side === _axisSide[src]));
-            }
-          }
-        });
-      }
-
-      // Cycles
-      if (params.has('cg')) {
-        const cg = params.get('cg');
-        if (cg === 'store' || cg === 'region') _cycleGroupBy = cg;
-      }
-      if (params.has('cr')) _cycleRegionFilter = params.get('cr');
-      if (params.has('mc')) document.getElementById('cycleMinCycles').value = params.get('mc');
-
-      // Theme (overrides localStorage)
-      if (params.has('theme')) {
-        const theme = params.get('theme');
-        if (theme === 'light') {
-          document.documentElement.setAttribute('data-theme', 'light');
-          document.getElementById('themeToggle').textContent = '☀️';
-        } else {
-          document.documentElement.removeAttribute('data-theme');
-          document.getElementById('themeToggle').textContent = '🌙';
-        }
-      }
-    }
-
     function _baseFilteredSnapshots() {
       return DATA.snapshots.filter(s => {
         // Always exclude qty/3-item files
@@ -2903,25 +1310,12 @@
     }
 
     function getSelectedCities() {
-      return _cityDropdown ? _cityDropdown.getSelected() : DATA.all_cities.slice();
+      const sel = document.getElementById('citySelect');
+      return [...sel.selectedOptions].map(o => o.value);
     }
 
-    /** Returns array of selected product model names */
-    function getSelectedProducts() {
-      return _productDropdown ? _productDropdown.getSelected() : [];
-    }
-
-    /** Whether the city "Average" line should be shown */
-    function isCityAverageOn() {
-      return _cityDropdown ? _cityDropdown.isHeaderSelected() : false;
-    }
-
-    /** Backward-compat: single product string or '__ALL__' */
     function getSelectedProduct() {
-      const prods = getSelectedProducts();
-      const allModels = _productDropdown ? _productDropdown.items.length : 0;
-      if (prods.length === allModels) return '__ALL__';
-      return prods.length === 1 ? prods[0] : prods[0] || '__ALL__';
+      return document.getElementById('productSelect').value;
     }
 
     function getCustomAvgCities() {
@@ -3051,44 +1445,26 @@
     function render() {
       const { snapshots, filterZeros } = getFilteredSnapshots();
       const selectedCities = getSelectedCities();
-      const selectedProducts = getSelectedProducts();
-      const isAllProducts = _productDropdown ? selectedProducts.length === _productDropdown.items.length : false;
-      const selectedProduct = isAllProducts ? '__ALL__' : (selectedProducts[0] || '__ALL__');
+      const selectedProduct = getSelectedProduct();
+      const isAllProducts = selectedProduct === '__ALL__';
       const blipSet = filterZeros ? getBlipSet(snapshots) : null;
 
-      // Toggle view-specific body classes for control hiding
-      document.body.classList.remove('heatmap-view', 'cycles-view');
+      // Toggle heatmap-view class for control hiding
       if (currentView === 'heatmap') {
         document.body.classList.add('heatmap-view');
-      } else if (currentView === 'cycles') {
-        document.body.classList.add('cycles-view');
+      } else {
+        document.body.classList.remove('heatmap-view');
       }
 
-      // Cycles view: render and return early (CSS handles hiding other elements)
-      if (currentView === 'cycles') {
-        renderCycles();
-        return;
-      }
-
-      updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
+      updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
 
       if (currentView === 'trends' || currentView === 'compare') {
-        // Show inline map in trends view too
-        if (DATA && DATA.store_map) {
-          document.getElementById('heatmapCard').style.display = 'block';
-          renderHeatmap(snapshots, selectedCities, filterZeros, blipSet);
-          setTimeout(() => {
-            initMap();
-            updateMapOverlay();
-          }, 50);
-        } else {
-          document.getElementById('heatmapCard').style.display = 'none';
-        }
-        renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
+        document.getElementById('heatmapCard').style.display = 'none';
+        renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
       } else {
         document.getElementById('heatmapCard').style.display = 'block';
         renderHeatmap(snapshots, selectedCities, filterZeros, blipSet);
-        renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
+        renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
         // Initialize & update map
         if (DATA && DATA.store_map) {
           setTimeout(() => {
@@ -3100,18 +1476,15 @@
 
       // City Averages now uses the same time-filtered snapshots as the main chart.
       // Movers still uses ALL snapshots so its period buttons are independent.
-      // When only "Average (All Cities)" is selected with no individual cities,
-      // show all cities in the summary/movers sections.
-      const citiesForSummary = selectedCities.length === 0 && isCityAverageOn() ? DATA.all_cities.slice() : selectedCities;
-      renderCitySummary(snapshots, citiesForSummary, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
+      renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
       const allSnaps = getAllSnapshots();
       const allBlipSet = allSnaps.filterZeros ? getBlipSet(allSnaps.snapshots) : null;
-      renderMovers(allSnaps.snapshots, citiesForSummary, allSnaps.filterZeros, isAllProducts, selectedProduct, allBlipSet, selectedProducts);
+      renderMovers(allSnaps.snapshots, selectedCities, allSnaps.filterZeros, isAllProducts, selectedProduct, allBlipSet);
       renderProductChart(snapshots, selectedCities, filterZeros, blipSet);
-      renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts);
+      renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet);
     }
 
-    function updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
+    function updateStats(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
       const statsRow = document.getElementById('statsRow');
       const excludedInfo = document.getElementById('excludedInfo');
 
@@ -3119,8 +1492,8 @@
       let excludedPoints = 0;
       let validValues = [];
 
-      const products = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
       snapshots.forEach((s, si) => {
+        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
         products.forEach(prod => {
           selectedCities.forEach(city => {
             totalPoints++;
@@ -3149,50 +1522,21 @@
         </div>
       `;
 
-      excludedInfo.textContent = '';
+      excludedInfo.textContent = excludedPoints > 0
+        ? `${excludedPoints} data points excluded by filters (ERR, N/A, error snapshots with 0 stores, or isolated single-call 0% values)`
+        : '';
     }
 
-    /** Rolling 2-sigma bands: 3-day trailing window.
-     *  Input: array of {t: epochMs, v: number}
-     *  Returns: array of {t, upper, lower} */
-    function _rollingBands(points) {
-      const WINDOW_MS = 3 * 24 * 3600000; // 3 days
-      const MIN_PTS = 3;
-      const result = [];
-      for (let i = 0; i < points.length; i++) {
-        const cur = points[i];
-        // Gather points in trailing window [t - WINDOW_MS, t]
-        let windowPts = [];
-        for (let j = i; j >= 0; j--) {
-          if (cur.t - points[j].t <= WINDOW_MS) windowPts.push(points[j].v);
-          else break;
-        }
-        // Fall back to expanding window from start if too few points
-        if (windowPts.length < MIN_PTS) {
-          windowPts = [];
-          for (let j = 0; j <= i; j++) windowPts.push(points[j].v);
-        }
-        const n = windowPts.length;
-        const mean = windowPts.reduce((a, b) => a + b, 0) / n;
-        const variance = windowPts.reduce((a, b) => a + (b - mean) ** 2, 0) / n;
-        const sigma2 = Math.sqrt(variance) * 2;
-        result.push({ t: cur.t, upper: cur.v + sigma2, lower: cur.v - sigma2 });
-      }
-      return result;
-    }
-
-    function renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
+    function renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
       const ctx = document.getElementById('mainChart');
 
       if (mainChart) {
         mainChart.destroy();
         mainChart = null;
       }
-      _crosshairHidden = !document.getElementById('showCrosshair').checked;
 
       let datasets = [];
       const showAvailability = document.getElementById('showAvailability').checked;
-      const showPoints = document.getElementById('showPoints').checked;
 
       /** Helper: get store count for a city in a snapshot */
       function getStoreCount(snapshot, cityName) {
@@ -3224,180 +1568,154 @@
         return weightedSum / totalWeight;
       }
 
-      const _prods = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
-      const PROD_DASHES = [[], [6,3], [2,2], [8,4,2,4], [4,4], [10,5], [1,4], [8,2], [12,4], [3,6], [6,3,2,3], [1,6], [4,2,4,6], [10,2,2,2], [5,5]];
+      if (showAvailability && (currentView === 'compare' || !isAllProducts)) {
+        // One line per city
+        const title = isAllProducts ? 'Average Availability by City' : `${selectedProduct} — Availability by City`;
+        document.getElementById('mainChartTitle').textContent = title;
 
-      if (showAvailability) {
-        // --- Helper: build points for a single line (one product, one city) ---
-        function buildLine(prod, city) {
-          return snapshots.map((s, si) => {
-            const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
-            return { x: new Date(s.timestamp), y: val };
-          }).filter(pt => pt.y !== null).map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
-        }
-
-        // --- Helper: build points averaging products for a city ---
-        function buildCityLine(prods, city) {
-          const minRequired = Math.max(1, Math.ceil(prods.length * 2 / 3));
-          return snapshots.map((s, si) => {
-            const vals = prods.map(p => getValidValue(s, p, city, filterZeros, blipSet, si)).filter(v => v !== null);
-            if (vals.length < minRequired) return { x: new Date(s.timestamp), y: null };
-            return { x: new Date(s.timestamp), y: vals.reduce((a,b) => a+b, 0) / vals.length };
-          }).filter(pt => pt.y !== null).map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
-        }
-
-        // --- Helper: build points averaging cities for a product ---
-        function buildProductLine(prod, cities) {
-          return snapshots.map((s, si) => {
-            let wSum = 0, wTotal = 0, validCount = 0;
-            cities.forEach(city => {
-              const sc = getStoreCount(s, city);
-              if (sc <= 0) return;
-              const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
-              if (val !== null) { wSum += val * sc; wTotal += sc; validCount++; }
-            });
-            if (wTotal <= 0 || validCount < cities.length * (2/3)) return { x: new Date(s.timestamp), y: null };
-            return { x: new Date(s.timestamp), y: wSum / wTotal };
-          }).filter(pt => pt.y !== null).map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
-        }
-
-        // --- Cartesian product rendering: every line = product × city ---
-        const avgSelProdOn = _productDropdown.selected.has('__AVG_SEL__');
-        const avgSelCityOn = _cityDropdown.selected.has('__AVG_SEL_CITY__');
-        const avgAllCityOn = isCityAverageOn(); // __AVG__
-
-        // Build effective product list
-        const effProds = []; // {type, name, label}
-        if (avgSelProdOn) {
-          effProds.push({ type: 'avg_sel', name: '__AVG_SEL__', label: 'Avg Products' });
-          if (_prodAvgSelComponents) {
-            _prods.forEach(p => effProds.push({ type: 'real', name: p, label: p }));
-          }
-        } else {
-          _prods.forEach(p => effProds.push({ type: 'real', name: p, label: p }));
-        }
-
-        // Build effective city list
-        const effCities = []; // {type, name, label}
-        if (avgAllCityOn) {
-          effCities.push({ type: 'avg_all', name: '__AVG__', label: 'All Cities' });
-        }
-        if (avgSelCityOn) {
-          effCities.push({ type: 'avg_sel', name: '__AVG_SEL_CITY__', label: 'Avg Selected' });
-          if (_cityAvgSelComponents) {
-            selectedCities.forEach(c => effCities.push({ type: 'real', name: c, label: c }));
-          }
-        } else {
-          selectedCities.forEach(c => effCities.push({ type: 'real', name: c, label: c }));
-        }
-
-        // Chart title
-        const nProds = effProds.length;
-        const nCities = effCities.length;
-        let chartTitle;
-        if (nProds === 0 || nCities === 0) {
-          chartTitle = nProds === 0 ? 'Select a product' : 'Select a city or Average';
-        } else if (nProds === 1 && nCities === 1) {
-          chartTitle = `${effProds[0].label} — ${effCities[0].label}`;
-        } else if (nProds === 1) {
-          chartTitle = `${effProds[0].label} — by City`;
-        } else if (nCities === 1) {
-          chartTitle = `${effCities[0].label} — by Product`;
-        } else {
-          chartTitle = `${nProds} Products × ${nCities} Cities`;
-        }
-        document.getElementById('mainChartTitle').textContent = chartTitle;
-
-        // Color strategy: color by city when multiple cities, else by product
-        const colorByCity = nCities > 1 || nProds <= 1;
-        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-
-        // Generate lines
-        effProds.forEach((prod, pi) => {
-          effCities.forEach((city, ci) => {
-            // Compute data points
-            let points;
-            if (prod.type === 'real' && city.type === 'real') {
-              points = buildLine(prod.name, city.name);
-            } else if (prod.type === 'avg_sel' && city.type === 'real') {
-              points = buildCityLine(_prods, city.name);
-            } else if (prod.type === 'real' && city.type === 'avg_all') {
-              points = buildProductLine(prod.name, DATA.all_cities);
-            } else if (prod.type === 'real' && city.type === 'avg_sel') {
-              points = buildProductLine(prod.name, selectedCities);
-            } else if (prod.type === 'avg_sel' && city.type === 'avg_all') {
-              points = snapshots.map((s, si) => {
-                const val = weightedAvg(s, si, _prods, DATA.all_cities, filterZeros, blipSet);
-                return val !== null ? { x: new Date(s.timestamp), y: val } : null;
-              }).filter(Boolean);
-            } else if (prod.type === 'avg_sel' && city.type === 'avg_sel') {
-              points = snapshots.map((s, si) => {
-                const val = weightedAvg(s, si, _prods, selectedCities, filterZeros, blipSet);
-                return val !== null ? { x: new Date(s.timestamp), y: val } : null;
-              }).filter(Boolean);
-            }
-            if (!points || points.length === 0) return;
-
-            // Styling
-            let color, dash = [], width = 2;
-            const isAvgProd = prod.type === 'avg_sel';
-            const isAvgCity = city.type !== 'real';
-
-            if (colorByCity) {
-              if (city.type === 'avg_all') color = isLight ? '#1d1d1f' : '#ffffff';
-              else if (city.type === 'avg_sel') color = '#ff9f0a';
-              else color = CITY_COLORS[city.name] || '#888';
-              if (nProds > 1) dash = PROD_DASHES[pi % PROD_DASHES.length];
+        selectedCities.forEach(city => {
+          // First pass: collect raw values (null where missing)
+          const rawPoints = snapshots.map((s, si) => {
+            let val = null;
+            if (isAllProducts) {
+              const vals = s.products
+                .map(p => getValidValue(s, p.model, city, filterZeros, blipSet, si))
+                .filter(v => v !== null);
+              if (vals.length > 0) {
+                val = vals.reduce((a, b) => a + b, 0) / vals.length;
+              }
             } else {
-              if (isAvgProd) color = '#ff9f0a';
-              else color = PRODUCT_COLORS[pi % PRODUCT_COLORS.length];
-              if (nCities > 1) dash = PROD_DASHES[ci % PROD_DASHES.length];
+              val = getValidValue(s, selectedProduct, city, filterZeros, blipSet, si);
             }
-            if (isAvgProd || isAvgCity) width = 2.5;
-
-            // Label
-            const pLabel = prod.label.replace(/\s*\([^)]*\)$/, '');
-            let lineLabel;
-            if (nProds === 1 && nCities === 1) lineLabel = `${pLabel} — ${city.label}`;
-            else if (nProds === 1) lineLabel = city.label;
-            else if (nCities === 1) lineLabel = pLabel;
-            else lineLabel = `${city.label} — ${pLabel}`;
-
-            datasets.push({
-              label: lineLabel, data: points,
-              borderColor: color, backgroundColor: color + '20',
-              pointBackgroundColor: color, borderWidth: width, borderDash: dash,
-              pointRadius: showPoints ? (isAvgProd || isAvgCity ? 1.5 : 2.5) : (isAvgProd || isAvgCity ? 0 : 1),
-              pointHoverRadius: showPoints ? 4 : 2.5, pointBorderWidth: 0, tension: 0.3, fill: false,
-              yAxisID: _getAxisId('availability'),
-            });
+            return { x: new Date(s.timestamp), y: val };
           });
+
+          // Only keep points with actual data — no interpolation
+          const points = rawPoints
+            .filter(pt => pt.y !== null)
+            .map(pt => ({ x: pt.x, y: pt.y, estimated: false }));
+
+          if (points.length > 0) {
+            datasets.push({
+              label: city,
+              data: points,
+              borderColor: CITY_COLORS[city] || '#888',
+              backgroundColor: (CITY_COLORS[city] || '#888') + '20',
+              borderWidth: 2,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              tension: 0.3,
+              fill: false
+            });
+          }
         });
 
-        // Custom weighted average line if user specified cities
+        // Add weighted average line (weighted by store count per city)
+        if (selectedCities.length > 1) {
+          const avgPoints = [];
+          const products = isAllProducts ? DATA.all_models : [selectedProduct];
+          snapshots.forEach((s, si) => {
+            const val = weightedAvg(s, si, products, selectedCities, filterZeros, blipSet);
+            if (val !== null) {
+              avgPoints.push({ x: new Date(s.timestamp), y: val });
+            }
+          });
+          if (avgPoints.length > 0) {
+            datasets.push({
+              label: 'Weighted Avg',
+              data: avgPoints,
+              borderColor: '#ffffff',
+              backgroundColor: '#ffffff20',
+              borderWidth: 3,
+              borderDash: [6, 3],
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              tension: 0.3,
+              fill: false
+            });
+          }
+        }
+
+        // Add custom weighted average line if user specified cities
         const customCities = getCustomAvgCities();
         if (customCities.length > 0) {
           const customPoints = [];
+          const products = isAllProducts ? DATA.all_models : [selectedProduct];
           snapshots.forEach((s, si) => {
-            const val = weightedAvg(s, si, _prods, customCities, filterZeros, blipSet);
-            if (val !== null) customPoints.push({ x: new Date(s.timestamp), y: val });
+            const val = weightedAvg(s, si, products, customCities, filterZeros, blipSet);
+            if (val !== null) {
+              customPoints.push({ x: new Date(s.timestamp), y: val });
+            }
           });
           if (customPoints.length > 0) {
             datasets.push({
-              label: 'Custom Avg (' + customCities.join(', ') + ')', data: customPoints,
-              borderColor: '#ffd60a', backgroundColor: '#ffd60a20',
-              borderWidth: 3, borderDash: [3, 3], pointRadius: 0,
-              pointHoverRadius: 5, tension: 0.3, fill: false,
-              yAxisID: _getAxisId('availability'),
+              label: 'Custom Avg (' + customCities.join(', ') + ')',
+              data: customPoints,
+              borderColor: '#ffd60a',
+              backgroundColor: '#ffd60a20',
+              borderWidth: 3,
+              borderDash: [3, 3],
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              tension: 0.3,
+              fill: false
             });
           }
         }
+      } else if (showAvailability) {
+        // All products view: one line per product (store-weighted average across selected cities)
+        document.getElementById('mainChartTitle').textContent = 'All Products — Store-Weighted Average Across Selected Cities';
+
+        // First pass: compute each product's overall weighted avg for sorting
+        const modelStats = DATA.all_models.map((model, idx) => {
+          const points = [];
+          let overallSum = 0, overallWeight = 0;
+          snapshots.forEach((s, si) => {
+            let wSum = 0, wTotal = 0;
+            let validCount = 0;
+            const totalPossible = selectedCities.length;
+            selectedCities.forEach(city => {
+              const sc = getStoreCount(s, city);
+              if (sc <= 0) return;
+              const val = getValidValue(s, model, city, filterZeros, blipSet, si);
+              if (val !== null) {
+                wSum += val * sc;
+                wTotal += sc;
+                validCount++;
+              }
+            });
+            // Only include point if more than 2/3 of cities are reporting
+            if (wTotal > 0 && validCount >= totalPossible * (2 / 3)) {
+              const avg = wSum / wTotal;
+              points.push({ x: new Date(s.timestamp), y: avg });
+              overallSum += avg;
+              overallWeight++;
+            }
+          });
+          return { model, idx, points, overallAvg: overallWeight > 0 ? overallSum / overallWeight : -1 };
+        }).filter(m => m.points.length > 0);
+
+        // Sort by overall weighted average (lowest first so worst products are easy to spot)
+        modelStats.sort((a, b) => a.overallAvg - b.overallAvg);
+
+        modelStats.forEach((m, sortIdx) => {
+          datasets.push({
+            label: `${m.model} (${m.overallAvg.toFixed(0)}%)`,
+            data: m.points,
+            borderColor: PRODUCT_COLORS[sortIdx % PRODUCT_COLORS.length],
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+            tension: 0.3,
+            fill: false
+          });
+        });
       }
 
       if (!showAvailability) {
         document.getElementById('mainChartTitle').textContent = isAllProducts
           ? 'eBay Prices — All Products'
-          : _prods.length === 1 ? `${_prods[0]} — eBay Prices` : `${_prods.length} Products — eBay Prices`;
+          : `${selectedProduct} — eBay Prices`;
       }
 
       // --- eBay price overlay ---
@@ -3406,80 +1724,45 @@
       const showMedian = document.getElementById('showEbayMedian').checked;
       if (showEbay) {
         const ebayData = DATA.ebay_prices.data;
-        if (_prods.length === 1) {
+        if (!isAllProducts) {
           // Single product: look for matching eBay product
-          const ebayHistory = ebayData[_prods[0]];
+          const ebayHistory = ebayData[selectedProduct];
           if (ebayHistory && ebayHistory.length > 0) {
             if (showMean) {
-              const meanFiltered = ebayHistory.filter(d => d.avg_price !== null);
               datasets.push({
                 label: 'eBay Mean Price',
-                data: meanFiltered.map(d => ({ x: new Date(d.timestamp), y: d.avg_price })),
-                _ebayData: meanFiltered,
+                data: ebayHistory.filter(d => d.avg_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.avg_price })),
                 borderColor: '#30d158',
                 backgroundColor: '#30d15820',
                 borderWidth: 2.5,
-                pointRadius: 1.5,
-                pointHoverRadius: 3,
-                pointBorderWidth: 0,
+                pointRadius: 5,
+                pointHoverRadius: 7,
                 pointStyle: 'rectRot',
                 tension: 0.3,
                 fill: false,
-                yAxisID: _getAxisId('ebay'),
+                yAxisID: 'y2',
               });
             }
             if (showMedian) {
-              const medianFiltered = ebayHistory.filter(d => d.median_price !== null);
               datasets.push({
                 label: 'eBay Median Price',
-                data: medianFiltered.map(d => ({ x: new Date(d.timestamp), y: d.median_price })),
-                _ebayData: medianFiltered,
+                data: ebayHistory.filter(d => d.median_price !== null).map(d => ({ x: new Date(d.timestamp), y: d.median_price })),
                 borderColor: '#ff9f0a',
                 backgroundColor: '#ff9f0a20',
                 borderWidth: 2,
                 borderDash: [6, 3],
-                pointRadius: 1.5,
-                pointHoverRadius: 3,
-                pointBorderWidth: 0,
+                pointRadius: 5,
+                pointHoverRadius: 7,
                 pointStyle: 'triangle',
                 tension: 0.3,
                 fill: false,
-                yAxisID: _getAxisId('ebay'),
+                yAxisID: 'y2',
               });
-            }
-            // Rolling 2-sigma band around the mean price (always shown when eBay is on)
-            {
-              const meanPoints = ebayHistory.filter(d => d.avg_price !== null);
-              if (meanPoints.length >= 2) {
-                const bands = _rollingBands(meanPoints.map(d => ({ t: new Date(d.timestamp).getTime(), v: d.avg_price })));
-                datasets.push({
-                  label: 'eBay +2\u03c3',
-                  data: bands.map(b => ({ x: new Date(b.t), y: b.upper })),
-                  borderColor: 'transparent',
-                  backgroundColor: 'rgba(48,209,88,0.08)',
-                  pointRadius: 0,
-                  pointHoverRadius: 0,
-                  tension: 0.3,
-                  fill: '+1',
-                  yAxisID: _getAxisId('ebay'),
-                });
-                datasets.push({
-                  label: 'eBay -2\u03c3',
-                  data: bands.map(b => ({ x: new Date(b.t), y: b.lower })),
-                  borderColor: 'transparent',
-                  backgroundColor: 'rgba(48,209,88,0.08)',
-                  pointRadius: 0,
-                  pointHoverRadius: 0,
-                  tension: 0.3,
-                  fill: '-1',
-                  yAxisID: _getAxisId('ebay'),
-                });
-              }
             }
           }
         } else {
-          // Multiple products: one avg + median line per selected product with eBay data
-          const ebayProducts = _prods.filter(p => ebayData[p] && ebayData[p].length > 0);
+          // All products: one avg + median line per eBay product
+          const ebayProducts = DATA.ebay_prices.products;
           ebayProducts.forEach((productName, idx) => {
             const history = ebayData[productName];
             if (!history || history.length === 0) return;
@@ -3492,13 +1775,12 @@
                 backgroundColor: color + '20',
                 borderWidth: 2,
                 borderDash: [8, 4],
-                pointRadius: 1.5,
-                pointHoverRadius: 3,
-                pointBorderWidth: 0,
+                pointRadius: 4,
+                pointHoverRadius: 6,
                 pointStyle: 'rectRot',
                 tension: 0.3,
                 fill: false,
-                yAxisID: _getAxisId('ebay'),
+                yAxisID: 'y2',
               });
             }
             if (showMedian) {
@@ -3509,338 +1791,56 @@
                 backgroundColor: color + '20',
                 borderWidth: 1.5,
                 borderDash: [3, 3],
-                pointRadius: 1,
-                pointHoverRadius: 2.5,
-                pointBorderWidth: 0,
+                pointRadius: 3,
+                pointHoverRadius: 5,
                 pointStyle: 'triangle',
                 tension: 0.3,
                 fill: false,
-                yAxisID: _getAxisId('ebay'),
+                yAxisID: 'y2',
               });
             }
-            // Rolling 2-sigma band per product (always shown when eBay is on)
-            {
-              const meanPoints = history.filter(d => d.avg_price !== null);
-              if (meanPoints.length >= 2) {
-                const bands = _rollingBands(meanPoints.map(d => ({ t: new Date(d.timestamp).getTime(), v: d.avg_price })));
-                datasets.push({
-                  label: `${productName} +2\u03c3`,
-                  data: bands.map(b => ({ x: new Date(b.t), y: b.upper })),
-                  borderColor: 'transparent',
-                  backgroundColor: color + '10',
-                  pointRadius: 0,
-                  pointHoverRadius: 0,
-                  tension: 0.3,
-                  fill: '+1',
-                  yAxisID: _getAxisId('ebay'),
-                });
-                datasets.push({
-                  label: `${productName} -2\u03c3`,
-                  data: bands.map(b => ({ x: new Date(b.t), y: b.lower })),
-                  borderColor: 'transparent',
-                  backgroundColor: color + '10',
-                  pointRadius: 0,
-                  pointHoverRadius: 0,
-                  tension: 0.3,
-                  fill: '-1',
-                  yAxisID: _getAxisId('ebay'),
-                });
-              }
-            }
           });
         }
       }
 
-      // --- eBay sales overlay (bar chart) ---
-      const showEbaySales = document.getElementById('showEbaySales').checked && DATA.ebay_sales;
-      if (showEbaySales) {
-        const salesData = DATA.ebay_sales.data;
-        // Match selected products to eBay sales products
-        const salesProducts = _prods.filter(p => salesData[p] && salesData[p].length > 0);
-        if (salesProducts.length === 0) {
-          // Try all products if none match selection
-          const allSalesProds = Object.keys(salesData);
-          // Aggregate all products into a single daily total
-          const dailyTotals = {};
-          for (const prod of allSalesProds) {
-            for (const d of salesData[prod]) {
-              if (!dailyTotals[d.date]) dailyTotals[d.date] = { sold: 0, revenue: 0 };
-              dailyTotals[d.date].sold += d.sold;
-              dailyTotals[d.date].revenue += d.revenue;
-            }
-          }
-          const points = Object.entries(dailyTotals)
-            .sort((a,b) => a[0].localeCompare(b[0]))
-            .map(([date, v]) => ({ x: new Date(date + 'T12:00:00'), y: v.sold }));
-          if (points.length > 0) {
-            datasets.push({
-              label: 'eBay Est. Sales (all)',
-              type: 'bar',
-              data: points,
-              backgroundColor: '#bf5af240',
-              borderColor: '#bf5af2',
-              borderWidth: 1,
-              barThickness: Math.max(4, Math.min(20, (chartEl.clientWidth - 100) / points.length * 0.6)),
-              yAxisID: _getAxisId('ebaySales'),
-            });
-          }
-        } else if (salesProducts.length === 1) {
-          const history = salesData[salesProducts[0]];
-          const points = history.map(d => ({ x: new Date(d.date + 'T12:00:00'), y: d.sold }));
-          datasets.push({
-            label: 'eBay Est. Sales',
-            type: 'bar',
-            data: points,
-            backgroundColor: '#bf5af240',
-            borderColor: '#bf5af2',
-            borderWidth: 1,
-            barThickness: Math.max(4, Math.min(20, (chartEl.clientWidth - 100) / points.length * 0.6)),
-            yAxisID: _getAxisId('ebaySales'),
-          });
-        } else {
-          // Multiple selected products: stacked or separate bars
-          salesProducts.forEach((prod, idx) => {
-            const history = salesData[prod];
-            if (!history || history.length === 0) return;
-            const color = PRODUCT_COLORS[idx % PRODUCT_COLORS.length];
-            const points = history.map(d => ({ x: new Date(d.date + 'T12:00:00'), y: d.sold }));
-            datasets.push({
-              label: `${prod} (Sales)`,
-              type: 'bar',
-              data: points,
-              backgroundColor: color + '50',
-              borderColor: color,
-              borderWidth: 1,
-              barThickness: Math.max(3, Math.min(14, (chartEl.clientWidth - 100) / points.length * 0.4)),
-              yAxisID: _getAxisId('ebaySales'),
-            });
-          });
-        }
-      }
-
-      // --- Lead time overlay ---
-      const showLeadTimes = document.getElementById('showLeadTimes').checked && DATA.lead_times;
-      if (showLeadTimes) {
-        const ltSnapshots = DATA.lead_times.snapshots;
-        const ltCities = selectedCities.length > 0 ? selectedCities : DATA.all_cities;
-        const ltShowAvg = isCityAverageOn() || selectedCities.length === 0;
-
-        // Per-city lead time lines
-        ltCities.forEach(city => {
-          const points = [];
-          ltSnapshots.forEach(snap => {
-            const cityData = snap.data[city];
-            if (!cityData) return;
-            // Average lead time across selected products
-            const vals = _prods.map(p => cityData[p]).filter(v => v !== undefined && v !== null);
-            if (vals.length > 0) {
-              points.push({ x: new Date(snap.t), y: vals.reduce((a,b) => a+b, 0) / vals.length });
-            }
-          });
-          if (points.length > 0) {
-            const cityColor = CITY_COLORS[city] || '#888';
-            datasets.push({
-              label: `${city} Lead Time`,
-              data: points,
-              borderColor: cityColor,
-              backgroundColor: 'transparent',
-              borderWidth: 2,
-              borderDash: [6, 3],
-              pointRadius: 1.5,
-              pointHoverRadius: 3,
-              pointBorderWidth: 0,
-              pointStyle: 'rect',
-              pointBackgroundColor: cityColor,
-              stepped: 'before',
-              fill: false,
-              yAxisID: _getAxisId('leadTimes'),
-            });
-          }
-        });
-
-        // Average lead time line across all cities
-        if (ltShowAvg) {
-          const avgPoints = [];
-          ltSnapshots.forEach(snap => {
-            let allVals = [];
-            DATA.all_cities.forEach(city => {
-              const cityData = snap.data[city];
-              if (!cityData) return;
-              const vals = _prods.map(p => cityData[p]).filter(v => v !== undefined && v !== null);
-              allVals = allVals.concat(vals);
-            });
-            if (allVals.length > 0) {
-              avgPoints.push({ x: new Date(snap.t), y: allVals.reduce((a,b) => a+b, 0) / allVals.length });
-            }
-          });
-          if (avgPoints.length > 0) {
-            datasets.push({
-              label: 'Avg Lead Time (All Cities)',
-              data: avgPoints,
-              borderColor: '#64d2ff',
-              backgroundColor: 'transparent',
-              borderWidth: 2.5,
-              borderDash: [6, 3],
-              pointRadius: 0,
-              pointHoverRadius: 3,
-              stepped: 'before',
-              fill: false,
-              yAxisID: _getAxisId('leadTimes'),
-            });
-          }
-        }
-      }
-
-      // --- Delivery time overlay ---
-      const showDeliveryTimes = document.getElementById('showDeliveryTimes').checked && DATA.delivery_times;
-      if (showDeliveryTimes) {
-        const dtSnapshots = DATA.delivery_times.snapshots;
-        const dtCities = selectedCities.length > 0 ? selectedCities : DATA.all_cities;
-        const dtShowAvg = isCityAverageOn() || selectedCities.length === 0;
-
-        // Per-city delivery time lines
-        dtCities.forEach(city => {
-          const points = [];
-          dtSnapshots.forEach(snap => {
-            const cityData = snap.data[city];
-            if (!cityData) return;
-            const vals = _prods.map(p => cityData[p]).filter(v => v !== undefined && v !== null);
-            if (vals.length > 0) {
-              points.push({ x: new Date(snap.t), y: vals.reduce((a,b) => a+b, 0) / vals.length });
-            }
-          });
-          if (points.length > 0) {
-            const cityColor = CITY_COLORS[city] || '#888';
-            datasets.push({
-              label: `${city} Delivery`,
-              data: points,
-              borderColor: cityColor,
-              backgroundColor: 'transparent',
-              borderWidth: 2,
-              borderDash: [3, 3],
-              pointRadius: 1.5,
-              pointHoverRadius: 3,
-              pointBorderWidth: 0,
-              pointStyle: 'circle',
-              pointBackgroundColor: cityColor,
-              stepped: 'before',
-              fill: false,
-              yAxisID: _getAxisId('deliveryTimes'),
-            });
-          }
-        });
-
-        // Average delivery time line across all cities
-        if (dtShowAvg) {
-          const avgPoints = [];
-          dtSnapshots.forEach(snap => {
-            let allVals = [];
-            DATA.all_cities.forEach(city => {
-              const cityData = snap.data[city];
-              if (!cityData) return;
-              const vals = _prods.map(p => cityData[p]).filter(v => v !== undefined && v !== null);
-              allVals = allVals.concat(vals);
-            });
-            if (allVals.length > 0) {
-              avgPoints.push({ x: new Date(snap.t), y: allVals.reduce((a,b) => a+b, 0) / allVals.length });
-            }
-          });
-          if (avgPoints.length > 0) {
-            datasets.push({
-              label: 'Avg Delivery (All Cities)',
-              data: avgPoints,
-              borderColor: '#ff9f0a',
-              backgroundColor: 'transparent',
-              borderWidth: 2.5,
-              borderDash: [3, 3],
-              pointRadius: 0,
-              pointHoverRadius: 3,
-              stepped: 'before',
-              fill: false,
-              yAxisID: _getAxisId('deliveryTimes'),
-            });
-          }
-        }
-      }
-
-      // --- Dynamic multi-axis scale builder ---
-      const tc = getThemeColors();
-      const _scalesConfig = { x: _makeTimeAxisConfig({ max: new Date() }) };
-
-      // Collect which (side, unit) combos are actually used by active datasets
-      const _usedAxes = new Set();
-      datasets.forEach(ds => { if (ds.yAxisID) _usedAxes.add(ds.yAxisID); });
-
-      // Count how many axes per side (for grid drawing decisions)
-      let leftCount = 0, rightCount = 0;
-      _usedAxes.forEach(id => { if (id.startsWith('y_left_')) leftCount++; else rightCount++; });
-
-      // Track how many axes stacked per side (for weight/offset)
-      let leftIdx = 0, rightIdx = 0;
-
-      _usedAxes.forEach(axisId => {
-        const isLeft = axisId.startsWith('y_left_');
-        const unit = axisId.split('_').pop(); // pct, dollars, days
-        const position = isLeft ? 'left' : 'right';
-        const sameCount = isLeft ? leftCount : rightCount;
-        const stackIdx = isLeft ? leftIdx++ : rightIdx++;
-
-        // Gather values for auto-ranging
-        const yVals = datasets.filter(ds => ds.yAxisID === axisId)
+      // Compute y2 axis max from eBay data
+      let y2Max = 100;
+      let y2Config;
+      if (showEbay) {
+        const ebayYValues = datasets
+          .filter(ds => ds.yAxisID === 'y2')
           .flatMap(ds => ds.data.map(pt => pt.y))
           .filter(v => v !== null && v !== undefined);
-
-        let min, max, tickCb, titleText, titleColor, tickColor;
-        if (unit === 'pct') {
-          min = 0; max = 100;
-          tickCb = v => Math.round(v) + '%';
-          titleText = 'Availability (%)';
-          titleColor = tc.tick;
-          tickColor = tc.tick;
-        } else if (unit === 'dollars') {
-          min = 0;
-          if (yVals.length > 0) {
-            const rawMax = Math.max(...yVals);
-            max = Math.ceil(rawMax / 100) * 100;
-            if (max < rawMax * 1.1) max = Math.ceil(rawMax * 1.1 / 50) * 50;
-          } else {
-            max = 100;
-          }
-          tickCb = v => '$' + Math.round(v).toLocaleString();
-          titleText = 'eBay Price ($)';
-          titleColor = '#30d158';
-          tickColor = '#30d158';
-        } else if (unit === 'count') {
-          min = 0;
-          max = yVals.length > 0 ? Math.max(5, Math.ceil(Math.max(...yVals) * 1.2)) : 10;
-          tickCb = v => v < 0 ? '' : Math.round(v).toString();
-          titleText = 'Est. Sales (items/day)';
-          titleColor = '#bf5af2';
-          tickColor = '#bf5af2';
-        } else { // days
-          min = -0.08;
-          max = yVals.length > 0 ? Math.max(2, Math.ceil(Math.max(...yVals) + 0.5)) : 2;
-          tickCb = v => v < 0 ? '' : v.toFixed(1) + 'd';
-          // Determine color from which day sources are active
-          const ltOn = showLeadTimes, dtOn = showDeliveryTimes;
-          titleColor = ltOn && dtOn ? '#aaa' : dtOn ? '#ff9f0a' : '#64d2ff';
-          tickColor = titleColor;
-          titleText = ltOn && dtOn ? 'Lead / Delivery (days)' : dtOn ? 'Delivery Time (days)' : 'Avg Lead Time (days)';
+        if (ebayYValues.length > 0) {
+          const rawMax = Math.max(...ebayYValues);
+          y2Max = Math.ceil(rawMax / 100) * 100;
+          if (y2Max < rawMax * 1.1) y2Max = Math.ceil(rawMax * 1.1 / 50) * 50;
         }
-
-        // First axis on each side draws grid, others don't
-        const drawGrid = stackIdx === 0;
-
-        _scalesConfig[axisId] = {
-          position,
-          min, max,
-          display: true,
-          grid: { drawOnChartArea: drawGrid, color: tc.grid },
-          ticks: { color: tickColor, callback: tickCb },
-          title: { display: true, text: titleText, color: titleColor, font: { size: 12 } },
-          ...(sameCount > 1 && stackIdx > 0 ? { weight: stackIdx } : {})
+        y2Config = {
+          position: 'right',
+          min: 0,
+          max: y2Max,
+          grid: { drawOnChartArea: !showAvailability, color: getThemeColors().grid },
+          ticks: { color: '#30d158', callback: v => '$' + v.toLocaleString() },
+          title: { display: true, text: 'eBay Price ($)', color: '#30d158', font: { size: 12 } }
         };
-      });
+      } else {
+        y2Config = {
+          position: 'right',
+          min: 0, max: 100,
+          grid: { drawOnChartArea: false },
+          ticks: { color: getThemeColors().tick, callback: v => v + '%' }
+        };
+      }
+
+      // Hide left y-axis when availability is off
+      const yConfig = {
+        position: 'left',
+        min: 0, max: 100,
+        display: showAvailability,
+        grid: { color: getThemeColors().grid },
+        ticks: { color: getThemeColors().tick, callback: v => v + '%' }
+      };
 
       const highlightPlugin = makeHighlightPlugin('mainChart');
       mainChart = new Chart(ctx, {
@@ -3849,26 +1849,144 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          interaction: { mode: 'nearest', intersect: true },
-          elements: { point: { borderWidth: 0, hoverBorderWidth: 0 } },
+          interaction: { mode: 'index', intersect: false },
           onClick: () => {}, // enable click events for plugin
           plugins: {
             legend: {
               position: 'top',
-              labels: { color: tc.tickLabel, usePointStyle: true, pointStyle: 'circle', padding: 16 },
+              labels: { color: getThemeColors().tickLabel, usePointStyle: true, pointStyle: 'circle', padding: 16 },
               onClick: (e, legendItem, legend) => {
                 // Clicking a legend item highlights that dataset
                 highlightPlugin._highlight(legend.chart, legendItem.datasetIndex);
               }
             },
-            tooltip: { enabled: false }
+            tooltip: {
+              backgroundColor: getThemeColors().tooltipBg,
+              borderColor: getThemeColors().tooltipBorder,
+              borderWidth: 1,
+              titleColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#1d1d1f' : '#fff',
+              bodyColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#1d1d1f' : '#ccc',
+              filter: (tooltipItem) => {
+                // When a line is highlighted, only show that line's tooltip
+                if (highlightPlugin._highlighted >= 0) {
+                  return tooltipItem.datasetIndex === highlightPlugin._highlighted;
+                }
+                return true;
+              },
+              itemSort: (a, b) => b.parsed.y - a.parsed.y,
+              callbacks: {
+                label: ctx => {
+                  if (ctx.dataset.yAxisID === 'y2') {
+                    return `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}`;
+                  }
+                  return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`;
+                }
+              }
+            }
           },
-          scales: _scalesConfig
+          scales: {
+            x: {
+              type: 'time',
+              max: showAvailability ? new Date() : undefined,
+              time: { tooltipFormat: 'MMM d, yyyy h:mm a', displayFormats: { hour: 'h a', day: 'MMM d' } },
+              grid: { color: getThemeColors().grid },
+              ticks: {
+                color: getThemeColors().tick,
+                maxRotation: 0,
+                autoSkip: true,
+                major: { enabled: true },
+                callback: function(value, index, ticks) {
+                  const raw = ticks[index] ? ticks[index].value : value;
+                  const d = new Date(raw);
+                  if (isNaN(d.getTime())) return value;
+
+                  const hour = d.getHours();
+                  const min = d.getMinutes();
+                  const ampm = hour >= 12 ? 'PM' : 'AM';
+                  const h12 = hour % 12 || 12;
+                  const minStr = min < 10 ? '0' + min : min;
+
+                  // Detect if chart is in minute mode (sub-hour range)
+                  const xScale = this.chart ? this.chart.options.scales.x : null;
+                  const isMinuteMode = xScale && xScale.time && xScale.time.unit === 'minute';
+
+                  if (!isMinuteMode && min !== 0) return '';
+                  const timeLine = isMinuteMode ? `${h12}:${minStr} ${ampm}` : `${h12} ${ampm}`;
+
+                  // Major ticks (day boundaries) get a second line with the date
+                  if (ticks[index].major) {
+                    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    const dateStr = `${dayNames[d.getDay()]} ${monthNames[d.getMonth()]} ${d.getDate()}`;
+                    return [timeLine, dateStr];
+                  }
+                  return timeLine;
+                }
+              }
+            },
+            y: yConfig,
+            y2: y2Config
+          }
         },
-        plugins: [highlightPlugin, crosshairTooltipPlugin, dragMeasurePlugin, y2DragPlugin, timeTicksPlugin, xZoomPlugin, nowLinePlugin]
+        plugins: [highlightPlugin, {
+          id: 'customTimeTicks',
+          beforeUpdate(chart) {
+            // Dynamically set time unit and stepSize based on data range
+            const xScale = chart.options.scales.x;
+            if (!xScale || xScale.type !== 'time') return;
+            let minT = Infinity, maxT = -Infinity;
+            chart.data.datasets.forEach(ds => {
+              ds.data.forEach(pt => {
+                const t = pt.x ? pt.x.getTime() : 0;
+                if (t > 0 && t < minT) minT = t;
+                if (t > maxT) maxT = t;
+              });
+            });
+            if (minT === Infinity) return;
+            const rangeHours = (maxT - minT) / (1000 * 60 * 60);
+            let unit, step;
+            if (rangeHours < 1) {
+              unit = 'minute';
+              const rangeMins = rangeHours * 60;
+              if (rangeMins <= 10) step = 1;
+              else if (rangeMins <= 30) step = 5;
+              else step = 10;
+            } else {
+              unit = 'hour';
+              if (rangeHours <= 12) step = 1;
+              else if (rangeHours <= 24) step = 2;
+              else if (rangeHours <= 48) step = 4;
+              else if (rangeHours <= 96) step = 6;
+              else if (rangeHours <= 192) step = 8;
+              else step = 12;
+            }
+            xScale.time.unit = unit;
+            xScale.time.stepSize = step;
+          },
+          afterBuildTicks(chart) {
+            // After Chart.js builds the time ticks, mark day-boundary ticks as major
+            // so they are never auto-skipped and get the date label
+            const xScale = chart.scales.x;
+            if (!xScale || !xScale.ticks || xScale.ticks.length === 0) return;
+
+            let lastDay = -1;
+            xScale.ticks.forEach(tick => {
+              const d = new Date(tick.value);
+              const day = d.getDate();
+              if (day !== lastDay) {
+                tick.major = true;
+                lastDay = day;
+              }
+            });
+          }
+        }]
       });
 
-      // No auto-highlight — show all lines at full opacity by default
+      // Auto-highlight the Weighted Avg line on load
+      const avgIdx = datasets.findIndex(ds => ds.label === 'Weighted Avg');
+      if (avgIdx >= 0) {
+        highlightPlugin._highlight(mainChart, avgIdx);
+      }
     }
 
     function renderHeatmap(snapshots, selectedCities, filterZeros, blipSet) {
@@ -3905,11 +2023,11 @@
     let _moverUpdatesCount = null; // null = use hours mode, number = use last N updates mode
 
     /** Helper: compute average for a set of snapshots for a given city */
-    function _avgForSnaps(snaps, allSnapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts) {
+    function _avgForSnaps(snaps, allSnapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet) {
       let vals = [];
-      const products = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
       snaps.forEach(s => {
         const si = allSnapshots.indexOf(s);
+        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
         products.forEach(prod => {
           const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
           if (val !== null) vals.push(val);
@@ -3929,13 +2047,12 @@
       });
     }
 
-    function renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
+    function renderCitySummary(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
       const grid = document.getElementById('citySummary');
       grid.innerHTML = '';
-      document.getElementById('cityAvgTimeRange').textContent = _timeRangeLabel();
 
       selectedCities.forEach(city => {
-        const avg = _avgForSnaps(snapshots, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts);
+        const avg = _avgForSnaps(snapshots, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
         const display = avg !== null ? avg.toFixed(0) : 'N/A';
         const cls = avg !== null ? (avg >= 75 ? 'good' : avg >= 50 ? 'ok' : 'bad') : '';
         const card = document.createElement('div');
@@ -3953,12 +2070,12 @@
      * Uses the two nearest snapshots on either side of targetMs to interpolate.
      * If targetMs is before all data, uses earliest; if after all, uses latest.
      */
-    function _interpolatedAvgAtTime(snapshots, targetMs, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts) {
+    function _interpolatedAvgAtTime(snapshots, targetMs, city, isAllProducts, selectedProduct, filterZeros, blipSet) {
       // Build time-series of (timestamp, avg) for this city
       const series = [];
-      const products = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
       snapshots.forEach((s, si) => {
         const t = new Date(s.timestamp).getTime();
+        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
         let vals = [];
         products.forEach(prod => {
           const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
@@ -3989,7 +2106,7 @@
       return null;
     }
 
-    function renderMovers(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
+    function renderMovers(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
       const grid = document.getElementById('moversGrid');
       grid.innerHTML = '';
 
@@ -4045,12 +2162,13 @@
       const movers = [];
 
       selectedCities.forEach(city => {
-        const recent = _avgForSnaps(recentSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts);
+        const recent = _avgForSnaps(recentSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
         let past;
         if (usePastSnaps) {
-          past = _avgForSnaps(pastSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts);
+          past = _avgForSnaps(pastSnaps, snapshots, city, isAllProducts, selectedProduct, filterZeros, blipSet);
         } else {
-          past = _interpolatedAvgAtTime(snapshots, targetPastMs, city, isAllProducts, selectedProduct, filterZeros, blipSet, selectedProducts);
+          // Extrapolate: find interpolated value at the target past time
+          past = _interpolatedAvgAtTime(snapshots, targetPastMs, city, isAllProducts, selectedProduct, filterZeros, blipSet);
         }
         if (recent !== null && past !== null) {
           movers.push({ city, delta: recent - past, recent, past, extrapolated: isExtrapolated });
@@ -4084,7 +2202,6 @@
     }
 
     function renderProductChart(snapshots, selectedCities, filterZeros, blipSet) {
-      document.getElementById('productChartTimeRange').textContent = _timeRangeLabel();
       const ctx = document.getElementById('productChart');
       if (productChart) {
         productChart.destroy();
@@ -4125,20 +2242,18 @@
       productAvgs.sort((a, b) => a.avg - b.avg);
 
       // Add weighted average as first item
-      const isLightTheme = document.documentElement.getAttribute('data-theme') === 'light';
-      const avgBarColor = isLightTheme ? '#1d1d1f' : '#ffffff';
       if (overallWTotal > 0) {
         productAvgs.unshift({
           model: '⚖️ Weighted Average (All Products)',
           avg: overallWSum / overallWTotal,
           count: overallWTotal,
-          color: avgBarColor,
+          color: '#ffffff',
           isAverage: true
         });
       }
 
       // Store original colors for highlight/reset
-      const origBgColors = productAvgs.map(p => p.isAverage ? avgBarColor + '55' : p.color + '99');
+      const origBgColors = productAvgs.map(p => p.isAverage ? '#ffffff55' : p.color + '99');
       const origBorderColors = productAvgs.map(p => p.color);
       const origBorderWidths = productAvgs.map(p => p.isAverage ? 2 : 1);
 
@@ -4184,7 +2299,7 @@
                   return productAvgs.map((p, i) => ({
                     text: p.model,
                     fontColor: p.color,
-                    fillStyle: p.isAverage ? avgBarColor + '55' : p.color + '99',
+                    fillStyle: p.isAverage ? '#ffffff55' : p.color + '99',
                     strokeStyle: p.color,
                     lineWidth: p.isAverage ? 2 : 1,
                     hidden: false,
@@ -4214,22 +2329,21 @@
             x: {
               min: 0, max: 100,
               grid: { color: getThemeColors().grid },
-              ticks: { color: getThemeColors().tick, callback: v => Math.round(v) + '%' }
+              ticks: { color: getThemeColors().tick, callback: v => v + '%' }
             },
             y: {
               grid: { display: false },
               ticks: { color: getThemeColors().tickLabel, font: { size: 11 } }
             }
           }
-        },
-        plugins: [xZoomPlugin]
+        }
       });
 
       function highlightBar(idx) {
         highlightedIdx = idx;
         const ds = productChart.data.datasets[0];
         ds.backgroundColor = productAvgs.map((p, i) =>
-          i === idx ? (p.isAverage ? avgBarColor + 'cc' : p.color + 'ff') : (p.isAverage ? avgBarColor + '15' : p.color + '22')
+          i === idx ? (p.isAverage ? '#ffffffcc' : p.color + 'ff') : (p.isAverage ? '#ffffff15' : p.color + '22')
         );
         ds.borderColor = productAvgs.map((p, i) =>
           i === idx ? p.color : p.color + '44'
@@ -4252,20 +2366,18 @@
 
     let _csvData = ''; // cached for download
 
-    function renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet, selectedProducts) {
-      document.getElementById('dataMatrixTimeRange').textContent = _timeRangeLabel();
+    function renderDataMatrix(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
       const card = document.getElementById('dataMatrixCard');
       const table = document.getElementById('dataMatrixTable');
       const title = document.getElementById('dataMatrixTitle');
-      const _prods = selectedProducts || (isAllProducts ? DATA.all_models : [selectedProduct]);
 
-      if (_prods.length !== 1 || snapshots.length === 0) {
+      if (isAllProducts || snapshots.length === 0) {
         card.style.display = 'none';
         return;
       }
 
       card.style.display = 'block';
-      title.textContent = `${_prods[0]} — Availability by City Over Time`;
+      title.textContent = `${selectedProduct} — Availability by City Over Time`;
 
       // Get latest store counts for column headers
       const latestSnap = snapshots[snapshots.length - 1];
@@ -4283,10 +2395,9 @@
       let csv = 'Timestamp,' + selectedCities.map(c => `${c} (${getCityStoreCount(c)})`).join(',') + ',Weighted Avg\n';
 
       snapshots.forEach((s, si) => {
-        const tsDisplay = formatMapTimestamp(s.timestamp);
-        const tsCsv = toLocalDatetimeStr(new Date(s.timestamp).getTime());
-        html += `<tr><td style="white-space:nowrap;color:var(--text-label);">${tsDisplay}</td>`;
-        let csvRow = tsCsv;
+        const ts = s.timestamp.replace('T', ' ').slice(0, 19);
+        html += `<tr><td style="white-space:nowrap;color:var(--text-label);">${ts}</td>`;
+        let csvRow = ts;
 
         const _isLight = document.documentElement.getAttribute('data-theme') === 'light';
         let wSum = 0, wTotal = 0;
@@ -4333,52 +2444,13 @@
 
     document.getElementById('downloadCsv').addEventListener('click', () => {
       if (!_csvData) return;
-      const prods = getSelectedProducts();
-      const safeName = (prods.length === 1 ? prods[0] : prods.length + '_products').replace(/[^a-zA-Z0-9]/g, '_');
+      const product = getSelectedProduct();
+      const safeName = product.replace(/[^a-zA-Z0-9]/g, '_');
       const blob = new Blob([_csvData], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `availability_${safeName}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    // Chart CSV download — exports raw (product × city) time series for current view
-    document.getElementById('downloadChartCsv').addEventListener('click', () => {
-      if (!DATA) return;
-      const { snapshots, filterZeros } = getFilteredSnapshots();
-      const prods = getSelectedProducts();
-      const cities = getSelectedCities();
-      if (prods.length === 0) return;
-      // Use all cities if none selected but average is on
-      const effectiveCities = cities.length > 0 ? cities : DATA.all_cities;
-      const blipSet = filterZeros ? getBlipSet(snapshots) : null;
-
-      // Build header: Timestamp, then one column per product × city
-      const cols = [];
-      effectiveCities.forEach(city => {
-        prods.forEach(prod => {
-          cols.push({ city, prod, label: `${prod} — ${city}` });
-        });
-      });
-
-      let csv = 'Timestamp,' + cols.map(c => '"' + c.label.replace(/"/g, '""') + '"').join(',') + '\n';
-      snapshots.forEach((s, si) => {
-        const row = [s.timestamp];
-        cols.forEach(c => {
-          const val = getValidValue(s, c.prod, c.city, filterZeros, blipSet, si);
-          row.push(val !== null ? val : '');
-        });
-        csv += row.join(',') + '\n';
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const safeName = (prods.length === 1 ? prods[0] : prods.length + '_products').replace(/[^a-zA-Z0-9]/g, '_');
-      a.download = `trends_${safeName}_${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
@@ -4439,33 +2511,6 @@
       }
     })();
 
-    // Share View button
-    document.getElementById('shareViewBtn').addEventListener('click', () => {
-      const hash = serializeState();
-      window.location.hash = hash;
-      const url = window.location.href;
-      navigator.clipboard.writeText(url).then(() => {
-        const btn = document.getElementById('shareViewBtn');
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = 'Share View'; btn.classList.remove('copied'); }, 2000);
-      }).catch(() => {
-        // Fallback for older browsers / insecure contexts
-        const ta = document.createElement('textarea');
-        ta.value = url;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        const btn = document.getElementById('shareViewBtn');
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = 'Share View'; btn.classList.remove('copied'); }, 2000);
-      });
-    });
-
     // ==========================================================
     // Interactive Map with Voronoi-Clipped Gradient Circles
     // ==========================================================
@@ -4483,8 +2528,8 @@
     /** Clustering distance thresholds by zoom level */
     function clusterDistanceForZoom(zoom) {
       if (zoom >= 7) return 0;    // no clustering
-      if (zoom >= 6) return 50;   // city-level (Houston, Austin stay separate)
-      if (zoom >= 5) return 250;  // state-level (Houston+Austin→Texas, NYC+Boston→Northeast)
+      if (zoom >= 5) return 50;   // city-level (Houston, Austin stay separate)
+      if (zoom >= 4) return 250;  // state-level (Houston+Austin→Texas, NYC+Boston→Northeast)
       return 500;                 // regional (Southeast, etc.)
     }
 
@@ -4597,9 +2642,8 @@
           // All same state — use state name
           displayName = STATE_NAMES[states[0]] || states[0];
         } else {
-          // Multiple states — use the state with the most stores
-          const topState = Object.entries(stateCounts).sort((a, b) => b[1] - a[1])[0][0];
-          displayName = (STATE_NAMES[topState] || topState) + ' region';
+          // Multiple states — use the city with the most stores
+          displayName = cityName + ' region';
         }
 
         return {
@@ -4693,12 +2737,7 @@
           const [px, py] = points[i];
           const color = item._color || MAP_COLORS.nodata;
           const opacity = 0.55;
-          let radiusPx = Math.max(10, milesToPixels(item.lat, zoom));
-          // Bigger circles for clustered views (zoomed out)
-          if (item._isCluster) {
-            const scaleFactor = zoom < 5 ? 3 : zoom < 6 ? 2.5 : zoom < 7 ? 2 : 1;
-            radiusPx *= scaleFactor;
-          }
+          const radiusPx = Math.max(10, milesToPixels(item.lat, zoom));
 
           const cell = voronoi.cellPolygon(i);
           if (!cell) return;
@@ -4749,11 +2788,7 @@
           const cell = voronoi.cellPolygon(i);
           if (!cell) continue;
           const [px, py] = points[i];
-          let radiusPx = Math.max(10, milesToPixels(items[i].lat, zoom));
-          if (items[i]._isCluster) {
-            const scaleFactor = zoom < 5 ? 3 : zoom < 6 ? 2.5 : zoom < 7 ? 2 : 1;
-            radiusPx *= scaleFactor;
-          }
+          const radiusPx = Math.max(10, milesToPixels(items[i].lat, zoom));
 
           ctx.save();
           // Clip to this store's circle
@@ -4845,408 +2880,6 @@
       return `${months[d.getMonth()]} ${d.getDate()} ${h12}:${m < 10 ? '0' + m : m} ${ampm}`;
     }
 
-    function formatDuration(hours) {
-      if (hours < 1) return `${Math.round(hours * 60)}m`;
-      if (hours < 24) return `${hours.toFixed(1)}h`;
-      const d = Math.floor(hours / 24);
-      const h = (hours % 24).toFixed(1);
-      return `${d}d ${h}h`;
-    }
-
-    function _initCycleControls() {
-      // Region dropdown
-      document.getElementById('cycleRegionSelect').addEventListener('change', e => {
-        _cycleRegionFilter = e.target.value;
-        renderCycles();
-      });
-      // Time range
-      document.getElementById('cycleTimeStart').addEventListener('change', e => {
-        _cycleTimeStart = e.target.value ? new Date(e.target.value).getTime() : null;
-        renderCycles();
-      });
-      document.getElementById('cycleTimeEnd').addEventListener('change', e => {
-        _cycleTimeEnd = e.target.value ? new Date(e.target.value).getTime() : null;
-        renderCycles();
-      });
-      document.getElementById('cycleTimeReset').addEventListener('click', () => {
-        _cycleTimeStart = null; _cycleTimeEnd = null;
-        document.getElementById('cycleTimeStart').value = '';
-        document.getElementById('cycleTimeEnd').value = '';
-        document.querySelectorAll('#cyclePeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector('#cyclePeriodBtns .period-btn[data-hours="0"]').classList.add('active');
-        renderCycles();
-      });
-      // Period buttons
-      document.querySelectorAll('#cyclePeriodBtns .period-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const hours = parseInt(btn.dataset.hours);
-          document.querySelectorAll('#cyclePeriodBtns .period-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          if (hours === 0) {
-            _cycleTimeStart = null; _cycleTimeEnd = null;
-            document.getElementById('cycleTimeStart').value = '';
-            document.getElementById('cycleTimeEnd').value = '';
-          } else {
-            const now = Date.now();
-            _cycleTimeStart = now - hours * 3600000;
-            _cycleTimeEnd = now;
-            document.getElementById('cycleTimeStart').value = toLocalDatetimeStr(_cycleTimeStart);
-            document.getElementById('cycleTimeEnd').value = toLocalDatetimeStr(_cycleTimeEnd);
-          }
-          renderCycles();
-        });
-      });
-      // Populate datetime inputs with 2w default
-      if (_cycleTimeStart && _cycleTimeEnd) {
-        document.getElementById('cycleTimeStart').value = toLocalDatetimeStr(_cycleTimeStart);
-        document.getElementById('cycleTimeEnd').value = toLocalDatetimeStr(_cycleTimeEnd);
-      }
-      // Min cycles filter
-      document.getElementById('cycleMinCycles').addEventListener('change', () => renderCycles());
-      // Group-by toggle
-      document.getElementById('cycleGroupStore').addEventListener('click', () => {
-        _cycleGroupBy = 'store';
-        document.getElementById('cycleGroupStore').classList.add('active');
-        document.getElementById('cycleGroupRegion').classList.remove('active');
-        renderCycles();
-      });
-      document.getElementById('cycleGroupRegion').addEventListener('click', () => {
-        _cycleGroupBy = 'region';
-        document.getElementById('cycleGroupRegion').classList.add('active');
-        document.getElementById('cycleGroupStore').classList.remove('active');
-        renderCycles();
-      });
-    }
-    let _cycleControlsInit = false;
-
-    function cycleSortBy(key) {
-      if (_cycleSortKey === key) {
-        _cycleSortDir = _cycleSortDir === 'asc' ? 'desc' : 'asc';
-      } else {
-        _cycleSortKey = key;
-        _cycleSortDir = 'asc';
-      }
-      renderCycles();
-    }
-
-    function renderCycles() {
-      if (!DATA || !DATA.cycles) {
-        document.getElementById('cyclesStats').innerHTML = '<div style="color:var(--text-dim);padding:40px;text-align:center;">No cycle data available. Run build_data.py with raw API responses.</div>';
-        return;
-      }
-      if (!_cycleControlsInit) { _initCycleControls(); _cycleControlsInit = true; }
-
-      const { cycles: allCycles } = DATA.cycles;
-
-      // Build product multi-dropdown for cycles
-      const products = [...new Set(allCycles.map(c => c.product))].sort();
-      if (!_cycleProductDropdown) {
-        const defaultProd = products.includes('Mac Mini M4 ($599)') ? ['Mac Mini M4 ($599)'] : products;
-        _cycleProductDropdown = new MultiDropdown(document.getElementById('cycleProductDropdown'), {
-          items: products.map(p => ({ value: p, label: p })),
-          header: { value: '__ALL__', label: 'All Products', btnLabel: 'all', isSelectAll: true },
-          initialSelected: defaultProd,
-          onChange: () => renderCycles()
-        });
-      }
-
-      // Populate region dropdown (once or when data changes)
-      const regionSel = document.getElementById('cycleRegionSelect');
-      const regions = [...new Set(allCycles.map(c => c.region).filter(Boolean))].sort();
-      if (regionSel.options.length !== regions.length + 1) {
-        regionSel.innerHTML = '<option value="__ALL__">All Regions</option>';
-        regions.forEach(r => {
-          const opt = document.createElement('option');
-          opt.value = r; opt.textContent = r;
-          regionSel.appendChild(opt);
-        });
-      }
-      regionSel.value = _cycleRegionFilter;
-
-      // Apply filters: product, region, time
-      const cycleSelectedProds = _cycleProductDropdown ? _cycleProductDropdown.getSelected() : products;
-      const isAllProd = cycleSelectedProds.length === products.length;
-      const isAllRegion = _cycleRegionFilter === '__ALL__';
-      const cycles = allCycles.filter(c => {
-        if (!isAllProd && !cycleSelectedProds.includes(c.product)) return false;
-        if (!isAllRegion && c.region !== _cycleRegionFilter) return false;
-        if (_cycleTimeStart) {
-          const t = new Date(c.restock).getTime();
-          if (t < _cycleTimeStart) return false;
-        }
-        if (_cycleTimeEnd) {
-          const t = new Date(c.sellout).getTime();
-          if (t > _cycleTimeEnd) return false;
-        }
-        return true;
-      });
-
-      if (cycles.length === 0) {
-        document.getElementById('cyclesStats').innerHTML = '<div style="color:var(--text-dim);padding:20px;text-align:center;">No cycles match current filters.</div>';
-        document.getElementById('rankingTable').innerHTML = '';
-        document.getElementById('cyclesTable').innerHTML = '';
-        if (cycleHistChart) { cycleHistChart.destroy(); cycleHistChart = null; }
-        if (cycleTimelineChart) { cycleTimelineChart.destroy(); cycleTimelineChart = null; }
-        return;
-      }
-
-      // Stats
-      const hrs = cycles.map(c => c.hours);
-      const sameDayN = cycles.filter(c => new Date(c.restock).toLocaleDateString() === new Date(c.sellout).toLocaleDateString()).length;
-      const statsEl = document.getElementById('cyclesStats');
-      statsEl.innerHTML = `
-        <div class="cycle-stat"><div class="stat-val">${cycles.length}</div><div class="stat-lbl">Total Cycles</div></div>
-        <div class="cycle-stat"><div class="stat-val">${formatDuration(hrs.reduce((a,b)=>a+b,0)/hrs.length)}</div><div class="stat-lbl">Avg Sellout Time</div></div>
-        <div class="cycle-stat"><div class="stat-val">${formatDuration(Math.min(...hrs))}</div><div class="stat-lbl">Fastest Sellout</div></div>
-        <div class="cycle-stat"><div class="stat-val">${cycles.length > 0 ? (100*sameDayN/cycles.length).toFixed(0) : 0}%</div><div class="stat-lbl">Same-Day Sellouts</div></div>
-        <div class="cycle-stat"><div class="stat-val">${new Set(cycles.map(c=>c.store)).size}</div><div class="stat-lbl">Stores</div></div>
-        <div class="cycle-stat"><div class="stat-val">${new Set(cycles.map(c=>c.region).filter(Boolean)).size}</div><div class="stat-lbl">Regions</div></div>
-      `;
-
-      // Ranking table: store or region mode
-      const isRegionView = _cycleGroupBy === 'region';
-      document.getElementById('rankingTitle').textContent = isRegionView ? 'Region Demand Ranking' : 'Store Demand Ranking';
-      document.getElementById('rankingSubtitle').textContent = isRegionView
-        ? 'Regions ranked by average time-to-sellout across all stores in the metro area.'
-        : 'Stores ranked by average time-to-sellout (fastest = highest demand).';
-
-      const groupMap = {};
-      cycles.forEach(c => {
-        const key = isRegionView ? (c.region || 'Other') : c.store;
-        if (!groupMap[key]) groupMap[key] = {
-          name: isRegionView ? (c.region || 'Other') : c.store_name,
-          region: c.region || '',
-          city: c.city || '',
-          state: c.state || '',
-          cycles: [], products: new Set(), stores: new Set()
-        };
-        groupMap[key].cycles.push(c);
-        groupMap[key].products.add(c.product);
-        groupMap[key].stores.add(c.store);
-      });
-      const rankings = Object.entries(groupMap).map(([k, d]) => {
-        const h = d.cycles.map(c => c.hours);
-        return {
-          key: k, name: d.name, region: d.region, city: d.city, state: d.state,
-          cycles: d.cycles.length, products: d.products.size, stores: d.stores.size,
-          avg_hours: h.reduce((a,b)=>a+b,0)/h.length,
-          fastest: Math.min(...h),
-        };
-      }).sort((a,b) => {
-        let cmp = 0;
-        const k = _cycleSortKey;
-        if (k === 'name') cmp = a.name.localeCompare(b.name);
-        else if (k === 'region') cmp = (a.region || '').localeCompare(b.region || '');
-        else if (k === 'cycles') cmp = a.cycles - b.cycles;
-        else if (k === 'avg_hours') cmp = a.avg_hours - b.avg_hours;
-        else if (k === 'fastest') cmp = a.fastest - b.fastest;
-        else if (k === 'stores') cmp = a.stores - b.stores;
-        else if (k === 'products') cmp = a.products - b.products;
-        else cmp = a.avg_hours - b.avg_hours;
-        return _cycleSortDir === 'asc' ? cmp : -cmp;
-      });
-
-      // Apply min cycles filter to ranking
-      const minCycles = parseInt(document.getElementById('cycleMinCycles').value) || 1;
-      const filteredRankings = rankings.filter(r => r.cycles >= minCycles);
-
-      const maxH = filteredRankings.length > 0 ? Math.max(...filteredRankings.map(r => r.avg_hours)) : 1;
-      const rankTable = document.getElementById('rankingTable');
-      const sa = (key) => `style="cursor:pointer;user-select:none;" onclick="cycleSortBy('${key}')"`;
-      const arrow = (key) => _cycleSortKey === key ? (_cycleSortDir === 'asc' ? ' \u25B2' : ' \u25BC') : '';
-      let rh = '<thead><tr><th>#</th>';
-      rh += isRegionView
-        ? `<th ${sa('name')}>Region${arrow('name')}</th><th ${sa('stores')}>Stores${arrow('stores')}</th>`
-        : `<th ${sa('name')}>Store${arrow('name')}</th><th ${sa('region')}>Region${arrow('region')}</th>`;
-      rh += `<th ${sa('cycles')}>Cycles${arrow('cycles')}</th>`;
-      if (isAllProd) rh += `<th ${sa('products')}>Products${arrow('products')}</th>`;
-      rh += `<th ${sa('avg_hours')}>Avg Time to Sellout${arrow('avg_hours')}</th><th ${sa('fastest')}>Fastest${arrow('fastest')}</th></tr></thead><tbody>`;
-      filteredRankings.forEach((r, i) => {
-        const barW = Math.max(4, Math.round(200 * r.avg_hours / maxH));
-        const clr = r.avg_hours < 6 ? '#ff453a' : r.avg_hours < 24 ? '#ffd60a' : '#30d158';
-        rh += `<tr><td>${i+1}</td>`;
-        if (isRegionView) {
-          rh += `<td>${r.name}</td><td>${r.stores}</td>`;
-        } else {
-          rh += `<td>${r.name}${r.city ? ` <span style="color:var(--text-dim);font-size:11px;">${r.city}, ${r.state}</span>` : ''}</td>`;
-          rh += `<td style="font-size:12px;">${r.region || '—'}</td>`;
-        }
-        rh += `<td>${r.cycles}</td>`;
-        if (isAllProd) rh += `<td>${r.products}</td>`;
-        rh += `<td><span class="dur-bar" style="width:${barW}px;background:${clr};"></span>${formatDuration(r.avg_hours)}</td>`;
-        rh += `<td>${formatDuration(r.fastest)}</td></tr>`;
-      });
-      rh += '</tbody>';
-      rankTable.innerHTML = rh;
-
-      // Histogram
-      renderCycleHistogram(cycles);
-
-      // Timeline chart: cycle duration over time by region
-      renderCycleTimeline(cycles);
-
-      // Recent cycles table
-      const tbl = document.getElementById('cyclesTable');
-      const sorted = [...cycles].sort((a,b) => b.sellout.localeCompare(a.sellout));
-      let th = '<thead><tr><th>Store</th><th>Region</th>';
-      if (isAllProd) th += '<th>Product</th>';
-      th += '<th>Restocked</th><th>Sold Out</th><th>Duration</th></tr></thead><tbody>';
-      sorted.slice(0, 150).forEach(c => {
-        const clr = c.hours < 6 ? '#ff453a' : c.hours < 24 ? '#ffd60a' : 'var(--text)';
-        th += `<tr><td>${c.store_name} <span style="color:var(--text-dim);font-size:11px;">${c.city ? c.city + ', ' + c.state : ''}</span></td>`;
-        th += `<td style="font-size:12px;">${c.region || '—'}</td>`;
-        if (isAllProd) th += `<td style="color:var(--text-muted);font-size:12px;">${c.product}</td>`;
-        th += `<td style="white-space:nowrap;font-size:12px;">${formatMapTimestamp(c.restock)}</td>`;
-        th += `<td style="white-space:nowrap;font-size:12px;">${formatMapTimestamp(c.sellout)}</td>`;
-        const wallNote = c.wall_hours && c.wall_hours !== c.hours ? ` <span style="color:var(--text-dimmer);font-size:10px;">(${formatDuration(c.wall_hours)} wall)</span>` : '';
-        th += `<td style="color:${clr};font-weight:600;">${formatDuration(c.hours)}${wallNote}</td></tr>`;
-      });
-      th += '</tbody>';
-      tbl.innerHTML = th;
-    }
-
-    function renderCycleHistogram(cycles) {
-      const canvas = document.getElementById('cycleHistChart');
-      if (cycleHistChart) { cycleHistChart.destroy(); cycleHistChart = null; }
-      const buckets = [
-        { label: '<1h', min: 0, max: 1 }, { label: '1-3h', min: 1, max: 3 },
-        { label: '3-6h', min: 3, max: 6 }, { label: '6-12h', min: 6, max: 12 },
-        { label: '12-24h', min: 12, max: 24 }, { label: '1-2d', min: 24, max: 48 },
-        { label: '2d+', min: 48, max: Infinity },
-      ];
-      const counts = buckets.map(() => 0);
-      cycles.forEach(c => {
-        for (let i = 0; i < buckets.length; i++) {
-          if (c.hours >= buckets[i].min && c.hours < buckets[i].max) { counts[i]++; break; }
-        }
-      });
-      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      cycleHistChart = new Chart(canvas, {
-        type: 'bar',
-        data: {
-          labels: buckets.map(b => b.label),
-          datasets: [{ label: 'Cycles', data: counts,
-            backgroundColor: ['#ff453a','#ff6961','#ffd60a','#ffcc00','#30d158','#34c759','#0a84ff'],
-            borderRadius: 4 }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false },
-            tooltip: { callbacks: { label: ctx => `${ctx.raw} cycles (${(100*ctx.raw/cycles.length).toFixed(1)}%)` } } },
-          scales: {
-            x: { grid: { color: isLight ? '#e5e5ea' : '#1a1a1a' }, ticks: { color: isLight ? '#86868b' : '#666' } },
-            y: { beginAtZero: true, grid: { color: isLight ? '#e5e5ea' : '#1a1a1a' },
-              ticks: { color: isLight ? '#86868b' : '#666', stepSize: 1 },
-              title: { display: true, text: 'Number of Cycles', color: isLight ? '#86868b' : '#666' } }
-          }
-        },
-        plugins: [xZoomPlugin]
-      });
-    }
-
-    function renderCycleTimeline(cycles) {
-      const canvas = document.getElementById('cycleTimelineChart');
-      if (cycleTimelineChart) { cycleTimelineChart.destroy(); cycleTimelineChart = null; }
-      if (cycles.length === 0) return;
-
-      // Group by region, plot sellout time (x) vs duration (y)
-      const regionCycles = {};
-      cycles.forEach(c => {
-        const r = c.region || 'Other';
-        if (!regionCycles[r]) regionCycles[r] = [];
-        regionCycles[r].push({ x: new Date(c.sellout), y: c.hours, store: c.store_name });
-      });
-
-      const regionColors = {
-        'NYC': '#ff6384', 'LA': '#36a2eb', 'SF': '#ffce56', 'Austin': '#4bc0c0',
-        'Boston': '#9966ff', 'Chicago': '#ff9f40', 'Houston': '#c9cbcf',
-        'Phoenix': '#e8575a', 'Seattle': '#2bbf6e', 'Miami': '#f5a623',
-        'Denver': '#a855f7', 'Atlanta': '#fb923c', 'Other': '#888',
-      };
-
-      // Compute 48h EMA per region
-      // EMA alpha: use ~48h half-life. For each region, process points in time order.
-      function computeEMA(pts, halfLifeMs) {
-        if (pts.length === 0) return [];
-        const alpha = 1 - Math.exp(-Math.LN2 / halfLifeMs); // time-weighted decay
-        const ema = [{ x: pts[0].x, y: pts[0].y }];
-        for (let i = 1; i < pts.length; i++) {
-          const dt = pts[i].x.getTime() - pts[i - 1].x.getTime();
-          const w = 1 - Math.exp(-Math.LN2 * dt / halfLifeMs);
-          const prev = ema[ema.length - 1].y;
-          ema.push({ x: pts[i].x, y: prev + w * (pts[i].y - prev) });
-        }
-        return ema;
-      }
-      const halfLife48h = 48 * 3600000;
-
-      const datasets = Object.entries(regionCycles).sort((a,b) => a[0].localeCompare(b[0])).map(([region, pts]) => {
-        const sorted = pts.sort((a,b) => a.x - b.x);
-        const emaData = computeEMA(sorted, halfLife48h);
-        return {
-          label: region,
-          data: emaData,
-          borderColor: regionColors[region] || '#888',
-          backgroundColor: (regionColors[region] || '#888') + '20',
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          showLine: true,
-          borderWidth: 2,
-          tension: 0.3,
-          fill: false,
-        };
-      });
-
-      // Add overall EMA across all regions
-      const allPts = cycles.map(c => ({ x: new Date(c.sellout), y: c.hours })).sort((a,b) => a.x - b.x);
-      if (allPts.length >= 3) {
-        const allEma = computeEMA(allPts, halfLife48h);
-        datasets.unshift({
-          label: 'All Regions (EMA)',
-          data: allEma,
-          borderColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#1d1d1f' : '#ffffff',
-          backgroundColor: 'transparent',
-          pointRadius: 0,
-          pointHoverRadius: 0,
-          showLine: true,
-          borderWidth: 3,
-          tension: 0.3,
-          borderDash: [6, 3],
-        });
-      }
-
-      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      cycleTimelineChart = new Chart(canvas, {
-        type: 'scatter',
-        data: { datasets },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: {
-            legend: { labels: { color: isLight ? '#1d1d1f' : '#e0e0e0', usePointStyle: true, pointStyle: 'circle' } },
-            tooltip: {
-              callbacks: {
-                label: ctx => {
-                  const d = ctx.raw;
-                  return `${ctx.dataset.label}: ${d.store || ''} — ${formatDuration(d.y)}`;
-                }
-              }
-            }
-          },
-          scales: {
-            x: _makeTimeAxisConfig({ title: { display: true, text: 'Sellout Date', color: isLight ? '#86868b' : '#666' } }),
-            y: {
-              beginAtZero: true,
-              grid: { color: isLight ? '#e5e5ea' : '#1a1a1a' },
-              ticks: { color: isLight ? '#86868b' : '#666',
-                callback: v => formatDuration(v) },
-              title: { display: true, text: 'Cycle Duration', color: isLight ? '#86868b' : '#666' },
-            }
-          }
-        },
-        plugins: [timeTicksPlugin, xZoomPlugin]
-      });
-    }
-
     function initMap() {
       if (leafletMap) {
         leafletMap.invalidateSize();
@@ -5257,8 +2890,8 @@
       if (!container) return;
 
       leafletMap = L.map(container, {
-        center: [41.0, -73.5],
-        zoom: 8,
+        center: [39.5, -98.5],
+        zoom: 5,
         zoomControl: true,
       });
 
@@ -5297,8 +2930,8 @@
                 html += `Delta: <span style="color:${item._delta > 0 ? '#30d158' : item._delta < 0 ? '#ff3b30' : '#8e8e93'};">${sign}${Math.round(item._delta * 100)}%</span>`;
               }
             } else {
-              const prods = getSelectedProducts();
-              if (prods.length !== 1) {
+              const product = getSelectedProduct();
+              if (product === '__ALL__') {
                 const avail = item._availCount || 0;
                 const total = item._totalProducts || 0;
                 html += `${avail}/${total} products available`;
@@ -5352,7 +2985,12 @@
         const numSnapshots = sm.snapshots.length;
         const numCities = new Set(sm.stores.map(s => `${s.city}, ${s.state}`)).size;
         const totalDatapoints = numStores * numSnapshots;
-        // (stats box removed — info is shown in controls above/below map)
+        const statsEl = document.getElementById('mapStats');
+        statsEl.innerHTML =
+          `<span><strong>${numCities}</strong> cities</span>` +
+          `<span><strong>${numStores}</strong> stores</span>` +
+          `<span><strong>${numSnapshots}</strong> snapshots</span>` +
+          `<span><strong>${totalDatapoints.toLocaleString()}</strong> data points</span>`;
       }
     }
 
@@ -5392,68 +3030,6 @@
         document.getElementById('mapTimeLabel').textContent = formatMapTimestamp(snaps[idx].t);
         updateMapOverlay();
       });
-
-      // Animate play/pause
-      let _mapAnimating = false;
-      let _mapAnimTimer = null;
-      const playBtn = document.getElementById('mapPlayBtn');
-
-      const pauseOverlay = document.getElementById('mapPauseOverlay');
-
-      function _showPauseOverlay() {
-        pauseOverlay.style.display = 'block';
-        pauseOverlay.style.opacity = '0';
-        requestAnimationFrame(() => { pauseOverlay.style.opacity = '1'; });
-      }
-
-      function _hidePauseOverlay() {
-        pauseOverlay.style.opacity = '0';
-        setTimeout(() => { pauseOverlay.style.display = 'none'; }, 300);
-      }
-
-      function _startMapAnim() {
-        if (_mapAnimating) return;
-        _mapAnimating = true;
-        _hidePauseOverlay();
-        playBtn.innerHTML = '&#9646;&#9646;';
-        playBtn.title = 'Pause animation';
-        const totalFrames = max + 1;
-        const intervalMs = Math.max(50, Math.floor(10000 / totalFrames));
-        if (parseInt(slider.value) >= max) slider.value = 0;
-        _mapAnimTimer = setInterval(() => {
-          let idx = parseInt(slider.value) + 1;
-          if (idx > max) idx = 0;
-          slider.value = idx;
-          document.getElementById('mapTimeLabel').textContent = formatMapTimestamp(snaps[idx].t);
-          updateMapOverlay();
-        }, intervalMs);
-      }
-
-      function _stopMapAnim(showOverlay) {
-        if (!_mapAnimating) return;
-        clearInterval(_mapAnimTimer);
-        _mapAnimating = false;
-        playBtn.innerHTML = '&#9654;';
-        playBtn.title = 'Animate through time';
-        if (showOverlay) _showPauseOverlay();
-      }
-
-      playBtn.addEventListener('click', () => {
-        if (_mapAnimating) _stopMapAnim(false);
-        else _startMapAnim();
-      });
-
-      pauseOverlay.addEventListener('click', () => {
-        _startMapAnim();
-      });
-
-      // Auto-play on first load, then pause with overlay after 3s
-      setTimeout(() => {
-        _startMapAnim();
-        setTimeout(() => {
-          if (_mapAnimating) _stopMapAnim(true);
-        }, 2000);
-      }, 200);
 
       // Delta controls
       const dStart = document.getElementById('mapDeltaStart');
@@ -5514,25 +3090,25 @@
       });
     }
 
-    /** Compute per-store availability fraction for a given snapshot index and product(s) */
+    /** Compute per-store availability fraction for a given snapshot index and product */
     function computeStoreItems(snapIdx) {
       if (!DATA || !DATA.store_map) return [];
-      const prods = getSelectedProducts();
+      const product = getSelectedProduct();
+      const isAll = product === '__ALL__';
       const avail = getStoreAvailAtIndex(snapIdx);
 
       return DATA.store_map.stores.map(s => {
         const store = { ...s, _avail: undefined, _availCount: 0, _totalProducts: 0, _fraction: 0 };
         const storeAvail = avail[s.id] || {};
 
-        if (prods.length !== 1) {
-          // Multi-product: show fraction of selected products available
-          const tracked = prods.length > 0 ? prods : Object.keys(storeAvail);
-          store._totalProducts = tracked.length;
-          store._availCount = tracked.filter(p => storeAvail[p] === 1).length;
-          store._fraction = tracked.length > 0 ? store._availCount / tracked.length : 0;
-          store._color = tracked.length > 0 ? availabilityColor(store._fraction) : MAP_COLORS.nodata;
+        if (isAll) {
+          const products = Object.keys(storeAvail);
+          store._totalProducts = products.length;
+          store._availCount = products.filter(p => storeAvail[p] === 1).length;
+          store._fraction = products.length > 0 ? store._availCount / products.length : 0;
+          store._color = products.length > 0 ? availabilityColor(store._fraction) : MAP_COLORS.nodata;
         } else {
-          const a = storeAvail[prods[0]];
+          const a = storeAvail[product];
           store._avail = a;
           if (a === undefined) {
             store._color = MAP_COLORS.nodata;
@@ -5551,7 +3127,8 @@
     /** Compute per-store delta between two snapshot indices */
     function computeDeltaItems(startIdx, endIdx) {
       if (!DATA || !DATA.store_map) return [];
-      const prods = getSelectedProducts();
+      const product = getSelectedProduct();
+      const isAll = product === '__ALL__';
       const availStart = getStoreAvailAtIndex(startIdx);
       const availEnd = getStoreAvailAtIndex(endIdx);
 
@@ -5560,22 +3137,26 @@
         const aStart = availStart[s.id] || {};
         const aEnd = availEnd[s.id] || {};
 
-        if (prods.length !== 1) {
-          const tracked = prods.length > 0 ? prods : [...new Set([...Object.keys(aStart), ...Object.keys(aEnd)])];
-          if (tracked.length === 0) {
-            store._delta = 0; store._hasData = false; store._color = deltaColor(0, false);
+        if (isAll) {
+          const allProducts = new Set([...Object.keys(aStart), ...Object.keys(aEnd)]);
+          if (allProducts.size === 0) {
+            store._delta = 0;
+            store._hasData = false;
+            store._color = deltaColor(0, false);
           } else {
-            const fracStart = tracked.filter(p => aStart[p] === 1).length / tracked.length;
-            const fracEnd = tracked.filter(p => aEnd[p] === 1).length / tracked.length;
+            const fracStart = [...allProducts].filter(p => aStart[p] === 1).length / allProducts.size;
+            const fracEnd = [...allProducts].filter(p => aEnd[p] === 1).length / allProducts.size;
             store._delta = fracEnd - fracStart;
             store._fraction = fracEnd;
             store._color = deltaColor(store._delta, true);
           }
         } else {
-          const vs = aStart[prods[0]];
-          const ve = aEnd[prods[0]];
+          const vs = aStart[product];
+          const ve = aEnd[product];
           if (vs === undefined && ve === undefined) {
-            store._delta = 0; store._hasData = false; store._color = deltaColor(0, false);
+            store._delta = 0;
+            store._hasData = false;
+            store._color = deltaColor(0, false);
           } else {
             store._delta = (ve || 0) - (vs || 0);
             store._fraction = ve || 0;
@@ -5623,8 +3204,9 @@
             const avg = fracs.reduce((a, b) => a + b, 0) / fracs.length;
             c._fraction = avg;
             c._color = availabilityColor(avg);
-            const _clProds = getSelectedProducts();
-            if (_clProds.length !== 1) {
+            const product = getSelectedProduct();
+            const isAll = product === '__ALL__';
+            if (isAll) {
               c._availCount = c.stores.filter(s => s._fraction > 0.5).length;
             } else {
               c._availCount = c.stores.filter(s => s._avail === 1).length;
@@ -5650,6 +3232,7 @@
   </script>
 
   <footer style="text-align:center;padding:24px;color:var(--text-dimmer);font-size:12px;border-top:1px solid var(--footer-border);margin-top:24px;">
+    Website last updated: <span id="lastUpdatedFooter">—</span>
   </footer>
 </body>
 </html>

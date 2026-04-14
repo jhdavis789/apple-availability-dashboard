@@ -4,12 +4,102 @@ Includes store deduplication (nearest-city assignment) and overflow zip support.
 import requests
 import csv
 import json
+import sys
 import time
 import glob
 from datetime import datetime
 from math import radians, sin, cos, sqrt, atan2
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+
+def _compact_lead(quote):
+    """Map pickupSearchQuote to lead days: 0=today, 1=tomorrow, None=unavailable."""
+    if not quote:
+        return None
+    q = quote.lower()
+    if "today" in q:
+        return 0
+    if "tomorrow" in q:
+        return 1
+    return None
+
+
+def _build_compact_snapshot(all_raw, all_stores):
+    """Build v2 compact format: store registry + compact availability snapshots.
+
+    Returns (stores_registry, snapshots) where stores_registry holds static info
+    once and snapshots hold only per-store availability keyed by store number.
+    """
+    stores_registry = {}
+    snapshots = []
+
+    # Build store registry from all_stores (collected during run)
+    for sn, meta in all_stores.items():
+        if not meta.get("assigned_city"):
+            continue
+        stores_registry[sn] = {
+            "name": meta.get("storeName", ""),
+            "lat": meta.get("lat"),
+            "lon": meta.get("lng"),  # all_stores uses 'lng'
+            "city": meta.get("city", ""),
+            "state": meta.get("state", ""),
+        }
+
+    for r in all_raw:
+        raw_resp = r.get("response") or r.get("raw_response")
+        if not raw_resp or not isinstance(raw_resp, dict):
+            continue
+        body = raw_resp.get("body", {})
+        raw_stores = body.get("stores", [])
+
+        avail = {}  # storeNum -> {partNum: "a"/"u"/"i"}
+        lead = {}   # storeNum -> {partNum: 0|1}
+        for s in raw_stores:
+            sn = s.get("storeNumber", "")
+            if not sn:
+                continue
+            # Backfill/enrich registry from API response
+            if sn not in stores_registry:
+                stores_registry[sn] = {
+                    "name": s.get("storeName", ""),
+                    "lat": s.get("storelatitude"),
+                    "lon": s.get("storelongitude"),
+                    "city": s.get("city", ""),
+                    "state": s.get("state", ""),
+                }
+            # Always add tz/hours from API (not in all_stores cache)
+            tz = s.get("retailStore", {}).get("timezone", "")
+            hours = s.get("storeHours", {})
+            if tz and "tz" not in stores_registry[sn]:
+                stores_registry[sn]["tz"] = tz
+            if hours and "hours" not in stores_registry[sn]:
+                stores_registry[sn]["hours"] = hours
+            store_avail = {}
+            store_lead = {}
+            for pn, pv in s.get("partsAvailability", {}).items():
+                disp = pv.get("pickupDisplay", "")
+                store_avail[pn] = disp[0] if disp else "u"  # a/u/i
+                ld = _compact_lead(pv.get("pickupSearchQuote", ""))
+                if ld is not None:
+                    store_lead[pn] = ld
+            if store_avail:
+                avail[sn] = store_avail
+            if store_lead:
+                lead[sn] = store_lead
+
+        snap = {
+            "product": r.get("product", ""),
+            "parts": r.get("parts", r.get("part", "")),
+            "city": r.get("city", ""),
+            "zip": r.get("zip", ""),
+            "avail": avail,
+        }
+        if lead:
+            snap["lead"] = lead
+        snapshots.append(snap)
+
+    return stores_registry, snapshots
 
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -359,7 +449,7 @@ def load_assignments() -> tuple:
 
 def collect_availability(products: dict, city_assignments: dict) -> tuple:
     """Query availability for all products across all zip codes using batch API.
-    One request per zip (all products batched). Returns (rows, counts, raw_responses)."""
+    One request per zip (all products batched). Returns (rows, counts, raw_responses, errored_zips)."""
     raw_responses = []
     all_zips = _all_zip_codes()
     counts = {city: len(stores) for city, stores in city_assignments.items()}
@@ -370,6 +460,7 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
 
     # {product_name: {storeNumber: bool}}
     product_store_avail = {name: {} for name in products}
+    errored_zips = set()
 
     completed_count = 0
 
@@ -384,6 +475,8 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
             z, result = future.result()
             completed_count += 1
             print(f"  [{completed_count}/{len(all_zips)}] Zip {z} ({_zip_to_label(z)}) done")
+            if result["error"]:
+                errored_zips.add(z)
             if result["raw_response"]:
                 raw_responses.append({
                     "product": "batch",
@@ -402,6 +495,23 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
                         product_store_avail[name].get(sn, False) or avail["available"]
                     )
 
+    # Report errors
+    if errored_zips:
+        print(f"\n  ⚠️  {len(errored_zips)}/{len(all_zips)} zip codes failed: {sorted(errored_zips)}")
+    if len(errored_zips) == len(all_zips):
+        print("  ❌ ALL zip codes failed — aborting")
+        sys.exit(1)
+
+    # Build set of cities affected by errored zips
+    affected_cities = set()
+    for z in errored_zips:
+        for city, primary_zip in CITIES.items():
+            if primary_zip == z:
+                affected_cities.add(city)
+        for parent_city, overflow_list in OVERFLOW_ZIPS.items():
+            if z in overflow_list:
+                affected_cities.add(parent_city)
+
     # Compute per-city percentages from assigned stores
     rows = []
     for name in products:
@@ -411,7 +521,10 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
         for city in CITIES:
             assigned = city_assignments[city]
             if not assigned:
-                row[f"{city} ({counts[city]})"] = "0%"
+                row[f"{city} ({counts[city]})"] = "ERR"
+                continue
+            if city in affected_cities:
+                row[f"{city} ({counts[city]})"] = "ERR"
                 continue
             avail_count = sum(1 for sn in assigned if store_availability.get(sn, False))
             pct = 100 * avail_count // len(assigned)
@@ -419,7 +532,7 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
         rows.append(row)
 
     print_matrix(rows, counts)
-    return rows, counts, raw_responses
+    return rows, counts, raw_responses, errored_zips
 
 
 def fetch_delivery_times(products: dict) -> dict:
@@ -544,7 +657,7 @@ def main():
         excluded_names = [k for k, v in PRODUCTS.items() if v in EXCLUDED_SKUS]
         print(f"EXCLUDED: {', '.join(excluded_names)}")
     print(f"{'='*100}")
-    all_rows, _, raw1 = collect_availability(TRACKED_PRODUCTS, city_assignments)
+    all_rows, _, raw1, errored_zips = collect_availability(TRACKED_PRODUCTS, city_assignments)
     all_raw = discovery_raw + raw1
 
     # === Fetch delivery times ===
@@ -564,20 +677,23 @@ def main():
 
     print(f"\n✅ Saved: {new_csv.name}")
 
-    # Write raw JSON with assignment metadata
+    # Write compact v2 raw JSON
     raw_dir = BASE_DIR / "raw_api_responses"
     raw_dir.mkdir(exist_ok=True)
     raw_file = raw_dir / f"raw_responses_{ts}.json"
+    stores_reg, compact_snaps = _build_compact_snapshot(all_raw, all_stores)
     with open(raw_file, 'w') as f:
         json.dump({
+            "v": 2,
             "timestamp": datetime.now().isoformat(),
             "products": dict(TRACKED_PRODUCTS),
             "cities": dict(CITIES),
             "overflow_zips": dict(OVERFLOW_ZIPS),
+            "errored_zips": sorted(errored_zips),
             "city_assignments": {city: list(stores) for city, stores in city_assignments.items()},
-            "store_metadata": {sn: meta for sn, meta in all_stores.items() if meta.get("assigned_city")},
             "delivery_times": delivery_times,
-            "responses": all_raw
+            "stores": stores_reg,
+            "snapshots": compact_snaps,
         }, f, indent=2)
 
     print(f"📦 Raw API data: {raw_file.name}")

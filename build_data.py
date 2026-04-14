@@ -874,6 +874,12 @@ def main():
     if ebay_prices:
         output["ebay_prices"] = ebay_prices
     if store_map:
+        # Subsample store_map snapshots to keep file size under GitHub's 100MB limit.
+        # Drop empty snapshots, then keep every 2nd for the map animation.
+        sm_snaps = store_map.get("snapshots", [])
+        sm_snaps = [s for s in sm_snaps if s.get("a") and any(len(v) > 0 for v in s["a"].values())]
+        sm_snaps = sm_snaps[::2]
+        store_map["snapshots"] = sm_snaps
         output["store_map"] = store_map
     if cycle_data:
         output["cycles"] = cycle_data
@@ -883,7 +889,7 @@ def main():
         output["delivery_times"] = delivery_times
 
     with open(OUTPUT_FILE, "w") as f:
-        json.dump(output, f, indent=2)
+        json.dump(output, f, separators=(",", ":"))
 
     print(f"Written {len(snapshots)} snapshots to {OUTPUT_FILE}")
     print(f"Models: {sorted(all_models)}")
