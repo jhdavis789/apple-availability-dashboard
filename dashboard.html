@@ -1580,16 +1580,12 @@
       const rawObservations = rawSnapshots * storeCount * DATA.all_models.length;
       statsRow.innerHTML = `
         <div class="stat-box">
-          <div class="stat-label">Raw Snapshots</div>
-          <div class="stat-value">${fmt(rawSnapshots)}</div>
+          <div class="stat-label">Snapshots</div>
+          <div class="stat-value">${fmt(rawSnapshots)} <span style="font-size:0.6em;color:var(--text-muted);">(${fmt(snapshots.length)} displayed)</span></div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Observations</div>
-          <div class="stat-value">${fmt(rawObservations)}</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Displayed</div>
-          <div class="stat-value">${fmt(validValues.length)}</div>
+          <div class="stat-value">${fmt(rawObservations)} <span style="font-size:0.6em;color:var(--text-muted);">(${fmt(validValues.length)} displayed)</span></div>
         </div>
       `;
 
