@@ -38,18 +38,16 @@ else
   echo "[2/4] Skipping eBay (runs every 2h at :00)"
 fi
 
-# 3. Rebuild data.json
-echo "[3/4] Rebuilding data.json..."
+# 3. Rebuild data.json + store_map.json
+echo "[3/4] Rebuilding data..."
 cd "$DASH_DIR"
 $PYTHON "$DASH_DIR/build_data.py" || { echo "ERROR: build_data.py failed"; exit 1; }
 
-# 4. Deploy to GitHub Pages
+# 4. Deploy to GitHub Pages (push directly from source repo)
 echo "[4/4] Deploying to GitHub Pages..."
-cp "$DASH_DIR/dashboard.html" "$DASH_DIR/deploy/index.html"
-cp "$DASH_DIR/data.json" "$DASH_DIR/deploy/data.json"
-cp "$DASH_DIR/store_map.json" "$DASH_DIR/deploy/store_map.json" 2>/dev/null || true
-cd "$DASH_DIR/deploy"
-git add -A
+cd "$DASH_DIR"
+cp dashboard.html index.html
+git add data.json store_map.json index.html
 git commit -m "Auto-update $(date '+%Y-%m-%d %H:%M')" || echo "No changes to commit"
 git push origin main || echo "WARNING: git push failed"
 

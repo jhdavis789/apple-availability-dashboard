@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.log
+*.log.old
+deploy/
+csvs
+.DS_Store
+m5_probe_wave2_output.log
