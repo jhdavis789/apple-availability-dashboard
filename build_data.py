@@ -15,7 +15,7 @@ import os
 import re
 import sqlite3
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "csvs"))
@@ -828,6 +828,66 @@ def load_cycles():
     }
 
 
+def _trim_discontinued_tails(snapshots, recent_days=2):
+    """End discontinued product lines at their last real (>0%) reading.
+
+    "Currently tracked" = any model present in a snapshot within `recent_days`
+    of the newest snapshot (time-based, so a collection outage gap can't pull
+    stale products into the current set). For every other model, find the last
+    timestamp it had a value > 0 in any city, then remove that model from all
+    later snapshots so its chart line ends at discontinuation instead of
+    flat-lining at 0% to the present. Models that never had a >0 reading are
+    dropped entirely. Mutates `snapshots` in place.
+    """
+    if not snapshots:
+        return
+    snapshots.sort(key=lambda s: s["timestamp"])
+
+    latest_dt = datetime.fromisoformat(snapshots[-1]["timestamp"])
+    cutoff = latest_dt - timedelta(days=recent_days)
+    current = set()
+    for snap in snapshots:
+        try:
+            if datetime.fromisoformat(snap["timestamp"]) >= cutoff:
+                for p in snap["products"]:
+                    current.add(p["model"])
+        except (ValueError, TypeError):
+            continue
+
+    # Last timestamp each discontinued model had real availability.
+    last_alive = {}
+    for snap in snapshots:
+        ts = snap["timestamp"]
+        for p in snap["products"]:
+            m = p["model"]
+            if m in current:
+                continue
+            if any((v is not None and v > 0) for v in p["values"].values()):
+                last_alive[m] = ts
+
+    trimmed = {}
+    for snap in snapshots:
+        ts = snap["timestamp"]
+        kept = []
+        for p in snap["products"]:
+            m = p["model"]
+            if m in current:
+                kept.append(p)
+                continue
+            alive_ts = last_alive.get(m)
+            if alive_ts is not None and ts <= alive_ts:
+                kept.append(p)
+            else:
+                trimmed[m] = trimmed.get(m, 0) + 1
+        snap["products"] = kept
+
+    if trimmed:
+        ended = {m: last_alive.get(m, "never") for m in trimmed}
+        print(f"Ended {len(trimmed)} discontinued product line(s) at last real reading:")
+        for m, ts in sorted(ended.items()):
+            print(f"  {m} -> {str(ts)[:16]} ({trimmed[m]} trailing 0% points dropped)")
+
+
 def main():
     csv_files = sorted(glob.glob(os.path.join(CSV_DIR, "availability_matrix_*.csv")))
     print(f"Looking for CSVs in: {CSV_DIR}")
@@ -884,6 +944,13 @@ def main():
     raw_snapshot_count = len(snapshots)
     print(f"Downsampled {raw_snapshot_count} → {len(downsampled)} snapshots")
     snapshots = downsampled
+
+    # --- End discontinued product lines at their last real data point ---
+    # A product no longer tracked (absent from the recent snapshots) keeps recording
+    # 0% while its Apple SKU is invalid, which draws a flat 0% tail to the present.
+    # Drop each discontinued product's entries after its last >0% reading so its line
+    # simply ends where the product was actually discontinued.
+    _trim_discontinued_tails(snapshots)
 
     # Load eBay price data and downsample older points
     ebay_prices = load_ebay_prices()
