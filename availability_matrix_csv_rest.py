@@ -110,24 +110,22 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * 2 * atan2(sqrt(a), sqrt(1 - a))
 
 PRODUCTS = {
-    "Mac Mini M4 ($599)": "MU9D3LL/A",
-    "Mac Mini M4 Pro ($1,399)": "MCX44LL/A",
+    # Mac mini — base 256GB ($599, MU9D3LL/A) discontinued by Apple; entry is now the 16/512.
     "Mac Mini M4 16/512 ($799)": "MU9E3LL/A",
     "Mac Mini M4 24/512 ($999)": "MCYT4LL/A",
+    "Mac Mini M4 Pro ($1,399)": "MCX44LL/A",
     "iMac 24\" M4 8-core ($1,299)": "MWUF3LL/A",
     "iMac 24\" M4 10-core ($1,499)": "MWV13LL/A",
-    "MacBook Pro 14\" M5 ($1,599)": "MDE04LL/A",
-    "MacBook Pro 14\" M4 Pro ($1,999)": "MX2H3LL/A",
-    "MacBook Pro 14\" M4 Max ($3,499)": "MX2K3LL/A",
+    # MacBook Pro refreshed to M5 generation (Mar 2026); old M4/M5 SKUs are no longer buyable.
+    "MacBook Pro 14\" M5 ($1,699)": "MDE14LL/A",       # was MDE04LL/A (M5 $1,599)
+    "MacBook Pro 14\" M5 Pro ($2,199)": "MGDR4LL/A",   # replaces M4 Pro MX2H3LL/A; 24GB/1TB Space Black
     "iPhone 16 128GB ($799)": "MYAP3LL/A",
     "Mac Studio M4 Max ($1,999)": "MU963LL/A",
     "Mac Studio M3 Ultra ($3,999)": "MU973LL/A",
 }
 
 # SKUs to exclude from tracking (easy to add more later)
-EXCLUDED_SKUS = {
-    "MX2K3LL/A",  # MacBook Pro 14" M4 Max ($3,499) — winding down
-}
+EXCLUDED_SKUS = set()
 
 TRACKED_PRODUCTS = {k: v for k, v in PRODUCTS.items() if v not in EXCLUDED_SKUS}
 
@@ -165,7 +163,7 @@ OVERFLOW_ZIPS = {
 MAX_ASSIGNMENT_DISTANCE = 75  # miles
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
-BASE_DIR = Path("/Users/Jackson/.openclaw/workspace/research/apple-availability")
+BASE_DIR = Path("/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability")
 OUT_DIR = BASE_DIR / "csvs"
 ASSIGNMENTS_CACHE = BASE_DIR / "store_assignments.json"
 MAX_WORKERS = 1  # Serialized to respect rate limits (~15 req burst, 541 after)
