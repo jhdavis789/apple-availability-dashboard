@@ -574,6 +574,48 @@
     body.heatmap-view .controls .control-group:not(.map-keep) {
       display: none;
     }
+    /* ---- Grouped product picker (pdrop-*) --------------------------------
+       Products are grouped by family. A family row is itself selectable, or it
+       can be expanded to pick individual configs. Prefix is unique in this
+       file — check before reusing it. */
+    .pdrop { position: relative; min-width: 240px; }
+    .pdrop-trigger {
+      width: 100%; text-align: left; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .pdrop-trigger .pdrop-caret { opacity: 0.6; font-size: 10px; flex: none; }
+    .pdrop-panel {
+      display: none; position: absolute; z-index: 60; top: calc(100% + 4px); left: 0;
+      min-width: 340px; max-width: 460px; max-height: 60vh; overflow-y: auto;
+      background: var(--card, #1c1c1e); border: 1px solid var(--border, #3a3a3c);
+      border-radius: 8px; padding: 6px; box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    }
+    .pdrop.open .pdrop-panel { display: block; }
+    .pdrop-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 6px; border-radius: 5px; cursor: pointer; font-size: 12px;
+      color: var(--text, #f5f5f7); white-space: nowrap;
+    }
+    .pdrop-row:hover { background: rgba(127,127,127,0.16); }
+    .pdrop-row input[type=checkbox] { flex: none; margin: 0; cursor: pointer; }
+    .pdrop-label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+    .pdrop-count { opacity: 0.5; font-size: 11px; flex: none; }
+    .pdrop-only {
+      flex: none; visibility: hidden; font-size: 10px; line-height: 1;
+      padding: 3px 6px; border-radius: 4px; cursor: pointer;
+      border: 1px solid var(--border, #3a3a3c); background: transparent;
+      color: var(--text-muted, #98989d);
+    }
+    .pdrop-row:hover .pdrop-only { visibility: visible; }
+    .pdrop-only:hover { color: var(--text, #f5f5f7); border-color: var(--accent, #0a84ff); }
+    .pdrop-caret-btn {
+      flex: none; width: 16px; text-align: center; cursor: pointer;
+      opacity: 0.55; font-size: 9px; user-select: none;
+    }
+    .pdrop-caret-btn:hover { opacity: 1; }
+    .pdrop-child { padding-left: 26px; }
+    .pdrop-sep { height: 1px; background: var(--border, #3a3a3c); margin: 5px 2px; }
+    .pdrop-dead { opacity: 0.45; }
   </style>
 </head>
 <body>
@@ -600,7 +642,14 @@
 
     <div class="control-group map-keep">
       <label>Product</label>
-      <select id="productSelect"></select>
+      <div class="pdrop" id="productDrop">
+        <button type="button" class="pdrop-trigger secondary" id="productTrigger"
+                aria-haspopup="true" aria-expanded="false">
+          <span id="productTriggerText">All products</span>
+          <span class="pdrop-caret">▼</span>
+        </button>
+        <div class="pdrop-panel" id="productPanel"></div>
+      </div>
     </div>
 
     <div class="control-group">
@@ -1057,6 +1106,245 @@
       ensureStoreMap();
     }
 
+    /* ================= Grouped product picker =============================
+       Families are matched longest-prefix-first: "MacBook Pro" and "MacBook
+       Air" must both beat a bare "Mac" rule, or every laptop lands in the Mac
+       mini bucket. */
+    const PRODUCT_FAMILIES = [
+      { name: 'Mac mini',     match: /^mac\s*mini\b/i },
+      { name: 'Mac Studio',   match: /^mac\s*studio\b/i },
+      { name: 'iMac',         match: /^imac\b/i },
+      { name: 'MacBook Pro',  match: /^macbook\s*pro\b/i },
+      { name: 'MacBook Air',  match: /^macbook\s*air\b/i },
+      { name: 'iPhone',       match: /^iphone\b/i },
+    ];
+
+    function productFamily(model) {
+      const hit = PRODUCT_FAMILIES.find(f => f.match.test(model));
+      return hit ? hit.name : 'Other';
+    }
+
+    // Models with a reading in the recent past. Everything else is a
+    // discontinued SKU whose line already ends at its last real value; it stays
+    // pickable but is dimmed and sorted below the live ones, so the several
+    // near-identical dead iPhone 17 entries can't be mistaken for the live one.
+    function modelsWithRecentData() {
+      const recent = DATA.snapshots.slice(-10);
+      return new Set(DATA.all_models.filter(model => recent.some(s => {
+        const prod = s.products.find(p => p.model === model);
+        return prod && Object.values(prod.values).some(v => v !== null && v !== undefined);
+      })));
+    }
+
+    let PRODUCT_GROUPS = [];          // [{name, models:[...], live:Set}]
+    let selectedProducts = new Set(); // model names; empty === "all"
+    const expandedFamilies = new Set();
+
+    function buildProductPicker() {
+      const live = modelsWithRecentData();
+      const byFamily = new Map();
+      for (const m of DATA.all_models) {
+        const fam = productFamily(m);
+        if (!byFamily.has(fam)) byFamily.set(fam, []);
+        byFamily.get(fam).push(m);
+      }
+      PRODUCT_GROUPS = [...byFamily.entries()]
+        .map(([name, models]) => ({
+          name,
+          models: models.sort((a, b) => (live.has(b) - live.has(a)) || a.localeCompare(b)),
+          live,
+        }))
+        // Families with something currently tracked first, then by name.
+        .sort((a, b) => (b.models.some(m => live.has(m)) - a.models.some(m => live.has(m)))
+                        || a.name.localeCompare(b.name));
+
+      // Default: the Mac mini family — the only one that actually goes out of
+      // stock, and the reason this dashboard exists.
+      const defaultFam = PRODUCT_GROUPS.find(g => g.name === 'Mac mini');
+      selectedProducts = new Set(
+        defaultFam ? defaultFam.models.filter(m => live.has(m)) : []);
+      if (defaultFam) expandedFamilies.add('Mac mini');
+
+      renderProductPicker();
+
+      const drop = document.getElementById('productDrop');
+      const trigger = document.getElementById('productTrigger');
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        const open = drop.classList.toggle('open');
+        trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.getElementById('productPanel').addEventListener('click', e => e.stopPropagation());
+      document.addEventListener('click', () => {
+        drop.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    function allModelsFlat() {
+      return PRODUCT_GROUPS.flatMap(g => g.models);
+    }
+
+    /** The models to aggregate over. An empty selection means everything. */
+    function getSelectedProducts() {
+      if (!selectedProducts.size) return allModelsFlat();
+      return allModelsFlat().filter(m => selectedProducts.has(m));
+    }
+
+    function renderProductPicker() {
+      const panel = document.getElementById('productPanel');
+      panel.innerHTML = '';
+
+      const allRow = makeRow({
+        label: 'All products',
+        checked: !selectedProducts.size,
+        indeterminate: false,
+        onToggle: () => { selectedProducts.clear(); afterProductChange(); },
+      });
+      panel.appendChild(allRow);
+      panel.appendChild(Object.assign(document.createElement('div'), { className: 'pdrop-sep' }));
+
+      for (const group of PRODUCT_GROUPS) {
+        const picked = group.models.filter(m => selectedProducts.has(m));
+        const isExpanded = expandedFamilies.has(group.name);
+
+        const row = makeRow({
+          label: group.name,
+          count: `${group.models.length}`,
+          checked: picked.length === group.models.length && picked.length > 0,
+          indeterminate: picked.length > 0 && picked.length < group.models.length,
+          caret: isExpanded ? '▾' : '▸',
+          onCaret: () => {
+            if (isExpanded) expandedFamilies.delete(group.name);
+            else expandedFamilies.add(group.name);
+            renderProductPicker();
+          },
+          onToggle: () => {
+            const allPicked = picked.length === group.models.length;
+            for (const m of group.models) {
+              if (allPicked) selectedProducts.delete(m);
+              else selectedProducts.add(m);
+            }
+            afterProductChange();
+          },
+          onOnly: () => {
+            selectedProducts = new Set(group.models.filter(m => group.live.has(m)));
+            if (!selectedProducts.size) selectedProducts = new Set(group.models);
+            afterProductChange();
+          },
+        });
+        panel.appendChild(row);
+
+        if (!isExpanded) continue;
+        for (const model of group.models) {
+          const isLive = group.live.has(model);
+          const child = makeRow({
+            label: model + (isLive ? '' : '  (discontinued)'),
+            checked: selectedProducts.has(model),
+            indeterminate: false,
+            child: true,
+            dead: !isLive,
+            onToggle: () => {
+              if (selectedProducts.has(model)) selectedProducts.delete(model);
+              else selectedProducts.add(model);
+              afterProductChange();
+            },
+            onOnly: () => { selectedProducts = new Set([model]); afterProductChange(); },
+          });
+          panel.appendChild(child);
+        }
+      }
+
+      updateProductTriggerText();
+    }
+
+    function makeRow(opt) {
+      const row = document.createElement('div');
+      row.className = 'pdrop-row' + (opt.child ? ' pdrop-child' : '') + (opt.dead ? ' pdrop-dead' : '');
+
+      if (opt.caret !== undefined) {
+        const caret = document.createElement('span');
+        caret.className = 'pdrop-caret-btn';
+        caret.textContent = opt.caret;
+        caret.addEventListener('click', e => { e.stopPropagation(); opt.onCaret(); });
+        row.appendChild(caret);
+      }
+
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = !!opt.checked;
+      box.indeterminate = !!opt.indeterminate;
+      row.appendChild(box);
+
+      const label = document.createElement('span');
+      label.className = 'pdrop-label';
+      label.textContent = opt.label;
+      row.appendChild(label);
+
+      if (opt.count) {
+        const c = document.createElement('span');
+        c.className = 'pdrop-count';
+        c.textContent = opt.count;
+        row.appendChild(c);
+      }
+
+      if (opt.onOnly) {
+        const only = document.createElement('button');
+        only.type = 'button';
+        only.className = 'pdrop-only';
+        only.textContent = 'only';
+        only.addEventListener('click', e => { e.stopPropagation(); opt.onOnly(); });
+        row.appendChild(only);
+      }
+
+      // The whole row toggles, so the native checkbox click must not fire the
+      // handler a second time and cancel itself out.
+      row.addEventListener('click', () => opt.onToggle());
+      box.addEventListener('click', e => e.stopPropagation());
+      box.addEventListener('change', () => opt.onToggle());
+      return row;
+    }
+
+    function updateProductTriggerText() {
+      const el = document.getElementById('productTriggerText');
+      const picked = getSelectedProducts();
+      if (!selectedProducts.size) { el.textContent = 'All products'; return; }
+      if (picked.length === 1) { el.textContent = picked[0]; return; }
+      // Name the family when the selection is exactly one whole family.
+      const whole = PRODUCT_GROUPS.find(g =>
+        g.models.length === picked.length && g.models.every(m => selectedProducts.has(m)));
+      if (whole) { el.textContent = `${whole.name} (all ${picked.length})`; return; }
+      const fams = [...new Set(picked.map(productFamily))];
+      el.textContent = fams.length === 1
+        ? `${fams[0]} — ${picked.length} configs`
+        : `${picked.length} products`;
+    }
+
+    function afterProductChange() {
+      renderProductPicker();
+      render();
+    }
+
+    /** The selection, restricted to the models this snapshot actually has.
+        A snapshot predating a SKU (or following its discontinuation) simply
+        has no row for it, and averaging must not count it as missing. */
+    function productsInSnapshot(s) {
+      const picked = selectedProducts;
+      if (!picked.size) return s.products.map(p => p.model);
+      return s.products.map(p => p.model).filter(m => picked.has(m));
+    }
+
+    /** Label for the current product selection, used in chart titles. */
+    function selectedProductLabel() {
+      const picked = getSelectedProducts();
+      if (!selectedProducts.size) return 'All Products';
+      if (picked.length === 1) return picked[0];
+      const whole = PRODUCT_GROUPS.find(g =>
+        g.models.length === picked.length && g.models.every(m => selectedProducts.has(m)));
+      return whole ? `${whole.name} (average of ${picked.length})`
+                   : `${picked.length} products (average)`;
+    }
+
     function updateEbaySubToggles() {
       const ebayOn = document.getElementById('showEbayPrices').checked;
       document.querySelectorAll('.ebay-sub-toggle').forEach(el => {
@@ -1066,33 +1354,7 @@
     }
 
     function initControls() {
-      const productSelect = document.getElementById('productSelect');
-      // Add "All Products (Average)" option
-      const allOpt = document.createElement('option');
-      allOpt.value = '__ALL__';
-      allOpt.textContent = 'All Products (Average)';
-      productSelect.appendChild(allOpt);
-
-      // Only include models that have data in recent snapshots (last 10)
-      const recentSnapshots = DATA.snapshots.slice(-10);
-      const modelsWithData = DATA.all_models.filter(model => {
-        return recentSnapshots.some(s => {
-          const prod = s.products.find(p => p.model === model);
-          if (!prod) return false;
-          return Object.values(prod.values).some(v => v !== null && v !== undefined);
-        });
-      });
-
-      modelsWithData.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        productSelect.appendChild(opt);
-      });
-
-      // Default to Mac Mini M4 ($599) on load
-      const defaultProduct = modelsWithData.find(m => m === 'Mac Mini M4 ($599)');
-      if (defaultProduct) productSelect.value = defaultProduct;
+      buildProductPicker();
 
       const citySelect = document.getElementById('citySelect');
       DATA.all_cities.forEach(c => {
@@ -1103,7 +1365,6 @@
         citySelect.appendChild(opt);
       });
 
-      productSelect.addEventListener('change', render);
       citySelect.addEventListener('change', render);
       document.getElementById('filterZeros').addEventListener('change', render);
       document.getElementById('showAvailability').addEventListener('change', render);
@@ -1149,9 +1410,12 @@
       // Quick view buttons
       document.getElementById('qvMacMini').addEventListener('click', () => {
         // Set product to Mac Mini M4 ($599), view to Compare Cities
-        const ps = document.getElementById('productSelect');
-        const macMini = [...ps.options].find(o => o.value === 'Mac Mini M4 ($599)');
-        if (macMini) ps.value = macMini.value;
+        const mini = PRODUCT_GROUPS.find(g => g.name === 'Mac mini');
+        if (mini) {
+          selectedProducts = new Set(mini.models.filter(m => mini.live.has(m)));
+          expandedFamilies.add('Mac mini');
+          renderProductPicker();
+        }
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const compareTab = document.querySelector('.view-tab[data-view="compare"]');
         if (compareTab) { compareTab.classList.add('active'); currentView = 'compare'; }
@@ -1160,7 +1424,8 @@
 
       document.getElementById('qvAllProducts').addEventListener('click', () => {
         // Set product to All Products, view to Trends
-        document.getElementById('productSelect').value = '__ALL__';
+        selectedProducts.clear();
+        renderProductPicker();
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         const trendsTab = document.querySelector('.view-tab[data-view="trends"]');
         if (trendsTab) { trendsTab.classList.add('active'); currentView = 'trends'; }
@@ -1447,8 +1712,12 @@
       return [...sel.selectedOptions].map(o => o.value);
     }
 
+    /* Legacy single-value accessor, kept for the heatmap paths. '__ALL__'
+       now means "an aggregate of more than one product", which is exactly how
+       those call sites already treated it. */
     function getSelectedProduct() {
-      return document.getElementById('productSelect').value;
+      const picked = getSelectedProducts();
+      return picked.length === 1 ? picked[0] : '__ALL__';
     }
 
     function getCustomAvgCities() {
@@ -1623,7 +1892,7 @@
       let validValues = [];
 
       snapshots.forEach((s, si) => {
-        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
+        const products = productsInSnapshot(s);
         products.forEach(prod => {
           selectedCities.forEach(city => {
             totalPoints++;
@@ -1704,22 +1973,18 @@
 
       if (showAvailability && (currentView === 'compare' || !isAllProducts)) {
         // One line per city
-        const title = isAllProducts ? 'Average Availability by City' : `${selectedProduct} — Availability by City`;
+        const title = `${selectedProductLabel()} — Availability by City`;
         document.getElementById('mainChartTitle').textContent = title;
 
         selectedCities.forEach(city => {
           // First pass: collect raw values (null where missing)
           const rawPoints = snapshots.map((s, si) => {
             let val = null;
-            if (isAllProducts) {
-              const vals = s.products
-                .map(p => getValidValue(s, p.model, city, filterZeros, blipSet, si))
-                .filter(v => v !== null);
-              if (vals.length > 0) {
-                val = vals.reduce((a, b) => a + b, 0) / vals.length;
-              }
-            } else {
-              val = getValidValue(s, selectedProduct, city, filterZeros, blipSet, si);
+            const vals = productsInSnapshot(s)
+              .map(m => getValidValue(s, m, city, filterZeros, blipSet, si))
+              .filter(v => v !== null);
+            if (vals.length > 0) {
+              val = vals.reduce((a, b) => a + b, 0) / vals.length;
             }
             return { x: new Date(s.timestamp), y: val };
           });
@@ -1748,7 +2013,7 @@
         // Add weighted average line (weighted by store count per city)
         if (selectedCities.length > 1) {
           const avgPoints = [];
-          const products = isAllProducts ? DATA.all_models : [selectedProduct];
+          const products = getSelectedProducts();
           snapshots.forEach((s, si) => {
             const val = weightedAvg(s, si, products, selectedCities, filterZeros, blipSet);
             if (val !== null) {
@@ -1775,7 +2040,7 @@
         const customCities = getCustomAvgCities();
         if (customCities.length > 0) {
           const customPoints = [];
-          const products = isAllProducts ? DATA.all_models : [selectedProduct];
+          const products = getSelectedProducts();
           snapshots.forEach((s, si) => {
             const val = weightedAvg(s, si, products, customCities, filterZeros, blipSet);
             if (val !== null) {
@@ -1798,11 +2063,17 @@
           }
         }
       } else if (showAvailability) {
-        // All products view: one line per product (store-weighted average across selected cities)
-        document.getElementById('mainChartTitle').textContent = 'All Products — Store-Weighted Average Across Selected Cities';
+        // Aggregate selection: one line per selected product (store-weighted
+        // average across selected cities). Selecting a family therefore gives a
+        // line per config in that family; selecting one config falls through to
+        // the per-city branch above.
+        document.getElementById('mainChartTitle').textContent =
+          `${selectedProductLabel()} — Store-Weighted Average Across Selected Cities`;
 
-        // First pass: compute each product's overall weighted avg for sorting
-        const modelStats = DATA.all_models.map((model, idx) => {
+        // Colour index is the product's position in the FULL model list, so a
+        // product keeps its colour as the selection changes.
+        const modelStats = getSelectedProducts().map(model => {
+          const idx = DATA.all_models.indexOf(model);
           const points = [];
           let overallSum = 0, overallWeight = 0;
           snapshots.forEach((s, si) => {
@@ -1848,9 +2119,8 @@
       }
 
       if (!showAvailability) {
-        document.getElementById('mainChartTitle').textContent = isAllProducts
-          ? 'eBay Prices — All Products'
-          : `${selectedProduct} — eBay Prices`;
+        document.getElementById('mainChartTitle').textContent =
+          `${selectedProductLabel()} — eBay Prices`;
       }
 
       // --- eBay price overlay ---
@@ -1896,8 +2166,12 @@
             }
           }
         } else {
-          // All products: one avg + median line per eBay product
-          const ebayProducts = DATA.ebay_prices.products;
+          // One avg + median line per eBay product, restricted to the current
+          // selection (an empty selection means all of them).
+          const picked = selectedProducts;
+          const ebayProducts = picked.size
+            ? DATA.ebay_prices.products.filter(n => picked.has(n))
+            : DATA.ebay_prices.products;
           ebayProducts.forEach((productName, idx) => {
             const history = ebayData[productName];
             if (!history || history.length === 0) return;
@@ -2166,7 +2440,7 @@
       let vals = [];
       snaps.forEach(s => {
         const si = allSnapshots.indexOf(s);
-        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
+        const products = productsInSnapshot(s);
         products.forEach(prod => {
           const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
           if (val !== null) vals.push(val);
@@ -2214,7 +2488,7 @@
       const series = [];
       snapshots.forEach((s, si) => {
         const t = new Date(s.timestamp).getTime();
-        const products = isAllProducts ? s.products.map(p => p.model) : [selectedProduct];
+        const products = productsInSnapshot(s);
         let vals = [];
         products.forEach(prod => {
           const val = getValidValue(s, prod, city, filterZeros, blipSet, si);
@@ -2347,12 +2621,18 @@
         productChart = null;
       }
 
-      document.getElementById('productChartTitle').textContent = 'Average Availability by Product (Store-Weighted)';
+      // Scoped to the selection like everything else on the page — pick
+      // "All products" to get the full cross-family comparison back.
+      document.getElementById('productChartTitle').textContent =
+        selectedProducts.size
+          ? `Average Availability — ${selectedProductLabel()} (Store-Weighted)`
+          : 'Average Availability by Product (Store-Weighted)';
 
       const productAvgs = [];
       let overallWSum = 0, overallWTotal = 0;
 
-      DATA.all_models.forEach((model, idx) => {
+      getSelectedProducts().forEach(model => {
+        const idx = DATA.all_models.indexOf(model);
         let wSum = 0, wTotal = 0;
         snapshots.forEach((s, si) => {
           selectedCities.forEach(city => {
@@ -2516,7 +2796,7 @@
       }
 
       card.style.display = 'block';
-      title.textContent = `${selectedProduct} — Availability by City Over Time`;
+      title.textContent = `${selectedProductLabel()} — Availability by City Over Time`;
 
       // Get latest store counts for column headers
       const latestSnap = snapshots[snapshots.length - 1];
@@ -3278,6 +3558,16 @@
       });
     }
 
+    /** Products present in one store's record, restricted to the current
+        selection. The store map only carries the products it has ever seen, so
+        intersect rather than assuming the selection is present. */
+    function storeProductsInSelection(storeAvail) {
+      const keys = Object.keys(storeAvail);
+      if (!selectedProducts.size) return keys;
+      const hit = keys.filter(k => selectedProducts.has(k));
+      return hit.length ? hit : [];
+    }
+
     /** Compute per-store availability fraction for a given snapshot index and product */
     function computeStoreItems(snapIdx) {
       if (!DATA || !DATA.store_map) return [];
@@ -3290,7 +3580,7 @@
         const storeAvail = avail[s.id] || {};
 
         if (isAll) {
-          const products = Object.keys(storeAvail);
+          const products = storeProductsInSelection(storeAvail);
           store._totalProducts = products.length;
           store._availCount = products.filter(p => storeAvail[p] === 1).length;
           store._fraction = products.length > 0 ? store._availCount / products.length : 0;
@@ -3326,7 +3616,8 @@
         const aEnd = availEnd[s.id] || {};
 
         if (isAll) {
-          const allProducts = new Set([...Object.keys(aStart), ...Object.keys(aEnd)]);
+          const allProducts = new Set([...storeProductsInSelection(aStart),
+                                       ...storeProductsInSelection(aEnd)]);
           if (allProducts.size === 0) {
             store._delta = 0;
             store._hasData = false;
