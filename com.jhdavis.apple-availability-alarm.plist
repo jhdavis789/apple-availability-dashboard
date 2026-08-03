@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Dead-man's switch: emails Jackson when the LIVE published site stops moving
+  for more than 3 days. Hourly at :17.
+
+  Also on launchd rather than cron, for the same reason as the collector — a
+  watchdog that only runs while the laptop happens to be awake is a watchdog
+  that can miss the outage it exists to catch. StartCalendarInterval replays a
+  missed run at wake.
+
+  Deliberately a SEPARATE job from the collector: the failure being watched for
+  is the collector not deploying, and a check living inside that job cannot fire
+  when that job is the thing that is broken.
+
+  Live copy: ~/Library/LaunchAgents/com.jhdavis.apple-availability-alarm.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.jhdavis.apple-availability-alarm</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/staleness_alarm.sh</string>
+  </array>
+
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Minute</key><integer>17</integer></dict>
+  </array>
+
+  <key>StandardOutPath</key>
+  <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.alarm.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.alarm.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin</string>
+  </dict>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>

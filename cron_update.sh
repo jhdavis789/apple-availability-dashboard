@@ -1,8 +1,67 @@
 #!/bin/bash
-# Cron job: pull Apple availability + eBay prices, rebuild dashboard, deploy
-# Runs every 30 minutes via crontab
+# Pull Apple availability + eBay prices, rebuild dashboard, deploy.
+#
+# Scheduled by launchd (com.jhdavis.apple-availability.plist, :00 and :30), NOT
+# crontab. cron silently drops every tick the laptop sleeps through and never
+# makes them up, which is why collection uptime was 53.8% — 774 of 1,440
+# expected ticks over 30 days. launchd's StartCalendarInterval replays one
+# missed run the moment the Mac wakes. That replay lands *before* Wi-Fi has
+# reassociated, hence the connectivity gate in step 0.
+#
+# The name is kept for the paths and log that reference it.
 
 set -e
+
+REAP_AFTER=1500   # seconds; a healthy run is ~4 min, so 25 min means wedged
+
+# launchd runs this single-instance: a run hung on a stalled TLS connection
+# blocks every later tick indefinitely. Kill any prior instance that has
+# outlived a plausible run.
+#
+# Exclude by process GROUP, not by $$ — launchd wraps bash so the shell's $$
+# differs from the PID pgrep reports for it, and excluding "self" by $$ fails,
+# leaving the reaper poking its own run. Every `ps ... | tr` needs `|| true`:
+# a pid can vanish mid-loop and `set -e` + a failing command substitution in an
+# assignment aborts the whole script right after the header.
+MYPGID="$(ps -o pgid= -p $$ 2>/dev/null | tr -d ' ' || true)"
+for pid in $(pgrep -f "cron_update.sh" 2>/dev/null || true); do
+  [ "$pid" = "$$" ] && continue
+  pgid="$(ps -o pgid= -p "$pid" 2>/dev/null | tr -d ' ' || true)"
+  [ -n "$MYPGID" ] && [ "$pgid" = "$MYPGID" ] && continue
+  # macOS ps has no `etimes` keyword — asking for it dumps the keyword list and
+  # the reaper silently never reaps. Parse `etime` ([[dd-]hh:]mm:ss) by hand;
+  # 10# guards leading-zero octal.
+  et="$(ps -o etime= -p "$pid" 2>/dev/null | tr -d ' ' || true)"
+  [ -n "$et" ] || continue
+  case "$et" in *[!0-9:-]*) continue;; esac
+  days=0; case "$et" in *-*) days="${et%%-*}"; et="${et#*-}";; esac
+  IFS=: read -r f1 f2 f3 <<< "$et" || true
+  if [ -n "${f3:-}" ]; then esec=$(( (10#$days*24 + 10#$f1)*3600 + 10#$f2*60 + 10#$f3 ))
+  else esec=$(( 10#$days*86400 + 10#$f1*60 + 10#$f2 )); fi
+  [ -n "${esec:-}" ] || continue
+  if [ "$esec" -gt "$REAP_AFTER" ] && [ -n "$pgid" ]; then
+    kill -KILL -"$pgid" 2>/dev/null || true
+  fi
+done
+
+# Bound any single network op. macOS ships no timeout(1); a self-exiting poller
+# is used rather than `sleep N; kill` because a signal-killed sleep prints
+# job-control noise into the log and can be orphaned into launchd's process
+# group, keeping the job flagged as still running.
+with_timeout() {              # with_timeout SECS cmd args...
+  local secs="$1"; shift
+  "$@" & local cmd_pid=$!
+  ( local w=0
+    while [ "$w" -lt "$secs" ]; do
+      kill -0 "$cmd_pid" 2>/dev/null || exit 0
+      sleep 1; w=$((w + 1))
+    done
+    kill -TERM "$cmd_pid" 2>/dev/null || true; sleep 3
+    kill -KILL "$cmd_pid" 2>/dev/null || true ) &
+  local rc=0
+  wait "$cmd_pid" 2>/dev/null || rc=$?
+  return "$rc"
+}
 
 # Export GH_TOKEN so gh credential helper works without keychain access.
 # '|| true' so a transient read failure can't trip `set -e` before logging starts.
@@ -48,7 +107,7 @@ done
 # 1. Pull Apple availability data
 echo "[1/5] Pulling Apple availability..."
 cd "$BASE_DIR"
-$PYTHON "$DASH_DIR/availability_matrix_csv_rest.py" || echo "WARNING: Apple pull failed"
+with_timeout 900 $PYTHON "$DASH_DIR/availability_matrix_csv_rest.py" || echo "WARNING: Apple pull failed"
 
 # 2. Pull eBay pricing data (every 2 hours only — check minute=00 and even hour)
 HOUR=$(date '+%H')
@@ -56,7 +115,7 @@ MINUTE=$(date '+%M')
 if [ "$MINUTE" -lt 15 ] && [ $(( HOUR % 2 )) -eq 0 ]; then
   echo "[2/5] Pulling eBay pricing..."
   cd "$EBAY_DIR"
-  $PYTHON "$EBAY_DIR/ebay_scraper.py" || echo "WARNING: eBay pull failed"
+  with_timeout 600 $PYTHON "$EBAY_DIR/ebay_scraper.py" || echo "WARNING: eBay pull failed"
 else
   echo "[2/5] Skipping eBay (runs every 2h at :00)"
 fi
@@ -64,7 +123,7 @@ fi
 # 3. Rebuild data.json + store_map.json
 echo "[3/5] Rebuilding data..."
 cd "$DASH_DIR"
-$PYTHON "$DASH_DIR/build_data.py" || { echo "ERROR: build_data.py failed"; exit 1; }
+with_timeout 600 $PYTHON "$DASH_DIR/build_data.py" || { echo "ERROR: build_data.py failed"; exit 1; }
 
 # 3b. Retention: prune raw snapshots older than the window + wave2 probe junk.
 # Raw is only an intermediate; data.json/store_map.json carry the downsampled history.
@@ -92,12 +151,15 @@ cp dashboard.html index.html
 git add data.json store_map.json index.html
 git commit -m "Auto-update $(date '+%Y-%m-%d %H:%M')" || echo "No changes to commit"
 
-if ! git pull --rebase --quiet origin main; then
+# --autostash: any tracked file left modified (an edit in progress, a partial
+# build) makes a plain `git pull --rebase` refuse outright, which silently
+# disables the very self-healing this line exists to provide.
+if ! with_timeout 120 git pull --rebase --autostash --quiet origin main; then
   echo "WARNING: rebase onto origin/main failed — aborting and leaving the tree clean"
   git rebase --abort 2>/dev/null || true
 fi
 
-if git push origin main; then
+if with_timeout 120 git push origin main; then
   echo "Deployed."
 else
   echo "ERROR: git push failed — the live site is NOT updated"

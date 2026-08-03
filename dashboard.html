@@ -671,6 +671,11 @@
     <div class="control-group">
       <label>Data Filters</label>
       <div class="filter-toggles">
+        <label class="toggle-label" id="carriedToggleWrap"
+               title="Apple reports a store as 'ineligible' both when it never carries a config and when a carried one sells out. Measuring against only the stores that have ever had a config in stock removes the first case from the denominator.">
+          <input type="checkbox" id="carriedBasis">
+          Only stores that stock it
+        </label>
         <label class="toggle-label">
           <input type="checkbox" id="filterZeros" checked>
           Filter likely errors?
@@ -1367,6 +1372,16 @@
 
       citySelect.addEventListener('change', render);
       document.getElementById('filterZeros').addEventListener('change', render);
+      const carriedBox = document.getElementById('carriedBasis');
+      // Hide the control entirely when the build carries no cvalues at all,
+      // rather than offering a toggle that blanks the chart.
+      if (!DATA.carried_from) {
+        document.getElementById('carriedToggleWrap').style.display = 'none';
+      }
+      carriedBox.addEventListener('change', () => {
+        carriedBasis = carriedBox.checked;
+        render();
+      });
       document.getElementById('showAvailability').addEventListener('change', render);
       document.getElementById('showEbayPrices').addEventListener('change', () => {
         updateEbaySubToggles();
@@ -1826,10 +1841,35 @@
      * Filters out: null/ERR, store count 0, and 0% blips (isolated drops surrounded
      * by much higher values).
      */
+    /* Availability measured against only the stores that actually stock the
+       config. Apple's `ineligible` means BOTH "this store never carries it"
+       and "the one it carries has sold out" — a<->i transitions outnumber
+       a<->u 356 to 44 — so the split has to be per (store, SKU) persistence,
+       not per letter. build_data.py does that and writes `cvalues`.
+       Only available from carried_from onward, since it needs the raw archive
+       (45-day retention) which does not reach the February CSVs. */
+    let carriedBasis = false;
+    const CARRIED_MIN_STORES = 3;   // below this a percentage is noise (n=2 -> 50%)
+
+    function carriedCount(product, cityName) {
+      const per = DATA.carried_counts && DATA.carried_counts[product];
+      return per ? (per[cityName] || 0) : 0;
+    }
+
     function getValidValue(snapshot, product, cityName, filterZeros, blipSet, snapshotIdx) {
       const prodData = snapshot.products.find(p => p.model === product);
       if (!prodData) return null;
-      const val = prodData.values[cityName];
+      let val;
+      if (carriedBasis) {
+        // No cvalues means this snapshot predates the raw archive — report
+        // nothing rather than silently falling back to the other denominator
+        // and splicing two different measurements into one line.
+        if (!prodData.cvalues) return null;
+        if (carriedCount(product, cityName) < CARRIED_MIN_STORES) return null;
+        val = prodData.cvalues[cityName];
+      } else {
+        val = prodData.values[cityName];
+      }
       if (val === null || val === undefined) return null;
 
       const cityInfo = snapshot.cities.find(c => c.name === cityName);
@@ -1925,9 +1965,18 @@
         </div>
       `;
 
-      excludedInfo.textContent = excludedPoints > 0
-        ? `${fmt(excludedPoints)} data points excluded by filters (ERR, N/A, error snapshots with 0 stores, or isolated single-call 0% values)`
-        : '';
+      const parts = [];
+      if (excludedPoints > 0) {
+        parts.push(`${fmt(excludedPoints)} data points excluded by filters (ERR, N/A, error snapshots with 0 stores, or isolated single-call 0% values)`);
+      }
+      if (carriedBasis && DATA.carried_from) {
+        const from = new Date(DATA.carried_from);
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        parts.push(`Denominator = stores that have ever had the config in stock, so a store that never carries it is excluded rather than counted as 0%. `
+          + `Needs the per-store archive, so this basis starts ${months[from.getMonth()]} ${from.getDate()}, ${from.getFullYear()} — earlier snapshots are blank, not zero. `
+          + `City/product pairs with fewer than ${CARRIED_MIN_STORES} stocking stores are dropped (a percentage off 2 stores is noise).`);
+      }
+      excludedInfo.textContent = parts.join('  |  ');
     }
 
     function renderTrendsChart(snapshots, selectedCities, filterZeros, isAllProducts, selectedProduct, blipSet) {
@@ -1947,12 +1996,27 @@
         return (c && c.store_count > 0) ? c.store_count : 0;
       }
 
+      /* The 2/3-coverage rule below asks "are enough cities reporting?", so its
+         denominator must be the slots that COULD report. On the carried-store
+         basis, cities where too few stores stock a config are deliberately
+         suppressed — counting them as expected-but-missing makes a product fail
+         coverage in every snapshot and vanish from the chart entirely. The Mac
+         mini 16/256 stocks in 5 of 12 cities and disappeared completely. */
+      function measurableSlots(cities, products) {
+        if (!carriedBasis) return cities.length * products.length;
+        let n = 0;
+        cities.forEach(city => products.forEach(prod => {
+          if (carriedCount(prod, city) >= CARRIED_MIN_STORES) n++;
+        }));
+        return n;
+      }
+
       /** Helper: compute store-weighted average across cities for a snapshot.
        *  products is an array of product names to average over.
        *  Returns null if no valid data. */
       function weightedAvg(snapshot, si, products, cities, filterZeros, blipSet) {
         let totalWeight = 0, weightedSum = 0;
-        const totalPossible = cities.length * products.length;
+        const totalPossible = measurableSlots(cities, products);
         let validCount = 0;
         cities.forEach(city => {
           const sc = getStoreCount(snapshot, city);
@@ -1967,7 +2031,8 @@
           });
         });
         // Require at least 2/3 of data points to be non-error
-        if (totalWeight <= 0 || validCount < totalPossible * (2 / 3)) return null;
+        if (totalWeight <= 0 || totalPossible === 0) return null;
+        if (validCount < totalPossible * (2 / 3)) return null;
         return weightedSum / totalWeight;
       }
 
@@ -2079,7 +2144,7 @@
           snapshots.forEach((s, si) => {
             let wSum = 0, wTotal = 0;
             let validCount = 0;
-            const totalPossible = selectedCities.length;
+            const totalPossible = measurableSlots(selectedCities, [model]);
             selectedCities.forEach(city => {
               const sc = getStoreCount(s, city);
               if (sc <= 0) return;
@@ -2091,7 +2156,7 @@
               }
             });
             // Only include point if more than 2/3 of cities are reporting
-            if (wTotal > 0 && validCount >= totalPossible * (2 / 3)) {
+            if (wTotal > 0 && totalPossible > 0 && validCount >= totalPossible * (2 / 3)) {
               const avg = wSum / wTotal;
               points.push({ x: new Date(s.timestamp), y: avg });
               overallSum += avg;

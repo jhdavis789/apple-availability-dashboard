@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Apple availability collector, every :00 and :30.
+
+  StartCalendarInterval (not StartInterval) on purpose: it replays ONE missed
+  run the moment the Mac wakes, which is the whole reason for moving off cron.
+  cron drops every tick the laptop sleeps through and never makes it up, which
+  held collection uptime at 53.8% (774 of 1,440 expected ticks over 30 days).
+
+  The wake replay fires before Wi-Fi reassociates, so cron_update.sh gates on
+  connectivity and exits 0 rather than burning the tick on a doomed run.
+
+  Live copy: ~/Library/LaunchAgents/com.jhdavis.apple-availability.plist
+  Reload after editing:
+    launchctl bootout   gui/$(id -u)/com.jhdavis.apple-availability
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.jhdavis.apple-availability.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.jhdavis.apple-availability</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/cron_update.sh</string>
+  </array>
+
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Minute</key><integer>30</integer></dict>
+  </array>
+
+  <!-- The script writes its own log; these catch anything before that redirect
+       (the stale-run reaper) and any launchd-level failure. -->
+  <key>StandardOutPath</key>
+  <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.err.log</string>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin</string>
+  </dict>
+
+  <!-- No RunAtLoad: bootstrapping would fire a full run immediately, and the
+       :00/:30 schedule plus the wake replay already covers every case. -->
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>

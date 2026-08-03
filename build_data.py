@@ -222,10 +222,14 @@ def load_ebay_prices():
         conn.close()
 
         # Build structured output: { products: [...], data: { product_name: [...] } }
-        product_names = [p["product_name"] for p in products]
+        # Canonicalise: the eBay DB stores whatever display name a product had
+        # when it was first scraped, and the dashboard joins these keys to the
+        # availability model names. A relabelled SKU therefore silently orphans
+        # its whole price series — which is exactly what happened on 2026-08-03.
+        product_names = [canonical_model(p["product_name"]) for p in products]
         data = {}
         for row in rows:
-            name = row["product_name"]
+            name = canonical_model(row["product_name"])
             if name not in data:
                 data[name] = []
             # Convert scraped_at from "YYYY-MM-DD HH:MM:SS" to ISO format
@@ -247,6 +251,105 @@ def load_ebay_prices():
     except Exception as e:
         print(f"Error loading eBay data: {e}")
         return None
+
+
+def load_carried_values():
+    """Availability measured against the stores that actually stock each SKU.
+
+    Apple's pickup API returns three states, and `ineligible` is overloaded:
+
+      * ~38% of (store, SKU) pairs are `ineligible` for the entire window —
+        that store simply does not carry that configuration.
+      * but `ineligible` is ALSO the state a carried SKU falls into when it
+        sells out. Measured over 2.5 days, `available <-> ineligible`
+        transitions outnumber `available <-> unavailable` 356 to 44.
+
+    So dropping every `ineligible` reading (the obvious reading of "exclude it
+    from both camps") deletes the primary out-of-stock signal and reports
+    MacBook Pro, iMac and the Mac mini 16/512 at 100% available. Splitting on
+    the letter is the wrong cut.
+
+    The right cut is per (store, SKU) PERSISTENCE: a store that has ever shown
+    the SKU as available demonstrably stocks it, so its `ineligible` readings
+    mean sold out and belong in the denominator. A store that has never shown it
+    available in the whole archive does not stock it and belongs in neither
+    camp — it is dropped from the denominator entirely.
+
+    Returns ({timestamp: {model: {city: pct}}}, {model: {city: carried_count}}).
+    Only covers the raw retention window; older snapshots keep the all-stores
+    percentage the scraper wrote into the CSVs, which cannot be recomputed.
+    """
+    paths = raw_paths()
+    print(f"Computing carried-store availability from {len(paths)} raw files...")
+
+    # Pass 1: which stores have ever had this SKU available.
+    ever = defaultdict(set)          # sku -> {store}
+    for p in paths:
+        raw = read_raw(p)
+        if raw is None:
+            continue
+        for snap in raw.get("snapshots", []):
+            for store, per_sku in (snap.get("avail") or {}).items():
+                for sku, letter in per_sku.items():
+                    if letter == "a":
+                        ever[sku].add(store)
+
+    # Pass 2: per snapshot, per city, availability over carried stores only.
+    by_ts = {}
+    carried_counts = defaultdict(lambda: defaultdict(int))
+    for p in paths:
+        raw = read_raw(p)
+        if raw is None:
+            continue
+        # Key on the FILENAME stamp, not raw["timestamp"]. The internal field
+        # records when the payload was serialised (2026-08-03T12:01:55.445523)
+        # while the filename carries the scheduled tick (…_120000) — which is
+        # what the CSV snapshots are keyed on. Using the internal one joins
+        # nothing, silently.
+        ts = parse_timestamp(p)
+        if not ts:
+            continue
+        city_of = {}
+        for city, stores in (raw.get("city_assignments") or {}).items():
+            for sn in stores:
+                city_of[sn] = city
+        part_to_name = {v: k for k, v in (raw.get("products") or {}).items()}
+
+        # A store can appear under several zip batches; 'a' must win over 'i'.
+        state = defaultdict(dict)     # sku -> store -> letter
+        for snap in raw.get("snapshots", []):
+            part_to_name.update({v: k for k, v in (snap.get("parts") or {}).items()})
+            for store, per_sku in (snap.get("avail") or {}).items():
+                for sku, letter in per_sku.items():
+                    prev = state[sku].get(store)
+                    if prev is None or (prev != "a" and letter == "a"):
+                        state[sku][store] = letter
+
+        out = {}
+        for sku, per_store in state.items():
+            name = canonical_model(part_to_name.get(sku, sku))
+            if name in EXCLUDED_MODELS:
+                continue
+            num = defaultdict(int)
+            den = defaultdict(int)
+            for store, letter in per_store.items():
+                city = city_of.get(store)
+                if city is None or store not in ever.get(sku, ()):
+                    continue          # unassigned, or this store never stocks it
+                den[city] += 1
+                if letter == "a":
+                    num[city] += 1
+            vals = {}
+            for city, d in den.items():
+                vals[city] = round(100 * num[city] / d)
+                carried_counts[name][city] = max(carried_counts[name][city], d)
+            if vals:
+                out[name] = vals
+        if out:
+            by_ts[ts] = out
+
+    print(f"  carried-store basis computed for {len(by_ts)} snapshots")
+    return by_ts, {k: dict(v) for k, v in carried_counts.items()}
 
 
 def _parse_one_raw_file(filepath):
@@ -1007,8 +1110,39 @@ def main():
     # simply ends where the product was actually discontinued.
     _trim_discontinued_tails(snapshots)
 
+    # --- Attach the carried-store denominator where raw data exists ---
+    # Raw and CSV files are written by the same run and share a timestamp
+    # exactly, so this is a direct key match, not a nearest-neighbour join.
+    carried_by_ts, carried_counts = load_carried_values()
+    attached = 0
+    for snap in snapshots:
+        per_model = carried_by_ts.get(snap["timestamp"])
+        if not per_model:
+            continue
+        for prod in snap["products"]:
+            vals = per_model.get(prod["model"])
+            if vals:
+                prod["cvalues"] = vals
+                attached += 1
+    print(f"  attached carried-basis values to {attached} product rows "
+          f"across {sum(1 for s in snapshots if any('cvalues' in p for p in s['products']))} snapshots")
+
     # Load eBay price data and downsample older points
     ebay_prices = load_ebay_prices()
+
+    # The dashboard joins eBay series to availability model names by string.
+    # A relabelled SKU orphans its price series and the overlay just renders
+    # nothing — no error, no empty state. Say so.
+    if ebay_prices:
+        sku_keyed = [n for n in ebay_prices["products"] if "(keyword)" not in n]
+        orphans = [n for n in sku_keyed if n not in all_models]
+        if orphans:
+            print(f"WARNING: {len(orphans)}/{len(sku_keyed)} eBay series do not match "
+                  f"any tracked model — their price overlay will not render:")
+            for n in orphans:
+                print(f"    {n}")
+            print("  Add a MODEL_ALIASES entry, or fix Ebay Scrape/config.json.")
+
     if ebay_prices and "data" in ebay_prices:
         for prod, points in ebay_prices["data"].items():
             if not points:
@@ -1075,6 +1209,11 @@ def main():
     }
     if ebay_prices:
         output["ebay_prices"] = ebay_prices
+    # How many stores stock each SKU in each city — the denominator behind
+    # `cvalues`, so the UI can show n and refuse to print a percentage off a
+    # handful of stores.
+    output["carried_counts"] = carried_counts
+    output["carried_from"] = min(carried_by_ts) if carried_by_ts else None
 
     with open(OUTPUT_FILE, "w") as f:
         json.dump(output, f, separators=(",", ":"))
