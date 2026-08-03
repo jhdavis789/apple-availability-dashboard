@@ -14,19 +14,96 @@ import json
 import os
 import re
 import sqlite3
+import sys
 from collections import defaultdict
 from datetime import datetime, timedelta
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-CSV_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "csvs"))
+BASE_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, ".."))
+CSV_DIR = os.path.join(BASE_DIR, "csvs")
 OUTPUT_FILE = os.path.join(SCRIPT_DIR, "data.json")
-EBAY_DB_PATH = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "Ebay Scrape", "ebay_data.db"))
-RAW_API_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "raw_api_responses"))
+EBAY_DB_PATH = os.path.join(BASE_DIR, "Ebay Scrape", "ebay_data.db")
+
+# Raw snapshots live in the compact v3 archive and must be read through the
+# codec — they are gzipped and share a content-addressed blob pool, so a plain
+# glob+json.load finds nothing. That is exactly what happened: the scraper moved
+# to v3 on 2026-07-20, this file kept globbing `../raw_api_responses/*.json`,
+# and the heatmap silently froze for two weeks because "no files found" was a
+# print statement rather than an error. See DATA_SOURCES.md, Apple Store Retail
+# API: "Read/write ONLY via raw_codec.py".
+sys.path.insert(0, BASE_DIR)
+import raw_codec  # noqa: E402
+
+RAW_API_DIR = raw_codec.DEFAULT_DIR
+
+
+def raw_paths():
+    """Every raw snapshot path, oldest first, excluding the wave2 probe junk.
+
+    Raises if the archive is empty. Every scraper run writes a raw snapshot, so
+    "no raw files" always means the reader is looking in the wrong place — the
+    condition that froze the heatmap for two weeks while build_data.py printed
+    "No raw API response files found" and exited 0. It must be loud.
+    """
+    paths = [p for p in raw_codec.iter_raw_paths()
+             if "wave2" not in os.path.basename(p)]
+    if not paths:
+        raise RuntimeError(
+            f"No raw snapshots under {raw_codec.DEFAULT_DIR}. The scraper writes "
+            f"one per run, so this means the archive moved or the codec is "
+            f"pointed at the wrong directory — not that there is no data."
+        )
+    return paths
+
+
+def read_raw(path):
+    """One raw snapshot in the legacy v2 shape, or None if unreadable."""
+    try:
+        return raw_codec.load_raw(path)
+    except Exception as e:  # noqa: BLE001 - report and skip the one file
+        print(f"  Skipping {os.path.basename(path)}: {e}")
+        return None
 
 # Models to exclude from dashboard output (easy to add more later)
 EXCLUDED_MODELS = {
     'MacBook Pro 14" M4 Max ($3,499)',
 }
+
+# Historical model name -> current name.
+#
+# The series key IS the display name, and the display name contains the price.
+# So when Apple reprices a SKU and we correct the label, the same physical
+# product becomes two disconnected series with a break at the rename date.
+# This map stitches them back together. Both sides are the SAME part number —
+# only the price text changed. Never alias two different parts together.
+#
+# 2026-08-03: all ten labels were repriced after `discover_skus.py --prices`
+# found every one of them stale (Macs ~+$200, Mac Studio +$500/+$1,300, iPhone
+# 16 -$70 once carrier-activation pricing was separated from unlocked).
+MODEL_ALIASES = {
+    'Mac Mini M4 16/512 ($799)': 'Mac Mini M4 16/512 ($999)',
+    'Mac Mini M4 24/512 ($999)': 'Mac Mini M4 24/512 ($1,199)',
+    'Mac Mini M4 Pro ($1,399)': 'Mac Mini M4 Pro ($1,599)',
+    'Mac Studio M4 Max ($1,999)': 'Mac Studio M4 Max ($2,499)',
+    'Mac Studio M3 Ultra ($3,999)': 'Mac Studio M3 Ultra ($5,299)',
+    'iMac 24" M4 8-core ($1,299)': 'iMac 24" M4 8-core ($1,499)',
+    'iMac 24" M4 10-core ($1,499)': 'iMac 24" M4 10-core ($1,699)',
+    'MacBook Pro 14" M5 ($1,699)': 'MacBook Pro 14" M5 ($1,999)',
+    'MacBook Pro 14" M5 Pro ($2,199)': 'MacBook Pro 14" M5 Pro ($2,499)',
+    'iPhone 16 128GB ($799)': 'iPhone 16 128GB ($729)',
+    # The $599 base was tracked before Apple repriced it to $799; same part
+    # (MU9D3LL/A), which is back in the tracked set as the 16/256 config.
+    'Mac Mini M4 ($599)': 'Mac Mini M4 16/256 ($799)',
+}
+
+# An alias whose target is itself an alias key would silently half-migrate.
+assert not (set(MODEL_ALIASES.values()) & set(MODEL_ALIASES)), \
+    "MODEL_ALIASES must not chain: a target is also a key"
+
+
+def canonical_model(name):
+    """Map a historical model name onto its current name."""
+    return MODEL_ALIASES.get(name, name)
 
 
 def parse_timestamp(filename):
@@ -85,7 +162,7 @@ def parse_csv_file(filepath):
     for row in rows[1:]:
         if not row or not row[0].strip():
             continue
-        model = row[0].strip().strip('"')
+        model = canonical_model(row[0].strip().strip('"'))
         values = {}
         for i, city_info in enumerate(cities):
             if i + 1 < len(row):
@@ -172,95 +249,88 @@ def load_ebay_prices():
         return None
 
 
-# Compact v2 availability chars (pickupDisplay[0]) -> full pickupDisplay string.
-_CHAR_TO_DISPLAY = {"a": "available", "u": "unavailable", "i": "ineligible"}
+def _parse_one_raw_file(filepath):
+    """Parse a single raw API response file and return (timestamp, store_avail_dict).
 
-
-def _iter_store_records(raw):
-    """Yield (store_number, store_meta, parts_display, lead_map) for every
-    per-zip store record in a raw file, normalizing BOTH formats:
-
-      - v1 ("responses"): verbose full API bodies (~17 MB/file, pre-2026-03)
-      - v2 ("snapshots"): compact format the pull script writes now (~185 KB)
-
-    store_meta:    {id, name, lat, lng, city, state, tz}
-    parts_display: {part_number: pickupDisplay_string}
-    lead_map:      {part_number: lead_days}   (0=today, 1=tomorrow)
-
-    Part numbers are the dict keys in both formats; callers resolve them to
-    product names via the file's top-level "products" map.
+    store_avail_dict is keyed by storeNumber, value is {product_name: 0|1}.
+    Also captures store metadata (name, lat, lng, city, state) on first encounter.
+    Handles both single-product and batch response formats.
     """
-    if "snapshots" in raw:  # v2 compact
-        stores_reg = raw.get("stores", {})
+    raw = read_raw(filepath)
+    if raw is None:
+        return None, None, None
+
+    timestamp = raw.get("timestamp", "")
+    store_meta = {}  # storeNumber -> {id, name, lat, lng, city, state}
+    store_avail = {}  # storeNumber -> {product_name: 0|1}
+
+    # Build part->product_name map from the top-level products dict
+    products_map = raw.get("products", {})  # {product_name: part_number}
+    part_to_name = {v: k for k, v in products_map.items()}
+
+    # --- v2/v3 shape (current) --------------------------------------------
+    # {"stores": {storeNumber: {name, lat, lon, city, state, ...}},
+    #  "snapshots": [{"parts": {name: sku}, "avail": {store: {sku: "a"|"i"|"u"}}}]}
+    if "snapshots" in raw:
+        for sn, meta in (raw.get("stores") or {}).items():
+            store_meta[sn] = {
+                "id": sn,
+                "name": meta.get("name", ""),
+                # v2 renamed storelatitude/storelongitude to lat/lon.
+                "lat": meta.get("lat"),
+                "lng": meta.get("lon"),
+                "city": meta.get("city", ""),
+                "state": meta.get("state", ""),
+            }
+            store_avail.setdefault(sn, {})
+
         for snap in raw.get("snapshots", []):
-            lead = snap.get("lead", {})
-            for sn, parts in snap.get("avail", {}).items():
-                meta = stores_reg.get(sn, {})
-                store_meta = {
-                    "id": sn,
-                    "name": meta.get("name", ""),
-                    "lat": meta.get("lat"),
-                    "lng": meta.get("lon"),   # v2 registry uses 'lon'
-                    "city": meta.get("city", ""),
-                    "state": meta.get("state", ""),
-                    "tz": meta.get("tz", ""),
-                }
-                parts_display = {pn: _CHAR_TO_DISPLAY.get(c, c) for pn, c in parts.items()}
-                yield sn, store_meta, parts_display, lead.get(sn, {})
-    else:  # v1 verbose
-        for resp in raw.get("responses", []):
-            body = resp.get("response", {}).get("body", {})
-            for s in body.get("stores", []):
-                sn = s.get("storeNumber", "")
-                if not sn:
-                    continue
-                store_meta = {
+            snap_part_to_name = {v: k for k, v in (snap.get("parts") or {}).items()}
+            for sn, per_sku in (snap.get("avail") or {}).items():
+                if sn not in store_avail:
+                    # A store that appears in a snapshot but not the directory
+                    # still deserves a row; coords just stay unknown.
+                    store_meta.setdefault(sn, {"id": sn, "name": "", "lat": None,
+                                               "lng": None, "city": "", "state": ""})
+                    store_avail[sn] = {}
+                for sku, letter in per_sku.items():
+                    name = snap_part_to_name.get(sku) or part_to_name.get(sku)
+                    if name and name not in EXCLUDED_MODELS:
+                        store_avail[sn][canonical_model(name)] = 1 if letter == "a" else 0
+        return timestamp, store_meta, store_avail
+
+    # --- v1 shape (deprecated, kept so old archives still parse) -----------
+    for resp in raw.get("responses", []):
+        product = resp.get("product", "")
+        # For batch responses, build part->name from the resp-level parts dict
+        resp_parts = resp.get("parts", {})  # {product_name: part_number}
+        resp_part_to_name = {v: k for k, v in resp_parts.items()}
+
+        body = resp.get("response", {}).get("body", {})
+        for s in body.get("stores", []):
+            sn = s.get("storeNumber", "")
+            if not sn:
+                continue
+
+            if sn not in store_meta:
+                store_meta[sn] = {
                     "id": sn,
                     "name": s.get("storeName", ""),
                     "lat": s.get("storelatitude"),
                     "lng": s.get("storelongitude"),
                     "city": s.get("city", ""),
                     "state": s.get("state", ""),
-                    "tz": s.get("retailStore", {}).get("timezone", ""),
                 }
-                parts_display = {}
-                lead_map = {}
-                for pn, info in s.get("partsAvailability", {}).items():
-                    parts_display[pn] = info.get("pickupDisplay", "")
-                    ld = _parse_lead_days(info.get("pickupSearchQuote", ""))
-                    if ld is not None:
-                        lead_map[pn] = ld
-                yield sn, store_meta, parts_display, lead_map
+                store_avail[sn] = {}
 
-
-def _parse_one_raw_file(filepath):
-    """Parse a single raw API response file and return (timestamp, store_meta, store_avail).
-
-    store_avail is keyed by storeNumber, value is {product_name: 0|1}.
-    Also captures store metadata (name, lat, lng, city, state) on first encounter.
-    Handles both v1 and v2 raw formats via _iter_store_records.
-    """
-    try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            raw = json.load(f)
-    except Exception as e:
-        print(f"  Skipping {os.path.basename(filepath)}: {e}")
-        return None, None, None
-
-    timestamp = raw.get("timestamp", "")
-    part_to_name = {v: k for k, v in raw.get("products", {}).items()}
-
-    store_meta = {}  # storeNumber -> {id, name, lat, lng, city, state, tz}
-    store_avail = {}  # storeNumber -> {product_name: 0|1}
-
-    for sn, meta, parts_display, _lead in _iter_store_records(raw):
-        if sn not in store_meta:
-            store_meta[sn] = meta
-            store_avail[sn] = {}
-        for pn, display in parts_display.items():
-            name = part_to_name.get(pn)
-            if name and name not in EXCLUDED_MODELS:
-                store_avail[sn][name] = 1 if display == "available" else 0
+            pa = s.get("partsAvailability", {})
+            for pn, info in pa.items():
+                pickup = info.get("pickupDisplay", "")
+                avail = 1 if pickup == "available" else 0
+                # Resolve product name: try resp-level parts, then top-level, then use raw product field
+                name = resp_part_to_name.get(pn) or part_to_name.get(pn) or product
+                if name and name != "batch" and name not in EXCLUDED_MODELS:
+                    store_avail[sn][name] = avail
 
     return timestamp, store_meta, store_avail
 
@@ -272,16 +342,7 @@ def load_store_map():
     time slider and delta features. Also includes the latest snapshot for
     default display.
     """
-    if not os.path.isdir(RAW_API_DIR):
-        print(f"Raw API directory not found at {RAW_API_DIR}, skipping store map")
-        return None
-
-    files = sorted(glob.glob(os.path.join(RAW_API_DIR, "raw_responses_*.json")))
-    candidates = [f for f in files if "wave2" not in os.path.basename(f)]
-    if not candidates:
-        print("No raw API response files found, skipping store map")
-        return None
-
+    candidates = raw_paths()
     print(f"Loading store map from {len(candidates)} raw API files...")
 
     # Collect store metadata from all files (latest wins for coords etc.)
@@ -351,12 +412,8 @@ def load_lead_times():
     Parses pickupSearchQuote ("Available Today" = 0 days, "Available Tomorrow" = 1 day)
     for each store+product, then aggregates to per-city averages.
     """
-    if not os.path.isdir(RAW_API_DIR):
-        print("Raw API directory not found, skipping lead times")
-        return None
-
     # Load store-to-region mapping for city aggregation
-    sa_path = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "store_assignments.json"))
+    sa_path = os.path.join(BASE_DIR, "store_assignments.json")
     store_region = {}
     if os.path.exists(sa_path):
         with open(sa_path) as f:
@@ -365,11 +422,7 @@ def load_lead_times():
             for sn in store_nums:
                 store_region[sn] = region
 
-    files = sorted(glob.glob(os.path.join(RAW_API_DIR, "raw_responses_*.json")))
-    candidates = [f for f in files if "wave2" not in os.path.basename(f)]
-    if not candidates:
-        print("No raw API response files found, skipping lead times")
-        return None
+    candidates = raw_paths()
 
     print(f"Extracting lead times from {len(candidates)} raw API files...")
 
@@ -385,21 +438,37 @@ def load_lead_times():
         if not timestamp:
             continue
 
-        part_to_name = {v: k for k, v in raw.get("products", {}).items()}
+        products_map = raw.get("products", {})
+        part_to_name = {v: k for k, v in products_map.items()}
 
         # {city: {product: [lead_days, ...]}} for this snapshot
         city_product_leads = defaultdict(lambda: defaultdict(list))
 
-        for sn, _meta, _parts_display, lead_map in _iter_store_records(raw):
-            region = store_region.get(sn)
-            if not region:
-                continue
-            for pn, lead in lead_map.items():
-                name = part_to_name.get(pn)
-                if not name or name in EXCLUDED_MODELS:
+        for resp in raw.get("responses", []):
+            resp_parts = resp.get("parts", {})
+            resp_part_to_name = {v: k for k, v in resp_parts.items()}
+            product = resp.get("product", "")
+
+            stores = resp.get("response", {}).get("body", {}).get("stores", [])
+            for store in stores:
+                sn = store.get("storeNumber", "")
+                if not sn:
                     continue
-                if lead is not None:
-                    city_product_leads[region][name].append(lead)
+                region = store_region.get(sn)
+                if not region:
+                    continue
+
+                for pn, pv in store.get("partsAvailability", {}).items():
+                    name = resp_part_to_name.get(pn) or part_to_name.get(pn) or product
+                    if not name or name == "batch":
+                        continue
+                    if name in EXCLUDED_MODELS:
+                        continue
+
+                    quote = pv.get("pickupSearchQuote", "")
+                    lead = _parse_lead_days(quote)
+                    if lead is not None:
+                        city_product_leads[region][name].append(lead)
 
         # Compute averages for this snapshot
         if city_product_leads:
@@ -421,16 +490,7 @@ def load_delivery_times():
     Reads the delivery_times key directly (already per-city, per-product).
     Returns {"snapshots": [{"t": timestamp, "data": {city: {product: days}}}]}.
     """
-    if not os.path.isdir(RAW_API_DIR):
-        print("Raw API directory not found, skipping delivery times")
-        return None
-
-    files = sorted(glob.glob(os.path.join(RAW_API_DIR, "raw_responses_*.json")))
-    candidates = [f for f in files if "wave2" not in os.path.basename(f)]
-    if not candidates:
-        print("No raw API response files found, skipping delivery times")
-        return None
-
+    candidates = raw_paths()
     print(f"Extracting delivery times from {len(candidates)} raw API files...")
 
     snapshots = []
@@ -476,11 +536,13 @@ def _is_glitch_snapshot(raw_data):
     """Detect glitch snapshots where nearly all stores show ineligible."""
     total = 0
     ineligible = 0
-    for _sn, _meta, parts_display, _lead in _iter_store_records(raw_data):
-        for _pn, display in parts_display.items():
-            total += 1
-            if display == "ineligible":
-                ineligible += 1
+    for resp in raw_data.get("responses", []):
+        stores = resp.get("response", {}).get("body", {}).get("stores", [])
+        for store in stores:
+            for pn, pv in store.get("partsAvailability", {}).items():
+                total += 1
+                if pv.get("pickupDisplay") == "ineligible":
+                    ineligible += 1
     if total == 0:
         return True
     return (ineligible / total) >= GLITCH_INELIGIBLE_THRESHOLD
@@ -497,11 +559,7 @@ def _extract_store_hours(raw_api_dir):
     """
     import re as _re
 
-    files = sorted(glob.glob(os.path.join(raw_api_dir, "raw_responses_*.json")))
-    candidates = [f for f in files if "wave2" not in os.path.basename(f)]
-    if not candidates:
-        return {}
-
+    candidates = raw_paths()
     # Use latest file for store hours
     with open(candidates[-1], "r", encoding="utf-8") as f:
         raw = json.load(f)
@@ -543,37 +601,30 @@ def _extract_store_hours(raw_api_dir):
         return result
 
     store_hours = {}
-
-    def _add_store_hours(sn, tz, hours_blob):
-        if not sn or sn in store_hours:
-            return
-        schedule = {}
-        for entry in hours_blob.get("hours", []):
-            timings = entry.get("storeTimings", "")
-            days_str = entry.get("storeDays", "")
-            if '-' not in timings:
+    for resp in raw.get("responses", []):
+        stores = resp.get("response", {}).get("body", {}).get("stores", [])
+        for store in stores:
+            sn = store.get("storeNumber", "")
+            if not sn or sn in store_hours:
                 continue
-            open_s, close_s = timings.split('-', 1)
-            open_h = parse_time(open_s)
-            close_h = parse_time(close_s)
-            if open_h is None or close_h is None:
-                continue
-            for d in expand_days(days_str):
-                schedule[d] = (open_h, close_h)
-        if schedule and tz:
-            store_hours[sn] = {"timezone": tz, "schedule": schedule}
-
-    if "snapshots" in raw:  # v2: hours live in the top-level store registry
-        for sn, meta in raw.get("stores", {}).items():
-            _add_store_hours(sn, meta.get("tz", ""), meta.get("hours", {}))
-    else:  # v1: hours live per-store inside each response body
-        for resp in raw.get("responses", []):
-            for store in resp.get("response", {}).get("body", {}).get("stores", []):
-                _add_store_hours(
-                    store.get("storeNumber", ""),
-                    store.get("retailStore", {}).get("timezone", ""),
-                    store.get("storeHours", {}),
-                )
+            tz = store.get("retailStore", {}).get("timezone", "")
+            sh = store.get("storeHours", {})
+            hours_list = sh.get("hours", [])
+            schedule = {}
+            for entry in hours_list:
+                timings = entry.get("storeTimings", "")
+                days_str = entry.get("storeDays", "")
+                if '-' not in timings:
+                    continue
+                open_s, close_s = timings.split('-', 1)
+                open_h = parse_time(open_s)
+                close_h = parse_time(close_s)
+                if open_h is None or close_h is None:
+                    continue
+                for d in expand_days(days_str):
+                    schedule[d] = (open_h, close_h)
+            if schedule and tz:
+                store_hours[sn] = {"timezone": tz, "schedule": schedule}
 
     return store_hours
 
@@ -649,16 +700,7 @@ def load_cycles():
       - store_rankings: stores ranked by demand (fastest sellout)
       - summary: aggregate stats
     """
-    if not os.path.isdir(RAW_API_DIR):
-        print("Raw API directory not found, skipping cycles")
-        return None
-
-    files = sorted(glob.glob(os.path.join(RAW_API_DIR, "raw_responses_*.json")))
-    candidates = [f for f in files if "wave2" not in os.path.basename(f)]
-    if not candidates:
-        print("No raw API response files found, skipping cycles")
-        return None
-
+    candidates = raw_paths()
     print(f"Computing restock/sellout cycles from {len(candidates)} files...")
 
     # Load store-to-region mapping
@@ -699,18 +741,31 @@ def load_cycles():
             skipped += 1
             continue
 
-        part_to_name = {v: k for k, v in raw.get("products", {}).items()}
+        products_map = raw.get("products", {})
+        part_to_name = {v: k for k, v in products_map.items()}
 
-        for sn, meta, parts_display, _lead in _iter_store_records(raw):
-            if sn not in store_info:
-                store_info[sn] = {
-                    "name": meta.get("name", ""),
-                    "timezone": meta.get("tz", ""),
-                }
-            for pn, display in parts_display.items():
-                name = part_to_name.get(pn)
-                if name and name not in EXCLUDED_MODELS:
-                    timeline_raw[sn][name].append((ts_str, display))
+        for resp in raw.get("responses", []):
+            product = resp.get("product", "")
+            resp_parts = resp.get("parts", {})
+            resp_part_to_name = {v: k for k, v in resp_parts.items()}
+
+            stores = resp.get("response", {}).get("body", {}).get("stores", [])
+            for store in stores:
+                sn = store.get("storeNumber", "")
+                if not sn:
+                    continue
+
+                if sn not in store_info:
+                    store_info[sn] = {
+                        "name": store.get("storeName", ""),
+                        "timezone": store.get("retailStore", {}).get("timezone", ""),
+                    }
+
+                for pn, pv in store.get("partsAvailability", {}).items():
+                    display = pv.get("pickupDisplay", "")
+                    name = resp_part_to_name.get(pn) or part_to_name.get(pn) or product
+                    if name and name != "batch" and name not in EXCLUDED_MODELS:
+                        timeline_raw[sn][name].append((ts_str, display))
 
     if skipped:
         print(f"  Skipped {skipped} glitch snapshots")

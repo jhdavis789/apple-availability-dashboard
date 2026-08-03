@@ -1363,6 +1363,68 @@
       });
     }
 
+    /* Collection outages must BREAK the lines, not be drawn through.
+     *
+     * Chart.js joins consecutive points, and a gap in collection is simply an
+     * absence of points — so the 32-day outage from 2026-05-02 to 2026-06-04
+     * rendered as a smooth straight ramp from ~30% to ~50% on every city line.
+     * That is the most eye-catching feature of the default "Max" view and it is
+     * entirely fabricated. Inserting one all-null snapshot inside each gap makes
+     * every series break there instead.
+     *
+     * 12h threshold: build_data.py downsamples to at most an 8-hour bucket
+     * (>30d old), so any spacing beyond 12h is a real collection outage rather
+     * than an artifact of downsampling. Keep this above the largest bucket in
+     * that downsampler if it ever changes. */
+    const GAP_BREAK_MS = 12 * 60 * 60 * 1000;
+
+    /* Every series builder drops null points ("Only keep points with actual
+     * data — no interpolation"). Dropping them is what PRODUCES the
+     * interpolation: Chart.js then joins the surviving neighbours across the
+     * hole. Re-inserting one explicit null inside each outage breaks the line.
+     *
+     * An outage is a property of the COLLECTION TIMELINE, not of any one
+     * series, and it must be measured on the un-downsampled snapshot list.
+     * Deriving it from a series' own points instead is wrong: lttbDownsample
+     * thins 570 points to 200, so surviving neighbours sit hours apart even
+     * where collection never stopped, and every line shatters into fragments. */
+    function computeGapMidpoints(snapshots) {
+      if (snapshots.length < 2) return [];
+      // Scale with the visible span. Collection uptime is ~54%, so at a
+      // six-month zoom a flat 12h rule breaks the line ~64 times and the shape
+      // becomes unreadable — every routine overnight gap gets its own break.
+      // What matters at a given zoom is whether the gap is wide enough that
+      // connecting across it would read as a trend, so use 2% of the visible
+      // span, floored at 12h (build_data.py's largest downsample bucket is 8h,
+      // so anything under 12h may be an artifact rather than a real outage).
+      const span = +new Date(snapshots[snapshots.length - 1].timestamp)
+                 - +new Date(snapshots[0].timestamp);
+      const threshold = Math.max(GAP_BREAK_MS, span * 0.02);
+      const mids = [];
+      for (let i = 1; i < snapshots.length; i++) {
+        const prev = +new Date(snapshots[i - 1].timestamp);
+        const cur = +new Date(snapshots[i].timestamp);
+        if (cur - prev > threshold) mids.push(prev + (cur - prev) / 2);
+      }
+      return mids;
+    }
+
+    function breakLongGaps(points, gapMids) {
+      if (!Array.isArray(points) || points.length < 2 || !gapMids.length) return points;
+      const out = [];
+      let g = 0;
+      for (const pt of points) {
+        const x = +new Date(pt.x);
+        while (g < gapMids.length && gapMids[g] <= x) {
+          // Only break between two real points, never before the first.
+          if (out.length) out.push({ x: new Date(gapMids[g]), y: null });
+          g++;
+        }
+        out.push(pt);
+      }
+      return out;
+    }
+
     function getFilteredSnapshots() {
       const filterZeros = document.getElementById('filterZeros').checked;
       let snapshots = _baseFilteredSnapshots().filter(s => {
@@ -1582,10 +1644,11 @@
       const rawSnapshots = DATA.total_snapshots || snapshots.length;
       const storeCount = DATA.store_map ? DATA.store_map.stores.length : 140;
       const rawObservations = rawSnapshots * storeCount * DATA.all_models.length;
+      const shownSnapshots = snapshots.length;
       statsRow.innerHTML = `
         <div class="stat-box">
           <div class="stat-label">Snapshots</div>
-          <div class="stat-value">${fmt(rawSnapshots)} <span style="font-size:0.6em;color:var(--text-muted);">(${fmt(snapshots.length)} displayed)</span></div>
+          <div class="stat-value">${fmt(rawSnapshots)} <span style="font-size:0.6em;color:var(--text-muted);">(${fmt(shownSnapshots)} displayed)</span></div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Observations</div>
@@ -1913,6 +1976,10 @@
         grid: { color: getThemeColors().grid },
         ticks: { color: getThemeColors().tick, callback: v => v + '%' }
       };
+
+      // Break every series across collection outages before it is drawn.
+      const gapMids = computeGapMidpoints(snapshots);
+      datasets.forEach(d => { d.data = breakLongGaps(d.data, gapMids); });
 
       const highlightPlugin = makeHighlightPlugin('mainChart');
       mainChart = new Chart(ctx, {

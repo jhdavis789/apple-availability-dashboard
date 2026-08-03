@@ -109,19 +109,50 @@ def haversine(lat1, lon1, lat2, lon2):
     a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
     return R * 2 * atan2(sqrt(a), sqrt(1 - a))
 
+# Every price below was read from Apple on 2026-08-03 by `discover_skus.py
+# --prices`, which is the guard against this list rotting: the price is baked
+# into the display name, so a repricing silently mislabels the whole dashboard.
+# It had — all 10 previously-tracked labels were stale, the Mac line having been
+# repriced roughly +$200 (Mac Studio +$500/+$1,300). Re-run that check after any
+# Apple event; it exits non-zero on drift and cron alarms on it weekly.
+#
+# Adding SKUs is close to free: /shop/retail/pickup-message accepts >=20 parts
+# in a single call, so pickup stays at one request per zip regardless of list
+# length, and delivery batches 8 per call.
 PRODUCTS = {
-    # Mac mini — base 256GB ($599, MU9D3LL/A) discontinued by Apple; entry is now the 16/512.
-    "Mac Mini M4 16/512 ($799)": "MU9E3LL/A",
-    "Mac Mini M4 24/512 ($999)": "MCYT4LL/A",
-    "Mac Mini M4 Pro ($1,399)": "MCX44LL/A",
-    "iMac 24\" M4 8-core ($1,299)": "MWUF3LL/A",
-    "iMac 24\" M4 10-core ($1,499)": "MWV13LL/A",
+    # Mac mini — the depth here is deliberate: this is the only family that
+    # actually goes out of stock, so we track the config ladder, not one SKU.
+    # (MU9D3LL/A was previously commented as "discontinued at $599" — it is not;
+    # it is the current base at $799.)
+    "Mac Mini M4 16/256 ($799)": "MU9D3LL/A",
+    "Mac Mini M4 16/512 ($999)": "MU9E3LL/A",
+    "Mac Mini M4 24/512 ($1,199)": "MCYT4LL/A",
+    "Mac Mini M4 Pro ($1,599)": "MCX44LL/A",
+
+    "Mac Studio M4 Max ($2,499)": "MU963LL/A",
+    "Mac Studio M3 Ultra ($5,299)": "MU973LL/A",
+
+    "iMac 24\" M4 8-core ($1,499)": "MWUF3LL/A",
+    "iMac 24\" M4 10-core ($1,699)": "MWV13LL/A",
+
     # MacBook Pro refreshed to M5 generation (Mar 2026); old M4/M5 SKUs are no longer buyable.
-    "MacBook Pro 14\" M5 ($1,699)": "MDE14LL/A",       # was MDE04LL/A (M5 $1,599)
-    "MacBook Pro 14\" M5 Pro ($2,199)": "MGDR4LL/A",   # replaces M4 Pro MX2H3LL/A; 24GB/1TB Space Black
-    "iPhone 16 128GB ($799)": "MYAP3LL/A",
-    "Mac Studio M4 Max ($1,999)": "MU963LL/A",
-    "Mac Studio M3 Ultra ($3,999)": "MU973LL/A",
+    "MacBook Pro 14\" M5 ($1,999)": "MDE14LL/A",       # was MDE04LL/A (M5 $1,599)
+    "MacBook Pro 14\" M5 Pro ($2,499)": "MGDR4LL/A",   # replaces M4 Pro MX2H3LL/A
+    "MacBook Pro 16\" M5 Pro ($2,999)": "MGEA4LL/A",
+    "MacBook Pro 14\" M5 Max ($4,099)": "MGDU4LL/A",
+
+    # MacBook Air — the highest-volume Mac, untracked until 2026-08-03.
+    "MacBook Air 13\" M4 ($1,299)": "MDH74LL/A",
+    "MacBook Air 15\" M4 ($1,499)": "MDV94LL/A",
+
+    # iPhone. Prices are the UNLOCKED list price; Apple also publishes lower
+    # carrier-activation prices per SKU (e.g. iPhone 16 128GB is $699 on
+    # Verizon/T-Mobile vs $729 unlocked) which are not what a pickup order costs.
+    "iPhone 16 128GB ($729)": "MYAP3LL/A",
+    "iPhone 17 256GB ($829)": "MG464LL/A",
+    "iPhone Air 256GB ($999)": "MG184LL/A",
+    "iPhone 17 Pro 256GB ($1,099)": "MG7K4LL/A",
+    "iPhone 17 Pro Max 256GB ($1,199)": "MFXG4LL/A",
 }
 
 # SKUs to exclude from tracking (easy to add more later)
@@ -167,6 +198,11 @@ BASE_DIR = Path("/Users/Jackson/.openclaw/workspace/research/CG Side Projects/ap
 OUT_DIR = BASE_DIR / "csvs"
 ASSIGNMENTS_CACHE = BASE_DIR / "store_assignments.json"
 MAX_WORKERS = 1  # Serialized to respect rate limits (~15 req burst, 541 after)
+
+# Raw snapshots are stored in the compact v3 archive; the codec lives one level
+# up, alongside the archive itself.
+sys.path.insert(0, str(BASE_DIR))
+import raw_codec  # noqa: E402
 
 def check_batch(parts: list, zip_code: str) -> dict:
     """Check availability for multiple parts in one API call (batch).
@@ -540,12 +576,15 @@ def fetch_delivery_times(products: dict) -> dict:
     today = datetime.now().date()
     results = {}
 
-    # Batch up to 3 parts per request (Apple's maxParamsPerURL)
+    # Measured 2026-08-03: /shop/delivery-message returns all 8 parts when asked
+    # for 8. The previous value of 3 was attributed to "Apple's maxParamsPerURL"
+    # but is not enforced here, and it cost 4 requests per city instead of 1-3.
+    DELIVERY_BATCH = 8
     parts_list = list(products.items())  # [(name, sku), ...]
 
     for city, zipcode in CITIES.items():
-        for batch_start in range(0, len(parts_list), 3):
-            batch = parts_list[batch_start:batch_start + 3]
+        for batch_start in range(0, len(parts_list), DELIVERY_BATCH):
+            batch = parts_list[batch_start:batch_start + DELIVERY_BATCH]
             params = {"mt": "regular", "postalCode": zipcode}
             for i, (name, sku) in enumerate(batch):
                 params[f"parts.{i}"] = sku
@@ -675,24 +714,23 @@ def main():
 
     print(f"\n✅ Saved: {new_csv.name}")
 
-    # Write compact v2 raw JSON
-    raw_dir = BASE_DIR / "raw_api_responses"
+    # Write compact v2 raw payload into the v3 archive (codec encodes + shares blobs)
+    raw_dir = BASE_DIR / "raw_api_responses_v3"
     raw_dir.mkdir(exist_ok=True)
-    raw_file = raw_dir / f"raw_responses_{ts}.json"
+    raw_file = raw_dir / f"raw_responses_{ts}.json.gz"
     stores_reg, compact_snaps = _build_compact_snapshot(all_raw, all_stores)
-    with open(raw_file, 'w') as f:
-        json.dump({
-            "v": 2,
-            "timestamp": datetime.now().isoformat(),
-            "products": dict(TRACKED_PRODUCTS),
-            "cities": dict(CITIES),
-            "overflow_zips": dict(OVERFLOW_ZIPS),
-            "errored_zips": sorted(errored_zips),
-            "city_assignments": {city: list(stores) for city, stores in city_assignments.items()},
-            "delivery_times": delivery_times,
-            "stores": stores_reg,
-            "snapshots": compact_snaps,
-        }, f, indent=2)
+    raw_codec.write_raw({
+        "v": 2,
+        "timestamp": datetime.now().isoformat(),
+        "products": dict(TRACKED_PRODUCTS),
+        "cities": dict(CITIES),
+        "overflow_zips": dict(OVERFLOW_ZIPS),
+        "errored_zips": sorted(errored_zips),
+        "city_assignments": {city: list(stores) for city, stores in city_assignments.items()},
+        "delivery_times": delivery_times,
+        "stores": stores_reg,
+        "snapshots": compact_snaps,
+    }, str(raw_file))
 
     print(f"📦 Raw API data: {raw_file.name}")
 
