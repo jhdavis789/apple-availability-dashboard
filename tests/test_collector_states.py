@@ -19,6 +19,12 @@ class PickupStateTests(unittest.TestCase):
         expected = {"MHQK4LL/A", "MHQN4LL/A", "MHL64LL/A", "MHL74LL/A"}
         self.assertTrue(expected.issubset(collector.TRACKED_PRODUCTS.values()))
 
+    def test_store_carried_macbook_neo_is_tracked(self):
+        self.assertEqual(
+            collector.TRACKED_PRODUCTS['MacBook Neo 512GB ($799)'],
+            "MHFE4LL/A",
+        )
+
     def test_macbook_air_labels_are_m5(self):
         names = set(collector.TRACKED_PRODUCTS)
         self.assertIn('MacBook Air 13" M5 ($1,299)', names)

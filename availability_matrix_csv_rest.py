@@ -143,6 +143,11 @@ PRODUCTS = {
     "MacBook Air 13\" M5 ($1,299)": "MDH74LL/A",
     "MacBook Air 15\" M5 ($1,499)": "MDV94LL/A",
 
+    # MacBook Neo is current but most color/config SKUs are not carried for
+    # pickup. Track the 512GB Citrus configuration that the pickup endpoint
+    # returns as eligible, rather than publishing an all-ineligible base SKU.
+    "MacBook Neo 512GB ($799)": "MHFE4LL/A",
+
     # iPhone. Prices are the UNLOCKED list price; Apple also publishes lower
     # carrier-activation prices per SKU (e.g. iPhone 16 128GB is $699 on
     # Verizon/T-Mobile vs $729 unlocked) which are not what a pickup order costs.
