@@ -6,3 +6,9 @@ deploy/
 csvs
 .DS_Store
 m5_probe_wave2_output.log
+
+# Operational, not part of the published site. staleness_alarm.sh carries a
+# personal email address and this repo is PUBLIC (GitHub Pages).
+staleness_alarm.sh
+.staleness_alarm_state
+_qc_*.html
