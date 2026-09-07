@@ -94,6 +94,10 @@ MODEL_ALIASES = {
     # The $599 base was tracked before Apple repriced it to $799; same part
     # (MU9D3LL/A), which is back in the tracked set as the 16/256 config.
     'Mac Mini M4 ($599)': 'Mac Mini M4 16/256 ($799)',
+    # These SKUs were added in August after the M5 Air launch but were
+    # mistakenly labelled M4. Same part numbers; label correction only.
+    'MacBook Air 13" M4 ($1,299)': 'MacBook Air 13" M5 ($1,299)',
+    'MacBook Air 15" M4 ($1,499)': 'MacBook Air 15" M5 ($1,499)',
 }
 
 # An alias whose target is itself an alias key would silently half-migrate.
@@ -986,31 +990,23 @@ def load_cycles():
     }
 
 
-def _trim_discontinued_tails(snapshots, recent_days=2):
+def _trim_discontinued_tails(snapshots):
     """End discontinued product lines at their last real (>0%) reading.
 
-    "Currently tracked" = any model present in a snapshot within `recent_days`
-    of the newest snapshot (time-based, so a collection outage gap can't pull
-    stale products into the current set). For every other model, find the last
-    timestamp it had a value > 0 in any city, then remove that model from all
-    later snapshots so its chart line ends at discontinuation instead of
-    flat-lining at 0% to the present. Models that never had a >0 reading are
-    dropped entirely. Mutates `snapshots` in place.
+    "Currently tracked" = a model present in the newest successful snapshot.
+    Collection is atomic across the product batch, so the newest snapshot is
+    the authoritative active set; using a two-day lookback left retired SKUs
+    visible as fake 0% lines for two more days after a lineup refresh. For
+    every other model, find the last timestamp it had a value > 0 in any city,
+    then remove that model from all later snapshots so its chart line ends at
+    discontinuation. Models that never had a >0 reading are dropped entirely.
+    Mutates `snapshots` in place.
     """
     if not snapshots:
         return
     snapshots.sort(key=lambda s: s["timestamp"])
 
-    latest_dt = datetime.fromisoformat(snapshots[-1]["timestamp"])
-    cutoff = latest_dt - timedelta(days=recent_days)
-    current = set()
-    for snap in snapshots:
-        try:
-            if datetime.fromisoformat(snap["timestamp"]) >= cutoff:
-                for p in snap["products"]:
-                    current.add(p["model"])
-        except (ValueError, TypeError):
-            continue
+    current = {p["model"] for p in snapshots[-1]["products"]}
 
     # Last timestamp each discontinued model had real availability.
     last_alive = {}

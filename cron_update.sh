@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH="/Users/Jackson/Documents/workspace/automation/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
 # Pull Apple availability + eBay prices, rebuild dashboard, deploy.
 #
 # Scheduled by launchd (com.jhdavis.apple-availability.plist, :00 and :30), NOT
@@ -72,8 +73,8 @@ export GIT_HTTP_LOW_SPEED_LIMIT=1000
 export GIT_HTTP_LOW_SPEED_TIME=30
 export GIT_TERMINAL_PROMPT=0
 
-PYTHON=/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
-BASE_DIR="/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability"
+PYTHON=/Users/Jackson/Documents/workspace/automation/.venv/bin/python
+BASE_DIR="/Users/Jackson/Documents/workspace/research/CG Side Projects/apple-availability"
 DASH_DIR="$BASE_DIR/dashboard copy"
 EBAY_DIR="$BASE_DIR/Ebay Scrape"
 LOG="$DASH_DIR/cron_update.log"
@@ -109,15 +110,23 @@ echo "[1/5] Pulling Apple availability..."
 cd "$BASE_DIR"
 with_timeout 900 $PYTHON "$DASH_DIR/availability_matrix_csv_rest.py" || echo "WARNING: Apple pull failed"
 
-# 2. Pull eBay pricing data (every 2 hours only — check minute=00 and even hour)
-HOUR=$(date '+%H')
-MINUTE=$(date '+%M')
-if [ "$MINUTE" -lt 15 ] && [ $(( HOUR % 2 )) -eq 0 ]; then
+# 2. Pull eBay pricing when its database is stale. A clock-slot test used to
+# require an even hour at :00, but launchd wake replays run at the wake time;
+# every replay outside that narrow slot skipped eBay and the feed went stale
+# for a month while Apple collection continued normally.
+EBAY_DB="$EBAY_DIR/ebay_data.db"
+EBAY_MAX_AGE=7200
+ebay_due=1
+if [ -f "$EBAY_DB" ]; then
+  ebay_age=$(( $(date '+%s') - $(stat -f%m "$EBAY_DB") ))
+  [ "$ebay_age" -lt "$EBAY_MAX_AGE" ] && ebay_due=0
+fi
+if [ "$ebay_due" -eq 1 ]; then
   echo "[2/5] Pulling eBay pricing..."
   cd "$EBAY_DIR"
   with_timeout 600 $PYTHON "$EBAY_DIR/ebay_scraper.py" || echo "WARNING: eBay pull failed"
 else
-  echo "[2/5] Skipping eBay (runs every 2h at :00)"
+  echo "[2/5] Skipping eBay (database is ${ebay_age}s old; refresh at ${EBAY_MAX_AGE}s)"
 fi
 
 # 3. Rebuild data.json + store_map.json

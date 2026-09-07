@@ -24,7 +24,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
-    <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/cron_update.sh</string>
+    <string>/Users/Jackson/Documents/workspace/research/CG Side Projects/apple-availability/dashboard copy/cron_update.sh</string>
   </array>
 
   <key>StartCalendarInterval</key>
@@ -36,12 +36,12 @@
   <!-- The script writes its own log; these catch anything before that redirect
        (the stale-run reaper) and any launchd-level failure. -->
   <key>StandardOutPath</key>
-  <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.out.log</string>
+  <string>/Users/Jackson/Documents/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.out.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.err.log</string>
+  <string>/Users/Jackson/Documents/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.err.log</string>
 
   <key>WorkingDirectory</key>
-  <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability</string>
+  <string>/Users/Jackson/Documents/workspace/research/CG Side Projects/apple-availability</string>
 
   <key>EnvironmentVariables</key>
   <dict>

@@ -23,7 +23,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
-    <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/staleness_alarm.sh</string>
+    <string>/Users/Jackson/Documents/workspace/research/CG Side Projects/apple-availability/dashboard copy/staleness_alarm.sh</string>
   </array>
 
   <key>StartCalendarInterval</key>
@@ -32,9 +32,9 @@
   </array>
 
   <key>StandardOutPath</key>
-  <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.alarm.out.log</string>
+  <string>/Users/Jackson/Documents/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.alarm.out.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.alarm.err.log</string>
+  <string>/Users/Jackson/Documents/workspace/research/CG Side Projects/apple-availability/dashboard copy/launchd.alarm.err.log</string>
 
   <key>EnvironmentVariables</key>
   <dict>

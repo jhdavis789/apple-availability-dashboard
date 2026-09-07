@@ -120,17 +120,14 @@ def haversine(lat1, lon1, lat2, lon2):
 # in a single call, so pickup stays at one request per zip regardless of list
 # length, and delivery batches 8 per call.
 PRODUCTS = {
-    # Mac mini — the depth here is deliberate: this is the only family that
-    # actually goes out of stock, so we track the config ladder, not one SKU.
-    # (MU9D3LL/A was previously commented as "discontinued at $599" — it is not;
-    # it is the current base at $799.)
-    "Mac Mini M4 16/256 ($799)": "MU9D3LL/A",
-    "Mac Mini M4 16/512 ($999)": "MU9E3LL/A",
-    "Mac Mini M4 24/512 ($1,199)": "MCYT4LL/A",
-    "Mac Mini M4 Pro ($1,599)": "MCX44LL/A",
+    # Refreshed 2026-08-25; available in stores from 2026-09-22. Apple leaves
+    # retired parts queryable but returns only `ineligible`, so the old M4
+    # mini / M4 Max / M3 Ultra parts must not remain in the active set.
+    "Mac Mini M6 ($899)": "MHQK4LL/A",
+    "Mac Mini M5 Pro ($1,699)": "MHQN4LL/A",
 
-    "Mac Studio M4 Max ($2,499)": "MU963LL/A",
-    "Mac Studio M3 Ultra ($5,299)": "MU973LL/A",
+    "Mac Studio M5 Max ($2,499)": "MHL64LL/A",
+    "Mac Studio M5 Ultra ($5,499)": "MHL74LL/A",
 
     "iMac 24\" M4 8-core ($1,499)": "MWUF3LL/A",
     "iMac 24\" M4 10-core ($1,699)": "MWV13LL/A",
@@ -141,9 +138,10 @@ PRODUCTS = {
     "MacBook Pro 16\" M5 Pro ($2,999)": "MGEA4LL/A",
     "MacBook Pro 14\" M5 Max ($4,099)": "MGDU4LL/A",
 
-    # MacBook Air — the highest-volume Mac, untracked until 2026-08-03.
-    "MacBook Air 13\" M4 ($1,299)": "MDH74LL/A",
-    "MacBook Air 15\" M4 ($1,499)": "MDV94LL/A",
+    # MacBook Air — these current Apple storefront records are M5; the prior
+    # M4 labels were wrong from the day the SKUs were added to this tracker.
+    "MacBook Air 13\" M5 ($1,299)": "MDH74LL/A",
+    "MacBook Air 15\" M5 ($1,499)": "MDV94LL/A",
 
     # iPhone. Prices are the UNLOCKED list price; Apple also publishes lower
     # carrier-activation prices per SKU (e.g. iPhone 16 128GB is $699 on
@@ -194,7 +192,7 @@ OVERFLOW_ZIPS = {
 MAX_ASSIGNMENT_DISTANCE = 75  # miles
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
-BASE_DIR = Path("/Users/Jackson/.openclaw/workspace/research/CG Side Projects/apple-availability")
+BASE_DIR = Path("/Users/Jackson/Documents/workspace/research/CG Side Projects/apple-availability")
 OUT_DIR = BASE_DIR / "csvs"
 ASSIGNMENTS_CACHE = BASE_DIR / "store_assignments.json"
 MAX_WORKERS = 1  # Serialized to respect rate limits (~15 req burst, 541 after)
@@ -481,6 +479,24 @@ def load_assignments() -> tuple:
         return None, None
 
 
+def assert_no_all_ineligible(product_store_states: dict) -> None:
+    """Reject SKUs that Apple recognizes only as not carried.
+
+    The pickup endpoint returns HTTP 200 and a normal store list for retired
+    parts, so transport-level checks cannot distinguish them from live stock.
+    """
+    all_ineligible = [
+        name for name, states in product_store_states.items()
+        if states and not any(s in {"available", "unavailable"} for s in states.values())
+    ]
+    if all_ineligible:
+        raise RuntimeError(
+            "Tracked SKU(s) returned only 'ineligible' across all stores; "
+            "retire or replace them instead of publishing false 0% availability: "
+            + ", ".join(all_ineligible)
+        )
+
+
 def collect_availability(products: dict, city_assignments: dict) -> tuple:
     """Query availability for all products across all zip codes using batch API.
     One request per zip (all products batched). Returns (rows, counts, raw_responses, errored_zips)."""
@@ -492,8 +508,10 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
 
     print(f"Checking availability ({len(all_zips)} batch requests, {len(products)} products each)...")
 
-    # {product_name: {storeNumber: bool}}
-    product_store_avail = {name: {} for name in products}
+    # {product_name: {storeNumber: pickupDisplay}}. Keep the API state rather
+    # than collapsing it to bool: `ineligible` means the SKU is not carried,
+    # not that a buyable product is out of stock.
+    product_store_states = {name: {} for name in products}
     errored_zips = set()
 
     completed_count = 0
@@ -518,16 +536,22 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
                     "city": _zip_to_label(z), "zip": z,
                     "response": result["raw_response"]
                 })
-            # Aggregate per-product store availability
+            # Aggregate per-product store state. A store can be returned by
+            # several overlapping zip queries; any eligible state outranks an
+            # `ineligible` copy of the same store.
             for part, store_avail in result["part_stores"].items():
                 name = name_by_part.get(part)
                 if not name:
                     continue
                 for sn, avail in store_avail.items():
-                    # OR logic: available if ANY query says so
-                    product_store_avail[name][sn] = (
-                        product_store_avail[name].get(sn, False) or avail["available"]
-                    )
+                    state = avail.get("pickupDisplay", "ineligible")
+                    prior = product_store_states[name].get(sn)
+                    if prior == "available" or state == "available":
+                        product_store_states[name][sn] = "available"
+                    elif prior == "unavailable" or state == "unavailable":
+                        product_store_states[name][sn] = "unavailable"
+                    else:
+                        product_store_states[name][sn] = "ineligible"
 
     # Report errors
     if errored_zips:
@@ -535,6 +559,11 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
     if len(errored_zips) == len(all_zips):
         print("  ❌ ALL zip codes failed — aborting")
         sys.exit(1)
+
+    # Fail closed on retired/invalid SKUs. Apple returns normal store payloads
+    # for them with every part state set to `ineligible`; treating that as a
+    # boolean produced fake 0% lines for discontinued products.
+    assert_no_all_ineligible(product_store_states)
 
     # Build set of cities affected by errored zips
     affected_cities = set()
@@ -550,7 +579,7 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
     rows = []
     for name in products:
         print(f"  {name}")
-        store_availability = product_store_avail.get(name, {})
+        store_states = product_store_states.get(name, {})
         row = {"Model": name}
         for city in CITIES:
             assigned = city_assignments[city]
@@ -560,7 +589,7 @@ def collect_availability(products: dict, city_assignments: dict) -> tuple:
             if city in affected_cities:
                 row[f"{city} ({counts[city]})"] = "ERR"
                 continue
-            avail_count = sum(1 for sn in assigned if store_availability.get(sn, False))
+            avail_count = sum(1 for sn in assigned if store_states.get(sn) == "available")
             pct = 100 * avail_count // len(assigned)
             row[f"{city} ({counts[city]})"] = f"{pct}%"
         rows.append(row)
