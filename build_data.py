@@ -19,7 +19,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, ".."))
+BASE_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "apple-runtime"))
 CSV_DIR = os.path.join(BASE_DIR, "csvs")
 OUTPUT_FILE = os.path.join(SCRIPT_DIR, "data.json")
 EBAY_DB_PATH = os.path.join(BASE_DIR, "Ebay Scrape", "ebay_data.db")
@@ -991,55 +991,12 @@ def load_cycles():
 
 
 def _trim_discontinued_tails(snapshots):
-    """End discontinued product lines at their last real (>0%) reading.
+    """Preserve valid historical zeros; absent products naturally end their lines.
 
-    "Currently tracked" = a model present in the newest successful snapshot.
-    Collection is atomic across the product batch, so the newest snapshot is
-    the authoritative active set; using a two-day lookback left retired SKUs
-    visible as fake 0% lines for two more days after a lineup refresh. For
-    every other model, find the last timestamp it had a value > 0 in any city,
-    then remove that model from all later snapshots so its chart line ends at
-    discontinuation. Models that never had a >0 reading are dropped entirely.
-    Mutates `snapshots` in place.
+    Product retirement is an explicit collector/catalogue event, not something
+    inferred from the last positive reading. No synthetic future rows are added.
     """
-    if not snapshots:
-        return
     snapshots.sort(key=lambda s: s["timestamp"])
-
-    current = {p["model"] for p in snapshots[-1]["products"]}
-
-    # Last timestamp each discontinued model had real availability.
-    last_alive = {}
-    for snap in snapshots:
-        ts = snap["timestamp"]
-        for p in snap["products"]:
-            m = p["model"]
-            if m in current:
-                continue
-            if any((v is not None and v > 0) for v in p["values"].values()):
-                last_alive[m] = ts
-
-    trimmed = {}
-    for snap in snapshots:
-        ts = snap["timestamp"]
-        kept = []
-        for p in snap["products"]:
-            m = p["model"]
-            if m in current:
-                kept.append(p)
-                continue
-            alive_ts = last_alive.get(m)
-            if alive_ts is not None and ts <= alive_ts:
-                kept.append(p)
-            else:
-                trimmed[m] = trimmed.get(m, 0) + 1
-        snap["products"] = kept
-
-    if trimmed:
-        ended = {m: last_alive.get(m, "never") for m in trimmed}
-        print(f"Ended {len(trimmed)} discontinued product line(s) at last real reading:")
-        for m, ts in sorted(ended.items()):
-            print(f"  {m} -> {str(ts)[:16]} ({trimmed[m]} trailing 0% points dropped)")
 
 
 def main():

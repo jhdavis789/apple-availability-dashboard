@@ -154,14 +154,28 @@ PRODUCTS = {
     "iPhone 16 128GB ($729)": "MYAP3LL/A",
     "iPhone 17 256GB ($829)": "MG464LL/A",
     "iPhone Air 256GB ($999)": "MG184LL/A",
-    "iPhone 17 Pro 256GB ($1,099)": "MG7K4LL/A",
-    "iPhone 17 Pro Max 256GB ($1,199)": "MFXG4LL/A",
+    "iPhone 18 Pro 256GB ($1,199)": "MJQ34LL/A",
+    "iPhone 18 Pro Max 256GB ($1,299)": "MJW44LL/A",
+    "iPhone Duo 256GB ($1,999)": "MK1E4LL/A",
 }
 
 # SKUs to exclude from tracking (easy to add more later)
 EXCLUDED_SKUS = set()
 
-TRACKED_PRODUCTS = {k: v for k, v in PRODUCTS.items() if v not in EXCLUDED_SKUS}
+# Announcement is not retail availability. Upcoming products are shown in the
+# dashboard catalogue but must never generate pre-launch zero observations.
+RETAIL_START = {
+    "MHQK4LL/A": "2026-09-22", "MHQN4LL/A": "2026-09-22",
+    "MHL64LL/A": "2026-09-22", "MHL74LL/A": "2026-09-22",
+    "MJQ34LL/A": "2026-09-18", "MJW44LL/A": "2026-09-18",
+    "MK1E4LL/A": "2026-10-23",
+}
+def active_products(on_date=None):
+    today = on_date or datetime.now().date().isoformat()
+    return {name: part for name, part in PRODUCTS.items()
+            if part not in EXCLUDED_SKUS and RETAIL_START.get(part, "0000") <= today}
+
+TRACKED_PRODUCTS = active_products()
 
 CITIES = {
     "NYC": "10001", "LA": "90001", "SF": "94102", "Austin": "78701",
@@ -197,7 +211,7 @@ OVERFLOW_ZIPS = {
 MAX_ASSIGNMENT_DISTANCE = 75  # miles
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
-BASE_DIR = Path("/Users/Jackson/Documents/workspace/research/CG Side Projects/apple-availability")
+BASE_DIR = Path(__file__).resolve().parent.parent / "apple-runtime"
 OUT_DIR = BASE_DIR / "csvs"
 ASSIGNMENTS_CACHE = BASE_DIR / "store_assignments.json"
 MAX_WORKERS = 1  # Serialized to respect rate limits (~15 req burst, 541 after)

@@ -31,7 +31,7 @@ class DiscontinuedTailTests(unittest.TestCase):
 
         self.assertEqual(
             [[p["model"] for p in snap["products"]] for snap in snapshots],
-            [["Retired Mac", "Current Mac"], ["Current Mac"], ["Current Mac"]],
+            [["Retired Mac", "Current Mac"], ["Retired Mac", "Current Mac"], ["Current Mac"]],
         )
 
 

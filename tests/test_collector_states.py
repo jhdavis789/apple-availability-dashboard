@@ -17,7 +17,7 @@ class PickupStateTests(unittest.TestCase):
 
     def test_current_desktop_skus_are_tracked(self):
         expected = {"MHQK4LL/A", "MHQN4LL/A", "MHL64LL/A", "MHL74LL/A"}
-        self.assertTrue(expected.issubset(collector.TRACKED_PRODUCTS.values()))
+        self.assertTrue(expected.issubset(collector.PRODUCTS.values()))
 
     def test_store_carried_macbook_neo_is_tracked(self):
         self.assertEqual(

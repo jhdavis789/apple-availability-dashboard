@@ -5,3 +5,5 @@ Read `../AGENTS.md` for the project context and data contracts. This is an indep
 `FEATURES.md` describes the frontend. `build_data.py` generates `data.json`; `cron_update.sh` collects and deploys; `staleness_alarm.sh` monitors freshness. Use `bash -n` for shell syntax checks. Do not execute collection, deployment, or notification scripts as harmless smoke tests.
 
 Apple pickup state is three-valued: `available`, `unavailable`, and `ineligible`. An all-`ineligible` SKU is retired or invalid, not 0% available. Remove it from active tracking and end its historical line at the last valid observation; never publish `ineligible` as zero. Source: Jackson correction, 2026-09-07.
+
+Jackson, 2026-09-13: show both old and new device generations. Preserve valid historical zero readings and end retired series without fabricated zero tails. Keep upcoming releases visible as upcoming until retail eligibility starts. Never alias different-generation SKUs.
